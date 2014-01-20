@@ -1,0 +1,42 @@
+\documentclass[]{report}   % list options between brackets
+
+% list packages between braces
+\usepackage{titlesec}             % http://ctan.org/pkg/titlesec 
+
+% For changing the table of content entries in to hyperlinks
+%\usepackage[linktoc=all]{hyperref}
+%\hypersetup{colorlinks=true, linkcolor=blue}
+
+% type user-defined commands here
+\renewcommand{\thesection}{}% Remove section references...
+\renewcommand{\thesubsection}{\arabic{subsection}}%... from subsections
+
+\begin{document}
+\raggedright{}  % Don't allow text to be spread to the right margin
+
+\title{PDP-11 Simulator}   % type title between braces
+\author{Benjamin Hunstman \\
+Michael Walton\\
+Kevin Bedrossian}         % type author(s) between braces
+\date{February 01, 2014}    % type date between braces
+\maketitle
+
+\begin{abstract}
+\end{abstract}
+
+\tableofcontents
+
+\chapter{Introduction}
+
+
+\chapter{Design Plan}
+
+
+\chapter{Test Plan}
+
+
+%\begin{thebibliography}{9}
+  % type bibliography here
+%\end{thebibliography}
+
+\end{document}

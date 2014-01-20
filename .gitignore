@@ -1,4 +1,19 @@
+# PDP-11
 *.ascii
 *.lst
 *.obj
+
+
+# Vim
 *.swp
+
+# LaTeX
+*.log
+*.aux
+*.aux.make
+*.auxbbl.make
+*.auxtarget.make
+*.d
+*.fls
+*.toc
+*.toc.make
