@@ -1,0 +1,23 @@
+		.PSECT A, REL
+;    **************************************
+;    * CALCULATE THE NTH FIBONACCI NUMBER *
+;    **************************************
+; 
+OLD:      .WORD     0.             ;initialise OLD, NEW, and FIBO
+NEW:      .WORD     0.             
+FIBO:     .WORD     0.
+N:        .WORD     6.             ;initialise N
+
+START:                             ;program starts executing here
+          MOV       #1.,OLD        ;set OLD, FIBO to 1
+          MOV       #1.,FIBO
+WHILE:    CMP       N, #1.         ;WHILE N > 1 DO
+          BLE       WEND           
+          MOV       FIBO,NEW
+          ADD       OLD,NEW        ;    NEW = FIBO + OLD
+          MOV       FIBO,OLD       ;    OLD = FIBO    
+          MOV       NEW,FIBO       ;    FIBO = NEW
+          DEC       N              ;    N = N - 1
+          BR        WHILE          ;WEND
+WEND:     HALT                     ;STOP
+          .END      START
