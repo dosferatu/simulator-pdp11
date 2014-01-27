@@ -1,33 +1,32 @@
-# Makefile assumes binaries in bin directory at top level of project folder.
+# Makefile for PDP-11 ISA Simulator
 
-# Path to the Macro-11 assembler
-ASM = ../bin/macro11 
-
-# Path to the translator
+AS = ../bin/macro11
 TRANS = ../bin/obj2ascii
+CC = g++
+CCFLAGS = -g -Wall -std=gnu++11
 
-# List all macro11 source files here 
-TARGET = main
+# Compile and translate any .mac in the directory
+MACS = $(wildcard *.mac)
+PDP_TARGETS = $(patsubst %.mac, %.ascii, $(MACS))
+SIMS = $(wildcard *.cpp)
+SIMOBJ = $(patsubst %.cpp, %.o, $(SIMS))
+SIM_TARGETS = $(patsubst %.cpp, %.o, $(SIMS))
 
-# Clean message
-MSG_CLEANING = Cleaning build directory...
+all : $(PDP_TARGETS) $(SIM_TARGETS) $(SIMOBJ)
 
-# Remove directive
-REMOVE = rm -rf
+%.ascii : %.mac
+	$(AS) $< -o $*.obj -l $*.lst
+	$(TRANS) $*.obj $@
 
-# Build the project
-all:
-	$(ASM) $(TARGET).mac -o $(TARGET).obj -l $(TARGET).lst
-	$(TRANS) $(TARGET).obj $(TARGET).ascii
+%.o : %.cpp
+	$(CC) $(CCFLAGS) $< -o simulator
+	valgrind --tool=memcheck --leak-check=yes ./simulator
 
-# Clean the project directory of all generated files
-clean:
-	@echo
-	@echo $(MSG_CLEANING)
-	$(REMOVE) $(TARGET).obj
-	$(REMOVE) $(TARGET).lst
-	$(REMOVE) $(TARGET).ascii
+clean :
+	rm -rf *.obj *.lst *.ascii
+	rm -rf *.o
+	rm -rf simulator
 
-# List phony targets to avoid issues with files in the build directory having
-# the same name as the makefile command
-.PHONY : all clean
+simulate:
+
+.PHONY : all clean simulate
