@@ -8,6 +8,7 @@ CCFLAGS = -g -Wall -std=gnu++11
 # Compile and translate any .mac in the directory
 MACS = $(wildcard *.mac)
 PDP_TARGETS = $(patsubst %.mac, %.ascii, $(MACS))
+SIM = simulator
 SIMS = $(wildcard *.cpp)
 SIMOBJ = $(patsubst %.cpp, %.o, $(SIMS))
 SIM_TARGETS = $(patsubst %.cpp, %.o, $(SIMS))
@@ -19,14 +20,15 @@ all : $(PDP_TARGETS) $(SIM_TARGETS) $(SIMOBJ)
 	$(TRANS) $*.obj $@
 
 %.o : %.cpp
-	$(CC) $(CCFLAGS) $< -o simulator
-	valgrind --tool=memcheck --leak-check=yes ./simulator
+	$(CC) $(CCFLAGS) $< -o $(SIM)
+	valgrind --tool=memcheck --leak-check=yes ./$(SIM)
 
 clean :
 	rm -rf *.obj *.lst *.ascii
 	rm -rf *.o
-	rm -rf simulator
+	rm -rf $(SIM)
 
 simulate:
+	./$(SIM) $(PDP_TARGETS)
 
 .PHONY : all clean simulate

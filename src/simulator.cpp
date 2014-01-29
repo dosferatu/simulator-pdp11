@@ -5,29 +5,48 @@
 /*
  * Create data structures to simulate PDP-11 memory and registers
  */
-std::vector<std::string> *source;
-std::fstream *Imac;
 
-int main()
+/*
+ * Logistical data structures used by the simulator
+ */
+std::vector<std::string> *instruction;
+std::vector<std::string> *source;
+std::fstream *macFile;
+
+// Change so we just call the simulator with the .ascii file as the argument for it to parse and run
+int main(int argc, char **argv)
 {
+  // Support only one .ascii file
+  if (argc != 2)
+  {
+    std::cout << "Usage: simulator <ascii file>" << std::endl;
+    return 0;
+  }
+
+  /*
+   * Ideally would perform validation on input name and check to see if the file exists
+   * so we can print the appropriate error if something goes wrong. This isn't critical
+   * right now so it isn't implemented.
+   */
+
   // Parse in .ascii file and retrieve instructions until EOF
-  Imac = new std::fstream();
+  macFile = new std::fstream();
 
   try
   {
-    Imac->open("main.ascii");
+    macFile->open(argv[1]);
     source = new std::vector<std::string>;
     std::string buffer;
 
     // Read in a line and store it in to our instruction source vector
-    while (!Imac->eof())
+    while (!macFile->eof())
     {
-      std::getline(*Imac, buffer);
+      std::getline(*macFile, buffer);
       source->push_back(buffer.c_str());
     }
 
     // File IO is finished, so close the file
-    Imac->close();
+    macFile->close();
   }
 
   catch (const std::ios_base::failure &e)
@@ -47,8 +66,8 @@ int main()
   // Make sure each line starts with a - or @ and only has numbers following
   for (std::vector<std::string>::iterator it = source->begin(); it != source->end(); ++it)
   {
-    // Quit if the first character is unrecognized
-    if (it->c_str()[0] != '@' && it->c_str()[0] != '-')
+    // Quit if the first character is unrecognized as an address load, store, or PC set
+    if (it->c_str()[0] != '@' && it->c_str()[0] != '*' && it->c_str()[0] != '-')
     {
       std::cout << "Unrecognized instruction at line " << it - source->begin() << std::endl;
       return 0;
@@ -74,20 +93,32 @@ int main()
    * simulator will error out with line number and instruction detail.
    */
 
+  // Begin the loop for instruction break down.
+  for (std::vector<std::string>::iterator it = source->begin(); it != source->end(); ++it)
+  {
+  }
+
+  // Run the simulator using the instruction vector
+
   // Just to verify that the Macro11 source file(s) have been parsed correctly.
-  //for (std::vector<std::string>::iterator it = source->begin(); it != source->end(); ++it)
-  //{
-    //std::cout << it->c_str() << std::endl;
-  //}
+  for (std::vector<std::string>::iterator it = source->begin(); it != source->end(); ++it)
+  {
+    std::cout << it->c_str() << std::endl;
+  }
 
   // Garbage collection
+  if (instruction)
+  {
+    delete instruction;
+  }
+
   if (source)
   {
     delete source;
   }
 
-  if (Imac)
+  if (macFile)
   {
-    delete Imac;
+    delete macFile;
   }
 }
