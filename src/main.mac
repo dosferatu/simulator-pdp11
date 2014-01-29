@@ -1,4 +1,4 @@
-		.PSECT A, REL
+		.PSECT A,ABS 
 ;    **************************************
 ;    * CALCULATE THE NTH FIBONACCI NUMBER *
 ;    **************************************
