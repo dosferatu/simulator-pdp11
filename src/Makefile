@@ -21,7 +21,9 @@ all : $(PDP_TARGETS) $(SIM_TARGETS) $(SIMOBJ)
 
 %.o : %.cpp
 	$(CC) $(CCFLAGS) $< -o $(SIM)
-	valgrind --tool=memcheck --leak-check=yes ./$(SIM)
+
+leak-check: all
+	valgrind --tool=memcheck --leak-check=yes ./$(SIM) $(PDP_TARGETS)
 
 clean :
 	rm -rf *.obj *.lst *.ascii
@@ -31,4 +33,4 @@ clean :
 simulate:
 	./$(SIM) $(PDP_TARGETS)
 
-.PHONY : all clean simulate
+.PHONY : all clean leak-check simulate

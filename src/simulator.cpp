@@ -5,6 +5,7 @@
 /*
  * Create data structures to simulate PDP-11 memory and registers
  */
+int RAM[177777];
 
 /*
  * Logistical data structures used by the simulator
