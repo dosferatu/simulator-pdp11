@@ -1,3 +1,7 @@
+/* This file contains the simulator as a whole.  It executes and manages all aspects of the
+ *  PDP-11/20 simulator.
+ */
+
 #include <iostream>
 #include <fstream>
 #include <vector>
