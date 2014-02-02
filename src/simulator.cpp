@@ -24,7 +24,6 @@ std::vector<std::string> *instruction;
 std::vector<std::string> *source;
 std::fstream *macFile;
 
-int printbinchar(char);
 int addressPointer;
 
 // Change so we just call the simulator with the .ascii file as the argument for it to parse and run
@@ -99,7 +98,23 @@ int main(int argc, char **argv)
         {
           // Use address pointer to write to mem, then increment address pointer.
           // If the value loaded in is 16 bits then incremenent address pointer by 2.
+          int value = 0;
 
+          for (std::string::iterator i = (it->begin() + 1); i != it->end(); ++i)
+          {
+            value = value << 3;
+            value = value + (*i - '0'); // Convert the ascii number to it's integer equivalent.
+          }
+
+          // Write both bytes to RAM
+          RAM[addressPointer] = value & 0x00FF;
+          ++addressPointer;
+          RAM[addressPointer] = value >> 8;
+          ++addressPointer;
+
+          std::cout << "Contents written to RAM at address " << addressPointer << ":" << std::endl;
+          std::cout << "Low order byte: " << RAM[addressPointer - 2] << std::endl;
+          std::cout << "High order byte: " << RAM[addressPointer - 1] << std::endl;
           break;
         }
 
@@ -112,7 +127,7 @@ int main(int argc, char **argv)
       default:
         {
           std::cout << "Unrecognized instruction at line " << it - source->begin() << std::endl;
-          //return 0;
+          return 0;
         }
     }
   }
@@ -131,8 +146,6 @@ int main(int argc, char **argv)
     //std::cout << it->c_str() << std::endl;
   //}
   
-  std::cout << addressPointer << std::endl;
-
   // Garbage collection
   if (instruction)
   {
