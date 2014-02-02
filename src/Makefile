@@ -30,7 +30,7 @@ clean :
 	rm -rf *.o
 	rm -rf $(SIM)
 
-simulate:
+simulate: all
 	./$(SIM) $(PDP_TARGETS)
 
 .PHONY : all clean leak-check simulate
