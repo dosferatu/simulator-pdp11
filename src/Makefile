@@ -20,7 +20,7 @@ all : $(PDP_TARGETS) $(SIM_TARGETS) $(SIMOBJ)
 	$(TRANS) $*.obj $@
 
 %.o : %.cpp
-	$(CC) $(CCFLAGS) $< -o $(SIM)
+	$(CC) $(CCFLAGS) $(SIMS) -o $(SIM)
 
 leak-check: all
 	valgrind --tool=memcheck --leak-check=yes ./$(SIM) $(PDP_TARGETS)
