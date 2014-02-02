@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include "memory.h"
 
 /*
  * Create data structures to simulate PDP-11 memory and registers.
@@ -15,7 +16,10 @@
  * System is word (16-bit) or byte (8-bit) addressable.
  * 32768 total words (or 65536) total bytes are available.
  */
-short RAM[32768];
+
+// Architecture modules
+Memory *memory;
+// CPU MODULE FOR FETCH DECODE EXECUTE & STATE CHANGES
 
 /*
  * Logistical data structures used by the simulator
@@ -24,7 +28,16 @@ std::vector<std::string> *instruction;
 std::vector<std::string> *source;
 std::fstream *macFile;
 
+/*
+ * Internal state buffers.
+ * These fields are used to hold everything about the current
+ * state of the PDP11/20 during program execution.
+ */
+// *** MOSTLY PLACEHOLDERS FOR NOW -- UPDATE WITH PROPER TYPES
 int addressPointer;
+int programCounter;
+int flags;
+
 
 // Change so we just call the simulator with the .ascii file as the argument for it to parse and run
 int main(int argc, char **argv)
@@ -41,6 +54,7 @@ int main(int argc, char **argv)
    * so we can print the appropriate error if something goes wrong. This isn't critical
    * right now so it isn't implemented.
    */
+  memory = new Memory();
 
   // Parse in .ascii file and retrieve instructions until EOF
   macFile = new std::fstream();
@@ -106,15 +120,7 @@ int main(int argc, char **argv)
             value = value + (*i - '0'); // Convert the ascii number to it's integer equivalent.
           }
 
-          // Write both bytes to RAM
-          RAM[addressPointer] = value & 0x00FF;
-          ++addressPointer;
-          RAM[addressPointer] = value >> 8;
-          ++addressPointer;
-
-          std::cout << "Contents written to RAM at address " << addressPointer << ":" << std::endl;
-          std::cout << "Low order byte: " << RAM[addressPointer - 2] << std::endl;
-          std::cout << "High order byte: " << RAM[addressPointer - 1] << std::endl;
+          memory->Write(addressPointer, value);
           break;
         }
 
@@ -139,12 +145,15 @@ int main(int argc, char **argv)
    */
 
   // Run the simulator using the instruction vector
+  // CPU module should perform fetch, decode, execute, and then cause any state changes.
 
   // Just to verify that the Macro11 source file(s) have been parsed correctly.
   //for (std::vector<std::string>::iterator it = source->begin(); it != source->end(); ++it)
   //{
     //std::cout << it->c_str() << std::endl;
   //}
+  
+
   
   // Garbage collection
   if (instruction)
@@ -160,5 +169,10 @@ int main(int argc, char **argv)
   if (macFile)
   {
     delete macFile;
+  }
+
+  if (memory)
+  {
+    delete memory;
   }
 }
