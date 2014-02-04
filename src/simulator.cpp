@@ -126,9 +126,4 @@ int main(int argc, char **argv)
   {
     delete macFile;
   }
-
-  if (memory)
-  {
-    delete memory;
-  }
 }
