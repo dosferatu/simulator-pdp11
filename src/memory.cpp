@@ -64,10 +64,7 @@ Memory::Memory(std::vector<std::string> *source)
 
 Memory::~Memory()
 {
-  if (RAM)
-  {
-    delete RAM;
-  }
+  delete [] RAM;
 }
 
 short Memory::Read(short effectiveAddress)

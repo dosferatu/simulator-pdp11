@@ -2,6 +2,7 @@
 
 CPU::CPU()
 {
+  memory = new Memory();
 }
 
 CPU::CPU(Memory *memory)
@@ -11,6 +12,7 @@ CPU::CPU(Memory *memory)
 
 CPU::~CPU()
 {
+  delete memory;
 }
 
 /*
@@ -20,6 +22,10 @@ CPU::~CPU()
  */ 
 void CPU::FDE()
 {
+  /*
+   * BEGIN INSTRUCTION FETCH
+   */
+
   /*
    * BEGIN INSTRUCTION DECODE
    */

@@ -14,7 +14,9 @@ class CPU
     void FDE();
 
   private:
-    Memory *memory;
-    // Registers available to the CPU
+    Memory *memory;   // RAM
+    short reg[6];     // General-purpose registers
+    short SP;         // Stack pointer
+    short PC;         // Program counter
     // Code struct for conditional codes
 };
