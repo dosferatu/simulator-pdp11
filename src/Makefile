@@ -23,7 +23,7 @@ all : $(PDP_TARGETS) $(SIM_TARGETS) $(SIMOBJ)
 	$(CC) $(CCFLAGS) $(SIMS) -o $(SIM)
 
 leak-check: all
-	valgrind --tool=memcheck --leak-check=yes ./$(SIM) $(PDP_TARGETS)
+	valgrind --tool=memcheck --leak-check=yes -v ./$(SIM) $(PDP_TARGETS)
 
 clean :
 	rm -rf *.obj *.lst *.ascii

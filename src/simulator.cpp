@@ -5,7 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include "memory.h"
+#include "cpu.h"
 
 /*
  * Create data structures to simulate PDP-11 memory and registers.
@@ -19,7 +19,7 @@
 
 // Architecture modules
 Memory *memory;
-// CPU MODULE FOR FETCH DECODE EXECUTE & STATE CHANGES
+CPU *cpu; 
 
 /*
  * Logistical data structures used by the simulator
@@ -35,11 +35,22 @@ std::fstream *macFile;
  */
 // *** MOSTLY PLACEHOLDERS FOR NOW -- UPDATE WITH PROPER TYPES
 int addressPointer;
-int programCounter;
-int flags;
+//int programCounter;
+//int flags;
+
+// If signed addresses are encountered then relative, otherwise mode is absolute.
+enum AddressMode
+{
+  relative,
+  absolute
+};
 
 
-// Change so we just call the simulator with the .ascii file as the argument for it to parse and run
+/**************************************************************************************************
+ *
+ * BEGIN MAIN
+ *
+ *************************************************************************************************/
 int main(int argc, char **argv)
 {
   // Support only one .ascii file
@@ -54,7 +65,6 @@ int main(int argc, char **argv)
    * so we can print the appropriate error if something goes wrong. This isn't critical
    * right now so it isn't implemented.
    */
-  memory = new Memory();
 
   // Parse in .ascii file and retrieve instructions until EOF
   macFile = new std::fstream();
@@ -84,78 +94,24 @@ int main(int argc, char **argv)
     std::cout << "Error parsing Macro11 assembler source file!" << std::endl;
     return 0;
   }
-
-  // First remove the last item in the vector that contains only a '\n' character
+  // Remove the last item in the vector that contains only a '\n' character
   source->pop_back();
 
-  // How do we figure out relative vs absolute addressing mode?
+  memory = new Memory(source);
+  cpu = new CPU(memory);
 
-  // Make sure each line starts with a - or @ and only has numbers following
-  for (std::vector<std::string>::iterator it = source->begin(); it != source->end(); ++it)
+  // Loop the CPU which will handle state changes internally.
+  //while (true)
+  //{
+    //cpu->FDE();
+  //}
+
+  // Garbage collection
+  if (cpu)
   {
-    switch(it->c_str()[0])
-    {
-      case '@': // This is the line we set our address pointer to
-        {
-          // Shift addressPointer left 3 bits, then add the next octal value
-          for (std::string::iterator i = (it->begin() + 1); i != it->end(); ++i)
-          {
-            addressPointer = 0;
-            addressPointer = addressPointer << 3;
-            addressPointer = addressPointer + (*i - '0'); // Convert the ascii number to it's integer equivalent.
-          }
-
-          break;
-        }
-
-      case '-': // This means we load this value in to the memory location pointed to by addressPointer
-        {
-          // Use address pointer to write to mem, then increment address pointer.
-          // If the value loaded in is 16 bits then incremenent address pointer by 2.
-          int value = 0;
-
-          for (std::string::iterator i = (it->begin() + 1); i != it->end(); ++i)
-          {
-            value = value << 3;
-            value = value + (*i - '0'); // Convert the ascii number to it's integer equivalent.
-          }
-
-          memory->Write(addressPointer, value);
-          break;
-        }
-
-      case '*': // This is the value we set the PC to
-        {
-
-          break;
-        }
-
-      default:
-        {
-          std::cout << "Unrecognized instruction at line " << it - source->begin() << std::endl;
-          return 0;
-        }
-    }
+    delete cpu;
   }
 
-  /*
-   * Now that preliminary validation is complete we will break each instruction down in to
-   * PDP11 state changes; if any illegal instructions are detected during this stage the
-   * simulator will error out with line number and instruction detail.
-   */
-
-  // Run the simulator using the instruction vector
-  // CPU module should perform fetch, decode, execute, and then cause any state changes.
-
-  // Just to verify that the Macro11 source file(s) have been parsed correctly.
-  //for (std::vector<std::string>::iterator it = source->begin(); it != source->end(); ++it)
-  //{
-    //std::cout << it->c_str() << std::endl;
-  //}
-  
-
-  
-  // Garbage collection
   if (instruction)
   {
     delete instruction;
