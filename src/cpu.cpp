@@ -22,14 +22,14 @@ CPU::~CPU()
  * be able to fetch, decode, and execute the next instruction
  * .
  */ 
-void CPU::FDE()
+int CPU::FDE()
 {
   /*
    * BEGIN INSTRUCTION FETCH
    */
+  // -(SP) pushes, +(SP) pops, X(SP) index accesses
   this->SP = memory->ReadInstruction(this->PC);
   this->PC += 2;
-  std::cout << this->SP << std::endl;
 
   /*
    * BEGIN INSTRUCTION DECODE
@@ -38,6 +38,9 @@ void CPU::FDE()
   /*
    * BEGIN INSTRUCTION EXECUTE
    */
+  // Temporary locator for HALT condition
+  if (this->SP == 0)
+    return -1;
 
-  return;
+  return 0;
 }

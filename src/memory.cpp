@@ -88,9 +88,9 @@ Memory::Memory(std::vector<std::string> *source)
 
 Memory::~Memory()
 {
-  delete [] RAM;
-
   traceFile->close();
+  delete [] RAM;
+  delete traceFile;
 }
 
 short Memory::Read(short effectiveAddress)

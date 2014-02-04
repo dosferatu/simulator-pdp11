@@ -3,7 +3,7 @@
 AS = ../bin/macro11
 TRANS = ../bin/obj2ascii
 CC = g++
-CCFLAGS = -g -Wall -std=gnu++11
+CCFLAGS = -g -Wall -pipe -std=gnu++11
 
 # Compile and translate any .mac in the directory
 MACS = $(wildcard *.mac)
@@ -23,7 +23,7 @@ all : $(PDP_TARGETS) $(SIM_TARGETS) $(SIMOBJ)
 	$(CC) $(CCFLAGS) $(SIMS) -o $(SIM)
 
 leak-check: all
-	valgrind --tool=memcheck --leak-check=yes -v ./$(SIM) $(PDP_TARGETS)
+	valgrind --tool=memcheck --leak-check=yes  --track-origins=yes -v ./$(SIM) $(PDP_TARGETS)
 
 clean :
 	rm -rf *.obj *.lst *.ascii

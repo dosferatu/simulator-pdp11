@@ -73,24 +73,22 @@ int main(int argc, char **argv)
   cpu = new CPU(memory);
 
   // Loop the CPU which will handle state changes internally.
-  while (true)
+  // Need to make sure program halting is handled in CPU.
+  int status;
+  do
   {
-    cpu->FDE();
+    status = cpu->FDE();
+  } while (status >= 0);
+
+  if (status == -1)
+  {
+    std::cout << "PDP 11/20 received HALT instruction" << std::endl;
   }
 
   // Garbage collection
-  if (cpu)
-  {
-    delete cpu;
-  }
+  delete cpu;
+  delete source;
+  delete macFile;
 
-  if (source)
-  {
-    delete source;
-  }
-
-  if (macFile)
-  {
-    delete macFile;
-  }
+  return 0;
 }

@@ -1,18 +1,13 @@
 #include <vector>
 #include "memory.h"
 
-// Condition codes for arithmetic operations
-enum ConditionCode
-{
-};
-
 class CPU
 {
   public:
     CPU();
     CPU(Memory *memory);
     ~CPU();
-    void FDE();
+    int FDE();
 
   private:
     Memory *memory;             // RAM
@@ -20,5 +15,4 @@ class CPU
     short SP;                   // Stack pointer
     short PS;                   // Process status register
     short PC;                   // Program counter
-    // Code struct for conditional codes
 };
