@@ -1,3 +1,4 @@
+#include <fstream>
 #include <string>
 #include <vector>
 
@@ -7,10 +8,11 @@ class Memory
     Memory();
     Memory(std::vector<std::string> *source);
     ~Memory();
-    short Read(short effectiveaddress);
-    short ReadInstruction(short effectiveaddress);
-    void Write(short effectiveaddress, short data);
+    short Read(short effectiveAddress);
+    short ReadInstruction(short effectiveAddress);
+    void Write(short effectiveAddress, short data);
 
   private:
     char *RAM;
+    std::fstream *traceFile;
 };

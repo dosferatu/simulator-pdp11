@@ -1,22 +1,13 @@
-/* This file contains the simulator as a whole.  It executes and manages all aspects of the
- *  PDP-11/20 simulator.
- */
-
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <vector>
 #include "cpu.h"
 
-/*
- * Create data structures to simulate PDP-11 memory and registers.
- * Addresses between 0 and 400 are reserved for interrupt and trap vectors.
- * Addresses between 400 and 157777 is for processor stack and programs/data.
- * Addresses above 160000 are reserved for peripheral device status, control, and data regs.
+/******************************************************************************
  *
- * System is word (16-bit) or byte (8-bit) addressable.
- * 32768 total words (or 65536) total bytes are available.
- */
-
+ *                            PDP 11/20 SIMULATOR
+ *
+ *****************************************************************************/
 // Architecture modules
 Memory *memory;
 CPU *cpu; 
@@ -24,33 +15,14 @@ CPU *cpu;
 /*
  * Logistical data structures used by the simulator
  */
-std::vector<std::string> *instruction;
 std::vector<std::string> *source;
 std::fstream *macFile;
 
-/*
- * Internal state buffers.
- * These fields are used to hold everything about the current
- * state of the PDP11/20 during program execution.
- */
-// *** MOSTLY PLACEHOLDERS FOR NOW -- UPDATE WITH PROPER TYPES
-int addressPointer;
-//int programCounter;
-//int flags;
-
-// If signed addresses are encountered then relative, otherwise mode is absolute.
-enum AddressMode
-{
-  relative,
-  absolute
-};
-
-
-/**************************************************************************************************
+/******************************************************************************
  *
- * BEGIN MAIN
+ *                                BEGIN MAIN
  *
- *************************************************************************************************/
+ *****************************************************************************/
 int main(int argc, char **argv)
 {
   // Support only one .ascii file
@@ -101,20 +73,15 @@ int main(int argc, char **argv)
   cpu = new CPU(memory);
 
   // Loop the CPU which will handle state changes internally.
-  //while (true)
-  //{
-    //cpu->FDE();
-  //}
+  while (true)
+  {
+    cpu->FDE();
+  }
 
   // Garbage collection
   if (cpu)
   {
     delete cpu;
-  }
-
-  if (instruction)
-  {
-    delete instruction;
   }
 
   if (source)

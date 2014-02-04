@@ -1,3 +1,4 @@
+#include <vector>
 #include "memory.h"
 
 // Condition codes for arithmetic operations
@@ -14,9 +15,10 @@ class CPU
     void FDE();
 
   private:
-    Memory *memory;   // RAM
-    short reg[6];     // General-purpose registers
-    short SP;         // Stack pointer
-    short PC;         // Program counter
+    Memory *memory;             // RAM
+    short reg[6];               // General-purpose registers
+    short SP;                   // Stack pointer
+    short PS;                   // Process status register
+    short PC;                   // Program counter
     // Code struct for conditional codes
 };

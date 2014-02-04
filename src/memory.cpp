@@ -4,14 +4,38 @@
 Memory::Memory()
 {
   RAM = new char[65536];
+
+  // Open trace file for output
+  traceFile = new std::fstream();
+  try
+  {
+    traceFile->open("trace.txt", std::ios::out);
+  }
+
+  catch (const std::ios_base::failure &e)
+  {
+    std::cout << "Error opening trace file for output mode!" << std::endl;
+  }
 }
 
 // Initialize memory with the obj2ascii translated MACRO11 assembly source instructions.
 Memory::Memory(std::vector<std::string> *source)
 {
   RAM = new char[65536];
-
   short addressIndex;
+
+  // Open trace file for output
+  traceFile = new std::fstream();
+  try
+  {
+    traceFile->open("trace.txt", std::ios::out);
+  }
+
+  catch (const std::ios_base::failure &e)
+  {
+    std::cout << "Error opening trace file for output mode!" << std::endl;
+  }
+
   // Make sure each line starts with a - or @ and only has numbers following
   for (std::vector<std::string>::iterator it = source->begin(); it != source->end(); ++it)
   {
@@ -65,6 +89,8 @@ Memory::Memory(std::vector<std::string> *source)
 Memory::~Memory()
 {
   delete [] RAM;
+
+  traceFile->close();
 }
 
 short Memory::Read(short effectiveAddress)

@@ -1,13 +1,15 @@
+#include <iostream>
 #include "cpu.h"
 
 CPU::CPU()
 {
-  memory = new Memory();
+  this->memory = new Memory();
 }
 
 CPU::CPU(Memory *memory)
 {
   this->memory = memory;
+  this->PC = 010;
 }
 
 CPU::~CPU()
@@ -25,6 +27,9 @@ void CPU::FDE()
   /*
    * BEGIN INSTRUCTION FETCH
    */
+  this->SP = memory->ReadInstruction(this->PC);
+  this->PC += 2;
+  std::cout << this->SP << std::endl;
 
   /*
    * BEGIN INSTRUCTION DECODE
