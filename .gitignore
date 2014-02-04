@@ -3,6 +3,8 @@
 *.lst
 *.obj
 
+# Simulator
+simulator
 
 # Vim
 *.swp
