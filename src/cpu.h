@@ -1,6 +1,9 @@
 #include <vector>
 #include "memory.h"
 
+#define SP 6
+#define PC 7
+
 class CPU
 {
   public:
@@ -11,8 +14,9 @@ class CPU
 
   private:
     Memory *memory;             // RAM
-    short reg[6];               // General-purpose registers
-    short SP;                   // Stack pointer
     short PS;                   // Process status register
-    short PC;                   // Program counter
+    short reg[8];               // General-purpose registers
+                                // R6 is the processor stack pointer
+                                // R7 is the program counter
+
 };

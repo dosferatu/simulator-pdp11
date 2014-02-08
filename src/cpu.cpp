@@ -9,7 +9,7 @@ CPU::CPU()
 CPU::CPU(Memory *memory)
 {
   this->memory = memory;
-  this->PC = 010;
+  this->reg[PC] = 010;
 }
 
 CPU::~CPU()
@@ -28,8 +28,8 @@ int CPU::FDE()
    * BEGIN INSTRUCTION FETCH
    */
   // -(SP) pushes, +(SP) pops, X(SP) index accesses
-  short instruction = memory->ReadInstruction(this->PC);
-  this->PC += 2;
+  short instruction = memory->ReadInstruction(this->reg[PC]);
+  this->reg[PC] += 2;
 
   /*
    * BEGIN INSTRUCTION DECODE
