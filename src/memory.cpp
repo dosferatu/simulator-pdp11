@@ -9,7 +9,7 @@ Memory::Memory()
   traceFile = new std::fstream();
   try
   {
-    traceFile->open("trace.txt", std::ios::out);
+    traceFile->open("trace.txt", std::ios::out | std::ios::app);
   }
 
   catch (const std::ios_base::failure &e)
@@ -28,7 +28,7 @@ Memory::Memory(std::vector<std::string> *source)
   traceFile = new std::fstream();
   try
   {
-    traceFile->open("trace.txt", std::ios::out);
+    traceFile->open("trace.txt", std::ios::out | std::ios::app);
   }
 
   catch (const std::ios_base::failure &e)
@@ -69,6 +69,7 @@ Memory::Memory(std::vector<std::string> *source)
           // Update internal memory
           this->RAM[addressIndex] = value & 0xFF;
           this->RAM[addressIndex + 1] = value >> 8;
+          addressIndex = addressIndex + 2;
           break;
         }
 
@@ -95,21 +96,21 @@ Memory::~Memory()
 
 short Memory::Read(short effectiveAddress)
 {
+  // Trace file output
+  std::string buffer = "0 <address>\n";
+  *traceFile << buffer;
+
   // Read both bytes from memory, and return the combined value
-
-  // STUB *** TRACE FILE READ
-  // 0 <address>
-
   return (RAM[effectiveAddress + 1] >> 8) + (RAM[effectiveAddress] & 0xFF);
 }
 
 short Memory::ReadInstruction(short effectiveAddress)
 {
+  // Trace file output
+  std::string buffer = "2 <address>\n";
+  *traceFile << buffer;
+
   // Read both bytes from memory, and return the combined value
-
-  // STUB *** TRACE FILE INSTRUCTION READ
-  // 2 <address>
-
   return (RAM[effectiveAddress + 1] >> 8) + (RAM[effectiveAddress] & 0xFF);
 }
 
@@ -119,8 +120,9 @@ void Memory::Write(short effectiveAddress, short data)
   RAM[effectiveAddress] = data & 0xFF;
   RAM[effectiveAddress + 1] = data >> 8;
 
-  // STUB *** TRACE FILE WRITE
-  // 1 <address>
+  // Trace file output
+  std::string buffer = "1 <address>\n";
+  *traceFile << buffer;
 
   return;
 }

@@ -3,8 +3,9 @@
 *.lst
 *.obj
 
-# Simulator
+# Simulator output
 simulator
+trace.txt
 
 # Vim
 *.swp
