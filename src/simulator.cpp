@@ -74,7 +74,7 @@ int main(int argc, char **argv)
 
   // Loop the CPU which will handle state changes internally.
   // Need to make sure program halting is handled in CPU.
-  int status;
+  int status = 0;
   do
   {
     status = cpu->FDE();
