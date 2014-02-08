@@ -18,5 +18,4 @@ class CPU
     short reg[8];               // General-purpose registers
                                 // R6 is the processor stack pointer
                                 // R7 is the program counter
-
 };
