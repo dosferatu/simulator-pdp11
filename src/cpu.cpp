@@ -12,6 +12,7 @@ CPU::CPU()
   this->reg[5] = R5;
   this->reg[6] = SP;
   this->reg[7] = PC;
+  this->reg[8] = SP;
 }
 
 CPU::CPU(Memory *memory)
@@ -25,6 +26,7 @@ CPU::CPU(Memory *memory)
   this->reg[5] = R5;
   this->reg[6] = SP;
   this->reg[7] = PC;
+  this->reg[8] = SP;
   memory->Write(PC, 010);
 }
 

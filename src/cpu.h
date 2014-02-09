@@ -9,6 +9,7 @@
 #define R5 0177713
 #define SP 0177715
 #define PC 0177717
+#define SP 0177776
 
 class CPU
 {
@@ -21,7 +22,8 @@ class CPU
   private:
     Memory *memory;             // RAM
     short PS;                   // Process status register
-    short reg[8];               // General-purpose registers
+    short reg[9];               // General-purpose registers
                                 // R6 is the processor stack pointer
                                 // R7 is the program counter
+                                // PS is the Processor Status Register
 };
