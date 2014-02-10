@@ -74,6 +74,7 @@ int main(int argc, char **argv)
 
   // Loop the CPU which will handle state changes internally.
   // Need to make sure program halting is handled in CPU.
+  cpu->SetDebugMode();
   int status = 0;
   char cont;
   do

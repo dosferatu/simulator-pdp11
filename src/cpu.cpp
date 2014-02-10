@@ -51,6 +51,16 @@ short CPU::EA(short encodedAddress)
   short decodedAddress = 0;
   std::string modeType = "Not Set!";
 
+  /*
+   * IMPLEMENT CHECK FOR OPERAND ADDRESSES
+   * MAKE SURE THAT RELATIVE AND ABSOLUTE
+   * ARE HANDLED FROM THE MACRO11 PROPERLY
+   *
+   * ESPECIALLY SINCE ABS AND REL DO NOT
+   * SEEM TO AFFECT THE INSTRUCTION CODES
+   * PRODUCED IN THE .LST FILE
+   */
+
   switch(mode)
   {
     case 0: // General Register
