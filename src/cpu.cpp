@@ -16,6 +16,7 @@ CPU::CPU()
   this->reg[6] = SP;
   this->reg[7] = PC;
   this->reg[8] = PS;
+
 }
 
 CPU::CPU(Memory *memory)
@@ -70,13 +71,13 @@ short CPU::EA(short encodedAddress)
         if (reg == 07)
         {
           // Point to the word after the instruction word
-          decodedAddress = this->memory->Read(PC) + 2;
+          decodedAddress = this->memory->Read(PC) + 02;
         }
 
         else
         {
           decodedAddress = this->memory->Read(encodedAddress);
-          this->memory->Write(encodedAddress, decodedAddress + 2);
+          this->memory->Write(encodedAddress, decodedAddress + 02);
         }
 
         break;
@@ -96,7 +97,7 @@ short CPU::EA(short encodedAddress)
           // Do we increment the pointer or address?
           short pointer = memory->Read(encodedAddress);
           short decodedAddress = memory->Read(pointer);
-          memory->Write(encodedAddress, decodedAddress + 2);
+          memory->Write(encodedAddress, decodedAddress + 02);
         }
 
         break;
@@ -105,11 +106,16 @@ short CPU::EA(short encodedAddress)
     case 4: // Autodecrement
       {
         decodedAddress = this->memory->Read(encodedAddress);
-        this->memory->Write(encodedAddress, decodedAddress - 2);
+        this->memory->Write(encodedAddress, decodedAddress - 02);
       }
 
     case 5: // Autodecrement Deferred
-      {}
+      {
+          // Do we decrement the pointer or address?
+          short pointer = memory->Read(encodedAddress);
+          short decodedAddress = memory->Read(pointer);
+          memory->Write(encodedAddress, decodedAddress - 02);
+      }
 
     case 6: // Indexed
       {
@@ -123,6 +129,11 @@ short CPU::EA(short encodedAddress)
 
         else
         {
+          /*
+           * The address is the some of the contents of the operand plus the specified
+           * offset which is the word following the instruction
+           */
+          decodedAddress = this->memory->Read(PC + 02) + this->memory->Read(encodedAddress);
         }
 
         break;
@@ -143,6 +154,13 @@ short CPU::EA(short encodedAddress)
 
         else
         {
+          /*
+           * The address is the some of the contents pointed to by the
+           * operand plus the specified offset which is the word following
+           * the instruction
+           */
+          short value = this->memory->Read(encodedAddress);
+          decodedAddress = this->memory->Read(PC + 02) + this->memory->Read(value);
         }
 
         break;
