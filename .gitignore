@@ -9,6 +9,7 @@ trace.txt
 
 # Vim
 *.swp
+Session.vim
 
 # LaTeX
 *.log
