@@ -60,7 +60,7 @@ short CPU::EA(short encodedAddress)
 
     case 1: // Deferred Register
       {
-        decodedAddress = memory->Read(encodedAddress);
+        decodedAddress = this->memory->Read(encodedAddress);
         break;
       }
 
@@ -68,12 +68,15 @@ short CPU::EA(short encodedAddress)
       {
         // Check for immediate PC addressing
         if (reg == 07)
-        {}
+        {
+          // Point to the word after the instruction word
+          decodedAddress = this->memory->Read(PC) + 2;
+        }
 
         else
         {
-          decodedAddress = memory->Read(encodedAddress);
-          memory->Write(encodedAddress, decodedAddress + 2);
+          decodedAddress = this->memory->Read(encodedAddress);
+          this->memory->Write(encodedAddress, decodedAddress + 2);
         }
 
         break;
@@ -83,7 +86,10 @@ short CPU::EA(short encodedAddress)
       {
         // Check for absolute PC addressing
         if (reg == 07)
-        {}
+        {
+          // Retrieve the operand from the address given
+          decodedAddress = this->memory->Read(encodedAddress);
+        }
 
         else
         {
@@ -97,7 +103,10 @@ short CPU::EA(short encodedAddress)
       }
 
     case 4: // Autodecrement
-      {}
+      {
+        decodedAddress = this->memory->Read(encodedAddress);
+        this->memory->Write(encodedAddress, decodedAddress - 2);
+      }
 
     case 5: // Autodecrement Deferred
       {}
@@ -106,10 +115,15 @@ short CPU::EA(short encodedAddress)
       {
         // Check for relative PC addressing
         if (reg == 07)
-        {}
+        {
+          // Calculate the distance between address of operand and the PC
+          decodedAddress = encodedAddress - this->memory->Read(PC);
+          break;
+        }
 
         else
-        {}
+        {
+        }
 
         break;
       }
@@ -118,10 +132,18 @@ short CPU::EA(short encodedAddress)
       {
         // Check for deferred relative PC addressing
         if (reg == 07)
-        {}
+        {
+          /*
+           * Calculate the distance between value at address pointed
+           * to by operand and the PC
+           */
+          short value = this->memory->Read(encodedAddress);
+          decodedAddress = value - this->memory->Read(PC);
+        }
 
         else
-        {}
+        {
+        }
 
         break;
       }
@@ -146,9 +168,9 @@ short CPU::EA(short encodedAddress)
  */ 
 int CPU::FDE()
 {
-  short pc;
-  short instruction;
-  short instructionBits[6];
+  short pc;                   // Program counter buffer
+  short instruction;          // Instruction word buffer
+  short instructionBits[6];   // Dissected instruction word
 
   /*
    * BEGIN INSTRUCTION FETCH
@@ -163,7 +185,7 @@ int CPU::FDE()
   instruction = memory->ReadInstruction(pc);
 
   /*
-   * BEGIN INSTRUCTION DECODE
+   * BEGIN INSTRUCTION DECODE & EXECUTE
    */
 
   /* Notes about the decoder
@@ -364,10 +386,6 @@ int CPU::FDE()
       }
     }
   }
-
-  /*
-   * BEGIN INSTRUCTION EXECUTE
-   */
 
   return 0;
 }
