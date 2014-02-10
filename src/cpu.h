@@ -1,6 +1,6 @@
-#include <vector>
 #include "memory.h"
 
+// Register memory locations
 #define R0 0177700
 #define R1 0177702
 #define R2 0177704
@@ -19,11 +19,14 @@ class CPU
     ~CPU();
     short EA(short encodedAddress);
     int FDE();
+    void SetDebugMode();
+    void ClearDebugMode();
 
   private:
+    int debugLevel;             // Debug verbosity level
     Memory *memory;             // RAM
     short reg[9];               // General-purpose registers
                                 // R6 is the processor stack pointer
                                 // R7 is the program counter
-                                // PS is the Processor Status Register
+                                // R8 is the Processor Status Register
 };

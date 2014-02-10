@@ -3,7 +3,10 @@
 
 CPU::CPU()
 {
+  this->debugLevel = Verbosity::off;
+
   this->memory = new Memory();
+
   this->reg[0] = R0;
   this->reg[1] = R1;
   this->reg[2] = R2;
@@ -17,7 +20,10 @@ CPU::CPU()
 
 CPU::CPU(Memory *memory)
 {
+  this->debugLevel = Verbosity::off;
+
   this->memory = memory;
+
   this->reg[0] = R0;
   this->reg[1] = R1;
   this->reg[2] = R2;
@@ -27,6 +33,8 @@ CPU::CPU(Memory *memory)
   this->reg[6] = SP;
   this->reg[7] = PC;
   this->reg[8] = PS;
+
+  // Temporarily initialize the PC for now. Remove when implemented properly.
   memory->Write(PC, 010);
 }
 
@@ -38,25 +46,55 @@ CPU::~CPU()
 short CPU::EA(short encodedAddress)
 {
   char mode = encodedAddress & 070;
-  //char reg = encodedAddress & 07;
+  char reg = encodedAddress & 07;
   short decodedAddress = 0;
+  std::string modeType = "Not Set!";
 
   switch(mode)
   {
     case 0: // General Register
       {
-        return encodedAddress;
+        decodedAddress = encodedAddress;
+        break;
       }
 
     case 1: // Deferred Register
       {
+        decodedAddress = memory->Read(encodedAddress);
+        break;
       }
 
     case 2: // Autoincrement
-      {}
+      {
+        // Check for immediate PC addressing
+        if (reg == 07)
+        {}
+
+        else
+        {
+          decodedAddress = memory->Read(encodedAddress);
+          memory->Write(encodedAddress, decodedAddress + 2);
+        }
+
+        break;
+      }
 
     case 3: // Autoincrement Deferred
-      {}
+      {
+        // Check for absolute PC addressing
+        if (reg == 07)
+        {}
+
+        else
+        {
+          // Do we increment the pointer or address?
+          short pointer = memory->Read(encodedAddress);
+          short decodedAddress = memory->Read(pointer);
+          memory->Write(encodedAddress, decodedAddress + 2);
+        }
+
+        break;
+      }
 
     case 4: // Autodecrement
       {}
@@ -65,13 +103,37 @@ short CPU::EA(short encodedAddress)
       {}
 
     case 6: // Indexed
-      {}
+      {
+        // Check for relative PC addressing
+        if (reg == 07)
+        {}
+
+        else
+        {}
+
+        break;
+      }
 
     case 7: // Deferred Indexed
-      {}
+      {
+        // Check for deferred relative PC addressing
+        if (reg == 07)
+        {}
+
+        else
+        {}
+
+        break;
+      }
 
     default:
       break;
+  }
+
+  if (debugLevel == Verbosity::minimal)
+  {
+    std::cout << "Mode Type: " << modeType << "(" << static_cast<int>(mode) << ")" << std::endl;
+    std::cout << "Register: " << static_cast<int>(reg) << std::endl;
   }
 
   return decodedAddress;
@@ -84,18 +146,21 @@ short CPU::EA(short encodedAddress)
  */ 
 int CPU::FDE()
 {
+  short pc;
+  short instruction;
+  short instructionBits[6];
+
   /*
    * BEGIN INSTRUCTION FETCH
    *
    */
 
-  // Retrieve the PC value
-  short pc = memory->Read(PC);
+  // Retrieve the PC value and increment by 2
+  pc = memory->Read(PC);
+  memory->Write(PC, pc + 2);
 
-  // -(SP) pushes, +(SP) pops, X(SP) index accesses
-  short instruction = memory->ReadInstruction(pc);
-  pc += 2;
-
+  // Fetch the instruction
+  instruction = memory->ReadInstruction(pc);
 
   /*
    * BEGIN INSTRUCTION DECODE
@@ -103,25 +168,24 @@ int CPU::FDE()
 
   /* Notes about the decoder
   */
-  short instruction_0 = (instruction & 0000007);
-  short instruction_1 = (instruction & 0000070) >> 3; 
-  short instruction_2 = (instruction & 0000700) >> 6;
-  short instruction_3 = (instruction & 0007000) >> 9;
-  short instruction_4 = (instruction & 0070000) >> 12;
-  short instruction_5 = (instruction & 0700000) >> 15; // This is actually only giving us the final bit of the 16-bit word
+  instructionBits[0] = (instruction & 0000007);
+  instructionBits[1] = (instruction & 0000070) >> 3; 
+  instructionBits[2] = (instruction & 0000700) >> 6;
+  instructionBits[3] = (instruction & 0007000) >> 9;
+  instructionBits[4] = (instruction & 0070000) >> 12;
+  instructionBits[5] = (instruction & 0700000) >> 15; // This is actually only giving us the final bit of the 16-bit word
 
-
-  if(instruction_4 == 0) 
+  if(instructionBits[4] == 0) 
   {
-    switch(instruction_4)
+    switch(instructionBits[4])
     {
-      case 0: switch(instruction_3) 
+      case 0: switch(instructionBits[3])
               {
-                case 0: switch(instruction_2)
+                case 0: switch(instructionBits[2])
                         {
-                          case 0: switch(instruction_5)
+                          case 0: switch(instructionBits[5])
                                   {
-                                    case 0: switch(instruction_0)
+                                    case 0: switch(instructionBits[0])
                                             {
                                               case 0: return -1; // HALT
                                               case 1: return 0;  // WAIT
@@ -138,12 +202,12 @@ int CPU::FDE()
                                   // Get effective address
                                   // effective address --> (PC) unconditional
                                   break;
-                          case 2: switch(instruction_1)
+                          case 2: switch(instructionBits[1])
                                   {
                                     case 0: // RTS reg
                                       // reg --> (PC), pop reg
                                       break;
-                                    case 4: switch(instruction_0)
+                                    case 4: switch(instructionBits[0])
                                             {
                                               case 1: break;  // CLC - Clear C
                                               case 2: break;  // CLV - Clear V
@@ -151,7 +215,7 @@ int CPU::FDE()
                                               default: break;
                                             }
                                     case 5: break;  // CLN - Clear N
-                                    case 6: switch(instruction_0)
+                                    case 6: switch(instructionBits[0])
                                             {
                                               case 1: break; // SEC - Set C
                                               case 2: break; // SEV - Set V
@@ -161,7 +225,7 @@ int CPU::FDE()
                                     case 7: break;  // SEN - Set N
                                   }
                           case 3: break; // SWAB dst - swap bytes of word at dst
-                          case 4: switch(instruction_5)
+                          case 4: switch(instructionBits[5])
                                   {
                                     case 0: break;  // BR loc - unconditional branch
                                     case 1: break;  // BMI loc
@@ -169,15 +233,15 @@ int CPU::FDE()
                                   }
                           default: break;
                         }
-                case 1: switch(instruction_2)
+                case 1: switch(instructionBits[2])
                         {
-                          case 0: switch(instruction_5)
+                          case 0: switch(instructionBits[5])
                                   {
                                     case 0: break;  // BNE loc
                                     case 1: break;  // BHI loc
                                     default: break;
                                   }
-                          case 4: switch(instruction_5)
+                          case 4: switch(instructionBits[5])
                                   {
                                     case 0: break;  // BEQ loc
                                     case 1: break;  // BLOS loc
@@ -185,15 +249,15 @@ int CPU::FDE()
                                   }
                           default: break;
                         }
-                case 2: switch(instruction_2)
+                case 2: switch(instructionBits[2])
                         {
-                          case 0: switch(instruction_5)
+                          case 0: switch(instructionBits[5])
                                   {
                                     case 0: break;  // BGE loc
                                     case 1: break;  // BVC loc
                                     default: break;
                                   }
-                          case 4: switch(instruction_5)
+                          case 4: switch(instructionBits[5])
                                   {
                                     case 0: break;  // BLT loc
                                     case 1: break;  // BVS loc
@@ -201,15 +265,15 @@ int CPU::FDE()
                                   }
                           default: break;
                         }
-                case 3: switch(instruction_2)
+                case 3: switch(instructionBits[2])
                         {
-                          case 0: switch(instruction_5)
+                          case 0: switch(instructionBits[5])
                                   {
                                     case 0: break;  // BGT loc
                                     case 1: break;  // BCC loc
                                     default: break;
                                   }
-                          case 4: switch(instruction_5)
+                          case 4: switch(instructionBits[5])
                                   {
                                     case 0: break;  // BLE loc
                                     case 1: break;  // BCS loc
@@ -218,9 +282,9 @@ int CPU::FDE()
                           default: break;
                         }
                 case 4: break;  // JSR reg, dst
-                case 5: switch(instruction_5)
+                case 5: switch(instructionBits[5])
                         {
-                          case 0: switch(instruction_2)
+                          case 0: switch(instructionBits[2])
                                   {
                                     case 0: break;  // CLR dst
                                     case 1: break;  // COM dst
@@ -232,7 +296,7 @@ int CPU::FDE()
                                     case 7: break;  // TST dst
                                     default: break;
                                   }
-                          case 1: switch(instruction_2)
+                          case 1: switch(instructionBits[2])
                                   {
 
                                     case 0: break;  // CLRB dst
@@ -247,9 +311,9 @@ int CPU::FDE()
                                   }
                           default: break;
                         }
-                case 6: switch(instruction_5)
+                case 6: switch(instructionBits[5])
                         {
-                          case 0: switch(instruction_2)
+                          case 0: switch(instructionBits[2])
                                   {
                                     case 0: break;  // ROR dst
                                     case 1: break;  // ROL dst
@@ -257,7 +321,7 @@ int CPU::FDE()
                                     case 3: break;  // ASL dst
                                     default: break;
                                   }
-                          case 1: switch(instruction_2)
+                          case 1: switch(instructionBits[2])
                                   {
                                     case 0: break;  // RORB dst
                                     case 1: break;  // ROLB dst
@@ -272,11 +336,11 @@ int CPU::FDE()
       default: break;
     }
 
-    if(instruction_4 > 0)
+    if(instructionBits[4] > 0)
     {
-      switch(instruction_5)
+      switch(instructionBits[5])
       {
-        case 0: switch(instruction_4)
+        case 0: switch(instructionBits[4])
                 {
                   case 1: break;  // MOV src, dst
                   case 2: break;  // CMP src, dst
@@ -286,7 +350,7 @@ int CPU::FDE()
                   case 6: break;  // ADD src, dst
                   default: break;
                 }
-        case 1: switch(instruction_4)
+        case 1: switch(instructionBits[4])
                 {
                   case 1: break;  // MOVB src, dst
                   case 2: break;  // CMPB src, dst
@@ -301,49 +365,21 @@ int CPU::FDE()
     }
   }
 
-
-
-
-
-
-
-  /*
-   * Register addressing modes
-   * 
-   * Mode 0 - General Register
-   * Mode 1 - Deferred Register
-   * Mode 6 - Indexed
-   * Mode 7 - Deferred Indexed
-   * Mode 2 - Autoincrement
-   * Mode 3 - Autoincrement Deferred
-   * Mode 4 - Autodecrement
-   * Mode 5 - Autodecrement Deferred
-   */
-
-  /*
-   * PC addressing modes
-   *
-   * Mode 2 - Immediate
-   * Mode 3 - Absolute
-   * Mode 6 - Relative
-   * Mode 7 - Relative Deferred
-   */
-
   /*
    * BEGIN INSTRUCTION EXECUTE
    */
 
-  // Write the new PC value
-  memory->Write(PC, pc);
-
   return 0;
 }
 
-/*
- * PC addressing modes
- *
- * Mode 2 - Immediate
- * Mode 3 - Absolute
- * Mode 6 - Relative
- * Mode 7 - Relative Deferred
- */
+void CPU::SetDebugMode()
+{
+  this->debugLevel = Verbosity::minimal;
+  return;
+}
+
+void CPU::ClearDebugMode()
+{
+  this->debugLevel = Verbosity::off;
+  return;
+}

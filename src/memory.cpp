@@ -126,3 +126,15 @@ void Memory::Write(short effectiveAddress, short data)
 
   return;
 }
+
+void Memory::SetDebugMode()
+{
+  this->debugLevel = Verbosity::minimal;
+  return;
+}
+
+void Memory::ClearDebugMode()
+{
+  this->debugLevel = Verbosity::off;
+  return;
+}
