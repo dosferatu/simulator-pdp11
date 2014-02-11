@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include "memory.h"
 
 Memory::Memory()
@@ -8,7 +9,7 @@ Memory::Memory()
   // Open trace file for output
   try
   {
-    traceFile = new std::ofstream("trace.txt", std::ios::out | std::ios::app);
+    traceFile = new std::ofstream("trace.txt", std::ios::out);
   }
 
   catch (const std::ios_base::failure &e)
@@ -25,7 +26,7 @@ Memory::Memory(std::vector<std::string> *source)
 
   try
   {
-    traceFile = new std::ofstream("trace.txt", std::ios::out | std::ios::app);
+    traceFile = new std::ofstream("trace.txt", std::ios::out);
   }
 
   catch (const std::ios_base::failure &e)
@@ -64,8 +65,8 @@ Memory::Memory(std::vector<std::string> *source)
           }
 
           // Update internal memory
-          this->Write(addressIndex, value);
-          addressIndex = addressIndex + 2;
+          this->RAM[addressIndex++] = value & 0xFF;
+          this->RAM[addressIndex++] = value >> 8;
           break;
         }
 
@@ -93,7 +94,11 @@ Memory::~Memory()
 short Memory::Read(int effectiveAddress)
 {
   // Trace file output
-  std::string buffer = "0 <address>\n";
+  std::string buffer = "0 ";
+  std::stringstream stream;
+  stream << std::oct << effectiveAddress;
+  buffer.append(stream.str());
+  buffer.append("\n");
   *traceFile << buffer;
 
   // Read both bytes from memory, and return the combined value
@@ -103,7 +108,11 @@ short Memory::Read(int effectiveAddress)
 short Memory::ReadInstruction(int effectiveAddress)
 {
   // Trace file output
-  std::string buffer = "2 <address>\n";
+  std::string buffer = "2 ";
+  std::stringstream stream;
+  stream << std::oct << effectiveAddress;
+  buffer.append(stream.str());
+  buffer.append("\n");
   *traceFile << buffer;
 
   // Read both bytes from memory, and return the combined value
@@ -117,7 +126,11 @@ void Memory::Write(int effectiveAddress, short data)
   this->RAM[effectiveAddress + 1] = data >> 8;
 
   // Trace file output
-  std::string buffer = "1 <address>\n";
+  std::string buffer = "1 ";
+  std::stringstream stream;
+  stream << std::oct << effectiveAddress;
+  buffer.append(stream.str());
+  buffer.append("\n");
   *traceFile << buffer;
 
   return;
