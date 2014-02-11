@@ -20,14 +20,6 @@ enum Verbosity
   minimal
 };
 
-// Operation types
-enum Transaction
-{
-  read,
-  write,
-  readInstruction
-};
-
 class Memory
 {
   public:
