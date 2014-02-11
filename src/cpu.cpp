@@ -22,9 +22,6 @@ CPU::CPU(Memory *memory)
 {
   this->debugLevel = Verbosity::off;
   this->memory = memory;
-
-  // Temporarily initialize the PC for now. Remove when implemented properly.
-  this->memory->Write(PC, 010);
 }
 
 CPU::~CPU()

@@ -24,6 +24,10 @@ Memory::Memory(std::vector<std::string> *source)
   this->RAM = new char[65536];
   short addressIndex;
 
+  // Temporarily initialize the PC for now. Remove when implemented properly.
+  this->RAM[PC] = 010;
+  //this->memory->Write(PC, 010);
+
   try
   {
     traceFile = new std::ofstream("trace.txt", std::ios::out);
@@ -64,7 +68,7 @@ Memory::Memory(std::vector<std::string> *source)
             value = value + (*i - '0'); // Convert the ascii number to it's integer equivalent.
           }
 
-          // Update internal memory
+          // Update internal memory directly to avoid trace output
           this->RAM[addressIndex++] = value & 0xFF;
           this->RAM[addressIndex++] = value >> 8;
           break;
