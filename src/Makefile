@@ -22,8 +22,23 @@ all : $(PDP_TARGETS) $(SIM_TARGETS) $(SIMOBJ)
 %.o : %.cpp
 	$(CC) $(CCFLAGS) $(SIMS) -o $(SIM)
 
+debug: all
+	valgrind\
+		--tool=memcheck\
+		--leak-check=yes\
+		--track-origins=yes\
+		--vgdb=yes\
+		--vgdb-error=0\
+		-v\
+		./$(SIM) $(PDP_TARGETS)
+
 leak-check: all
-	valgrind --tool=memcheck --leak-check=yes  --track-origins=yes -v ./$(SIM) $(PDP_TARGETS)
+	valgrind\
+		--tool=memcheck\
+		--leak-check=yes\
+		--track-origins=yes\
+		-v\
+		./$(SIM) $(PDP_TARGETS)
 
 clean :
 	rm -rf *.obj *.lst *.ascii
@@ -33,4 +48,4 @@ clean :
 simulate: all
 	./$(SIM) $(PDP_TARGETS)
 
-.PHONY : all clean leak-check simulate
+.PHONY : all clean debug leak-check simulate
