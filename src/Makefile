@@ -4,16 +4,22 @@ AS = ../bin/macro11
 TRANS = ../bin/obj2ascii
 CC = g++
 CCFLAGS = -g -Wall -pipe -std=gnu++11
+PY = python2
 
 # Compile and translate any .mac in the directory
 MACS = $(wildcard *.mac)
 PDP_TARGETS = $(patsubst %.mac, %.ascii, $(MACS))
+PYS = asciiPCinsert.py
+PY_TARGETS = $(patsubst %.mac, %.PCascii, $(MACS))
 SIM = simulator
 SIMS = $(wildcard *.cpp)
 SIMOBJ = $(patsubst %.cpp, %.o, $(SIMS))
 SIM_TARGETS = $(patsubst %.cpp, %.o, $(SIMS))
 
-all : $(PDP_TARGETS) $(SIM_TARGETS) $(SIMOBJ)
+all : $(PDP_TARGETS) $(PY_TARGETS) $(SIM_TARGETS) $(SIMOBJ)
+
+%.PCascii : %.ascii
+	$(PY) $(PYS) $*.ascii $*.lst $@
 
 %.ascii : %.mac
 	$(AS) $< -o $*.obj -l $*.lst
@@ -30,7 +36,7 @@ debug: all
 		--vgdb=yes\
 		--vgdb-error=0\
 		-v\
-		./$(SIM) $(PDP_TARGETS)
+		./$(SIM) $(PY_TARGETS)
 
 leak-check: all
 	valgrind\
@@ -39,14 +45,15 @@ leak-check: all
 		--show-leak-kinds=all\
 		--track-origins=yes\
 		-v\
-		./$(SIM) $(PDP_TARGETS)
+		./$(SIM) $(PY_TARGETS)
 
 clean :
-	rm -rf *.obj *.lst *.ascii
+	rm -rf *.obj *.lst *.ascii *.PCascii
 	rm -rf *.o
 	rm -rf $(SIM)
+	rm -rf trace.txt
 
 simulate: all
-	./$(SIM) $(PDP_TARGETS)
+	./$(SIM) $(PY_TARGETS)
 
 .PHONY : all clean debug leak-check simulate
