@@ -25,7 +25,7 @@ all : $(PDP_TARGETS) $(SIM_TARGETS) $(SIMOBJ)
 debug: all
 	valgrind\
 		--tool=memcheck\
-		--leak-check=yes\
+		--leak-check=full\
 		--track-origins=yes\
 		--vgdb=yes\
 		--vgdb-error=0\
@@ -35,7 +35,6 @@ debug: all
 leak-check: all
 	valgrind\
 		--tool=memcheck\
-		--leak-check=yes\
 		--leak-check=full\
 		--show-leak-kinds=all\
 		--track-origins=yes\
