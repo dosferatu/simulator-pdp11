@@ -4,44 +4,21 @@
 CPU::CPU()
 {
   this->debugLevel = Verbosity::off;
-
   this->memory = new Memory();
-
-  this->reg[0] = R0;
-  this->reg[1] = R1;
-  this->reg[2] = R2;
-  this->reg[3] = R3;
-  this->reg[4] = R4;
-  this->reg[5] = R5;
-  this->reg[6] = SP;
-  this->reg[7] = PC;
-  this->reg[8] = PS;
-
 }
 
 CPU::CPU(Memory *memory)
 {
   this->debugLevel = Verbosity::off;
-
   this->memory = memory;
 
-  this->reg[0] = R0;
-  this->reg[1] = R1;
-  this->reg[2] = R2;
-  this->reg[3] = R3;
-  this->reg[4] = R4;
-  this->reg[5] = R5;
-  this->reg[6] = SP;
-  this->reg[7] = PC;
-  this->reg[8] = PS;
-
   // Temporarily initialize the PC for now. Remove when implemented properly.
-  memory->Write(PC, 010);
+  this->memory->Write(PC, 010);
 }
 
 CPU::~CPU()
 {
-  delete memory;
+  delete this->memory;
 }
 
 short CPU::EA(short encodedAddress)
@@ -81,11 +58,16 @@ short CPU::EA(short encodedAddress)
         if (reg == 07)
         {
           // Point to the word after the instruction word
+          
           decodedAddress = this->memory->Read(PC) + 02;
         }
 
         else
         {
+          /*
+           * Retrieve the memory address from encodedAddress
+           * and then increment the pointer stored in encodedAddress
+           */
           decodedAddress = this->memory->Read(encodedAddress);
           this->memory->Write(encodedAddress, decodedAddress + 02);
         }
@@ -180,7 +162,7 @@ short CPU::EA(short encodedAddress)
       break;
   }
 
-  if (debugLevel == Verbosity::minimal)
+  if (this->debugLevel == Verbosity::minimal)
   {
     std::cout << "Mode Type: " << modeType << "(" << static_cast<int>(mode) << ")" << std::endl;
     std::cout << "Register: " << static_cast<int>(reg) << std::endl;
@@ -207,7 +189,7 @@ int CPU::FDE()
 
   // Retrieve the PC value and increment by 2
   pc = memory->Read(PC);
-  memory->Write(PC, pc + 2);
+  memory->Write(PC, pc + 02);
 
   // Fetch the instruction
   instruction = memory->ReadInstruction(pc);
@@ -413,6 +395,12 @@ int CPU::FDE()
         default: break;
       }
     }
+  }
+
+  // For debug purposes
+  if (instruction == 0)
+  {
+    return -1;
   }
 
   return 0;

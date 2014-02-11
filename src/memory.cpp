@@ -3,13 +3,12 @@
 
 Memory::Memory()
 {
-  RAM = new char[65536];
+  this->RAM = new char[65536];
 
   // Open trace file for output
-  traceFile = new std::fstream();
   try
   {
-    traceFile->open("trace.txt", std::ios::out | std::ios::app);
+    traceFile = new std::ofstream("trace.txt", std::ios::out | std::ios::app);
   }
 
   catch (const std::ios_base::failure &e)
@@ -21,14 +20,12 @@ Memory::Memory()
 // Initialize memory with the obj2ascii translated MACRO11 assembly source instructions.
 Memory::Memory(std::vector<std::string> *source)
 {
-  RAM = new char[65536];
+  this->RAM = new char[65536];
   short addressIndex;
 
-  // Open trace file for output
-  traceFile = new std::fstream();
   try
   {
-    traceFile->open("trace.txt", std::ios::out | std::ios::app);
+    traceFile = new std::ofstream("trace.txt", std::ios::out | std::ios::app);
   }
 
   catch (const std::ios_base::failure &e)
@@ -67,8 +64,7 @@ Memory::Memory(std::vector<std::string> *source)
           }
 
           // Update internal memory
-          this->RAM[addressIndex] = value & 0xFF;
-          this->RAM[addressIndex + 1] = value >> 8;
+          this->Write(addressIndex, value);
           addressIndex = addressIndex + 2;
           break;
         }
@@ -89,36 +85,36 @@ Memory::Memory(std::vector<std::string> *source)
 
 Memory::~Memory()
 {
-  traceFile->close();
+  this->traceFile->close();
   delete [] RAM;
   delete traceFile;
 }
 
-short Memory::Read(short effectiveAddress)
+short Memory::Read(int effectiveAddress)
 {
   // Trace file output
   std::string buffer = "0 <address>\n";
   *traceFile << buffer;
 
   // Read both bytes from memory, and return the combined value
-  return (RAM[effectiveAddress + 1] >> 8) + (RAM[effectiveAddress] & 0xFF);
+  return (this->RAM[effectiveAddress + 1] << 8) + (this->RAM[effectiveAddress] & 0xFF);
 }
 
-short Memory::ReadInstruction(short effectiveAddress)
+short Memory::ReadInstruction(int effectiveAddress)
 {
   // Trace file output
   std::string buffer = "2 <address>\n";
   *traceFile << buffer;
 
   // Read both bytes from memory, and return the combined value
-  return (RAM[effectiveAddress + 1] >> 8) + (RAM[effectiveAddress] & 0xFF);
+  return (this->RAM[effectiveAddress + 1] << 8) + (this->RAM[effectiveAddress] & 0xFF);
 }
 
-void Memory::Write(short effectiveAddress, short data)
+void Memory::Write(int effectiveAddress, short data)
 {
   // Write the data to the specified memory address
-  RAM[effectiveAddress] = data & 0xFF;
-  RAM[effectiveAddress + 1] = data >> 8;
+  this->RAM[effectiveAddress] = data & 0xFF;
+  this->RAM[effectiveAddress + 1] = data >> 8;
 
   // Trace file output
   std::string buffer = "1 <address>\n";
@@ -136,5 +132,83 @@ void Memory::SetDebugMode()
 void Memory::ClearDebugMode()
 {
   this->debugLevel = Verbosity::off;
+  return;
+}
+
+short Memory::StackPop()
+{
+  return 0;
+}
+
+void Memory::StackPush(int _register)
+{
+  // Translate register number to the appropriate address
+  switch(_register)
+  {
+    case 0:
+      {
+        _register = R0;
+        break;
+      }
+
+    case 1:
+      {
+        _register = R1;
+        break;
+      }
+
+    case 2:
+      {
+        _register = R2;
+        break;
+      }
+
+    case 3:
+      {
+        _register = R3;
+        break;
+      }
+
+    case 4:
+      {
+        _register = R4;
+        break;
+      }
+
+    case 5:
+      {
+        _register = R5;
+        break;
+      }
+
+    case 6:
+      {
+        _register = SP;
+        break;
+      }
+
+    case 7:
+      {
+        _register = PC;
+        break;
+      }
+
+    default:
+      break;
+  }
+
+  /*
+   * Check if stack pointer has exceeded it's limit.
+   * If it has then we need to crash and burn.
+   * Limit is 0160000
+   */
+  //if (this->Read(SP) < 0160000)
+  //{
+    //short sp = this->Read(SP);
+    //sp += 02;
+    //this->Write(sp, _register);
+    //this->Write(SP, this->Read(sp));
+  //}
+
   return;
 }
