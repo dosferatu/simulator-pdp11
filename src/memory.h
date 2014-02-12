@@ -17,7 +17,8 @@
 enum Verbosity
 {
   off,
-  minimal
+  minimal,
+  verbose
 };
 
 class Memory
@@ -29,8 +30,7 @@ class Memory
     short Read(int effectiveAddress);
     short ReadInstruction(int effectiveAddress);
     void Write(int effectiveAddress, short data);
-    void SetDebugMode();
-    void ClearDebugMode();
+    void SetDebugMode(Verbosity verbosity);
     short StackPop();
     void StackPush(int _register);
 

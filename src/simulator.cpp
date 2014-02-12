@@ -23,13 +23,95 @@ std::fstream *macFile;
  *                                BEGIN MAIN
  *
  *****************************************************************************/
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
-  // Support only one .ascii file
-  if (argc != 2)
+  int sourceArg = -1;
+  Verbosity verbosity = Verbosity::off;
+  macFile = new std::fstream();
+
+  if (argc > 3)
   {
     std::cout << "Usage: simulator <ascii file>" << std::endl;
     return 0;
+  }
+
+  // Support only one .ascii file
+  switch(argc)
+  {
+    case 2:
+      {
+        if (static_cast<std::string>(argv[1]).find(".ascii") != std::string::npos)
+        {
+          sourceArg = 1;
+          break;
+        }
+
+        else if (static_cast<std::string>(argv[1]).find(".PCascii") != std::string::npos)
+        {
+          sourceArg = 1;
+          break;
+        }
+      }
+
+    case 3:
+      {
+        for (int i = 1; i < argc; ++i)
+        {
+          if(static_cast<std::string>(argv[i]).compare("-v") == 0)
+          {
+            if (verbosity == Verbosity::off)
+            {
+              verbosity = Verbosity::minimal;
+            }
+
+            else
+            {
+              std::cout << "Conflicting verbosity arguments!" << std::endl;
+              std::cout << "Usage: simulator <ascii file>" << std::endl;
+              return 0;
+            }
+          }
+
+          else if(static_cast<std::string>(argv[i]).compare("-V") == 0)
+          {
+            if (verbosity == Verbosity::off)
+            {
+              verbosity = Verbosity::verbose;
+            }
+
+            else
+            {
+              std::cout << "Conflicting verbosity arguments!" << std::endl;
+              std::cout << "Usage: simulator <ascii file>" << std::endl;
+              return 0;
+            }
+          }
+
+          else if (static_cast<std::string>(argv[i]).find(".ascii") != std::string::npos)
+          {
+            sourceArg = i;
+          }
+
+          else if (static_cast<std::string>(argv[i]).find(".PCascii") != std::string::npos)
+          {
+            sourceArg = i;
+          }
+
+          else
+          {
+            std::cout << "Usage: simulator <ascii file>" << std::endl;
+            return 0;
+          }
+        }
+
+        break;
+
+        default:
+        {
+          std::cout << "Usage: simulator <ascii file>" << std::endl;
+          return 0;
+        }
+      }
   }
 
   /*
@@ -39,11 +121,10 @@ int main(int argc, char **argv)
    */
 
   // Parse in .ascii file and retrieve instructions until EOF
-  macFile = new std::fstream();
 
   try
   {
-    macFile->open(argv[1]);
+    macFile->open(argv[sourceArg]);
     source = new std::vector<std::string>;
     std::string buffer;
 
@@ -70,21 +151,22 @@ int main(int argc, char **argv)
   source->pop_back();
 
   memory = new Memory(source);
+  memory->SetDebugMode(verbosity);
   cpu = new CPU(memory);
+  cpu->SetDebugMode(verbosity);
 
   // Loop the CPU which will handle state changes internally.
   // Need to make sure program halting is handled in CPU.
-  cpu->SetDebugMode();
   int status = 0;
   //char cont;
   do
   {
     status = cpu->FDE();
-    
+
     if (status == -1)
     { 
       std::cout << "PDP 11/20 received HALT instruction\n" << std::endl;
-      
+
       /* The HALT results in a process halt but can be resumed after the user
        *  presses continue on the console.  In this case we are using the
        *  enter key to denote the continue key on the console.
