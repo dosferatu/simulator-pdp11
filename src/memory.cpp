@@ -87,6 +87,28 @@ Memory::~Memory()/*{{{*/
 }
 /*}}}*/
 
+void Memory::DecrementPC()/*{{{*/
+{
+  --this->RAM[PC];
+  --this->RAM[PC];
+  return;
+}
+/*}}}*/
+
+void Memory::IncrementPC()/*{{{*/
+{
+  ++this->RAM[PC];
+  ++this->RAM[PC];
+  return;
+}
+/*}}}*/
+
+short Memory::RetrievePC()/*{{{*/
+{
+  return (this->RAM[PC + 1] << 8) + (this->RAM[PC] & 0xFF);
+}
+/*}}}*/
+
 short Memory::Read(int effectiveAddress)/*{{{*/
 {
   // Trace file output
@@ -102,18 +124,19 @@ short Memory::Read(int effectiveAddress)/*{{{*/
 }
 /*}}}*/
 
-short Memory::ReadInstruction(int effectiveAddress)/*{{{*/
+short Memory::ReadInstruction()/*{{{*/
 {
+  short pc = this->RetrievePC();
+  
   // Trace file output
   std::string buffer = "2 ";
   std::stringstream stream;
-  stream << std::oct << effectiveAddress;
+  stream << std::oct << pc;
   buffer.append(stream.str());
   buffer.append("\n");
   *traceFile << buffer;
 
-  // Read both bytes from memory, and return the combined value
-  return (this->RAM[effectiveAddress + 1] << 8) + (this->RAM[effectiveAddress] & 0xFF);
+  return pc;
 }
 /*}}}*/
 

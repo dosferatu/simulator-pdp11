@@ -27,7 +27,7 @@ CPU::~CPU()/*{{{*/
 
 short CPU::EA(short encodedAddress)/*{{{*/
 {
-  char mode = encodedAddress & 070;
+  char mode = (encodedAddress & 070) >> 3;
   char reg = encodedAddress & 07;
   short decodedAddress = 0;
   std::string modeType = "Not Set!";
@@ -55,6 +55,7 @@ short CPU::EA(short encodedAddress)/*{{{*/
         {
           // Point to the word after the instruction word
           decodedAddress = this->memory->Read(PC) + 02;
+          this->memory->Write(PC, decodedAddress);
           modeType = "Immediate PC";
         }
 
@@ -185,13 +186,15 @@ short CPU::EA(short encodedAddress)/*{{{*/
  */ 
 int CPU::FDE()/*{{{*/
 {
-  short pc;                   // Program counter buffer
   short instruction;          // Instruction word buffer
   short instructionBits[6];   // Dissected instruction word
+  short tmp;                  // Used as a temporary buffer for instruction operations
+  short src_temp;             // Stores the working value of the src register
+  short dst_temp;             // Stores the working value of the dst register
 
   // Decoder lambda function declarations/*{{{*/
-  auto address = [=] (const int i) { return (instructionBits[i] << 3) + instructionBits[i - 1]; };
-  auto update_flags = [=] (const int i, const int bit) 
+  auto address = [&] (const int i) { return (instructionBits[i] << 3) + instructionBits[i - 1]; };
+  auto update_flags = [&] (const int i, const int bit) 
   {
     if (i == 0) { 
       short temp = memory->Read(PS);
@@ -204,18 +207,16 @@ int CPU::FDE()/*{{{*/
       memory->Write(PS, temp);
     }
   };
-  auto resultIsZero = [=] (const int result) { result == 0? update_flags(1,Zbit) : update_flags(0,Zbit); };  // Update Zbit
-  auto resultLTZero = [=] (const int result) { result < 0? update_flags(1,Nbit) : update_flags(0,Nbit); };  // Update Nbit
+  auto resultIsZero = [&] (const int result) { result == 0? update_flags(1,Zbit) : update_flags(0,Zbit); };  // Update Zbit
+  auto resultLTZero = [&] (const int result) { result < 0? update_flags(1,Nbit) : update_flags(0,Nbit); };  // Update Nbit
   /*}}}*/
 
   // Instruction fetch/*{{{*/
-  // Retrieve the PC value and increment by 2
-  pc = memory->Read(PC);
-  memory->Write(PC, pc + 02);
 
-  // Fetch the instruction
-  instruction = memory->ReadInstruction(pc);
-  ++instructionCount;
+  // Fetch the instruction and increment PC
+  instruction = this->memory->ReadInstruction();
+  this->memory->IncrementPC();
+  ++this->instructionCount;
 
   // Optional instruction fetch state dump/*{{{*/
   if (debugLevel == Verbosity::verbose)
@@ -253,17 +254,12 @@ int CPU::FDE()/*{{{*/
   /*}}}*/
 
   // Decode & execute/*{{{*/
-  /* Notes about the decoder
-  */
   instructionBits[0] = (instruction & 0000007);
   instructionBits[1] = (instruction & 0000070) >> 3; 
   instructionBits[2] = (instruction & 0000700) >> 6;
   instructionBits[3] = (instruction & 0007000) >> 9;
   instructionBits[4] = (instruction & 0070000) >> 12;
   instructionBits[5] = (instruction & 0700000) >> 15; // This is actually only giving us the final bit of the 16-bit word
-  short tmp;      // Use for holding temperary values for instruction operations
-  short src_temp; // Stores the working value of the src register
-  short dst_temp; // Stores the working value of the dst register
 
   if(instructionBits[4] == 0) /*{{{*/
   {
@@ -884,6 +880,7 @@ int CPU::FDE()/*{{{*/
                 update_flags(0,Vbit);         // Update V bit
                 return instruction;
               }
+              
             case 2:
               { // CMP src, dst (src) + ~(dst) + 1
                 src_temp = EA(address(src));  // Get effective address of src
@@ -897,6 +894,7 @@ int CPU::FDE()/*{{{*/
                  ~((memory->Read(dst_temp) & 0x80) ^ (tmp & 0x80))) == 0? \
                   update_flags(1,Vbit) : update_flags(0,Vbit); // Update V bit
                 return instruction;
+
               }
 
             case 3:
