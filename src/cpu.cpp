@@ -32,27 +32,19 @@ short CPU::EA(short encodedAddress)/*{{{*/
   short decodedAddress = 0;
   std::string modeType = "Not Set!";
 
-  /*
-   * IMPLEMENT CHECK FOR OPERAND ADDRESSES
-   * MAKE SURE THAT RELATIVE AND ABSOLUTE
-   * ARE HANDLED FROM THE MACRO11 PROPERLY
-   *
-   * ESPECIALLY SINCE ABS AND REL DO NOT
-   * SEEM TO AFFECT THE INSTRUCTION CODES
-   * PRODUCED IN THE .LST FILE
-   */
-
   switch(mode)
   {
     case 0: // General Register
       {
         decodedAddress = encodedAddress;
+        modeType = "General Register";
         break;
       }
 
     case 1: // Deferred Register
       {
         decodedAddress = this->memory->Read(encodedAddress);
+        modeType = "Deferred Register";
         break;
       }
 
@@ -62,8 +54,8 @@ short CPU::EA(short encodedAddress)/*{{{*/
         if (reg == 07)
         {
           // Point to the word after the instruction word
-
           decodedAddress = this->memory->Read(PC) + 02;
+          modeType = "Immediate PC";
         }
 
         else
@@ -74,6 +66,7 @@ short CPU::EA(short encodedAddress)/*{{{*/
            */
           decodedAddress = this->memory->Read(encodedAddress);
           this->memory->Write(encodedAddress, decodedAddress + 02);
+          modeType = "Autoincrement";
         }
 
         break;
@@ -86,6 +79,7 @@ short CPU::EA(short encodedAddress)/*{{{*/
         {
           // Retrieve the operand from the address given
           decodedAddress = this->memory->Read(encodedAddress);
+          modeType = "Absolute PC";
         }
 
         else
@@ -94,6 +88,7 @@ short CPU::EA(short encodedAddress)/*{{{*/
           short pointer = memory->Read(encodedAddress);
           short decodedAddress = memory->Read(pointer);
           memory->Write(encodedAddress, decodedAddress + 02);
+          modeType = "Autoincrement Deferred";
         }
 
         break;
@@ -103,6 +98,8 @@ short CPU::EA(short encodedAddress)/*{{{*/
       {
         decodedAddress = this->memory->Read(encodedAddress);
         this->memory->Write(encodedAddress, decodedAddress - 02);
+        modeType = "Autodecrement Deferred";
+        break;
       }
 
     case 5: // Autodecrement Deferred
@@ -111,6 +108,8 @@ short CPU::EA(short encodedAddress)/*{{{*/
         short pointer = memory->Read(encodedAddress);
         short decodedAddress = memory->Read(pointer);
         memory->Write(encodedAddress, decodedAddress - 02);
+        modeType = "Autodecrement Deferred";
+        break;
       }
 
     case 6: // Indexed
@@ -120,7 +119,7 @@ short CPU::EA(short encodedAddress)/*{{{*/
         {
           // Calculate the distance between address of operand and the PC
           decodedAddress = encodedAddress - this->memory->Read(PC);
-          break;
+          modeType = "Relative PC";
         }
 
         else
@@ -130,6 +129,7 @@ short CPU::EA(short encodedAddress)/*{{{*/
            * offset which is the word following the instruction
            */
           decodedAddress = this->memory->Read(PC + 02) + this->memory->Read(encodedAddress);
+          modeType = "Indexed";
         }
 
         break;
@@ -146,6 +146,7 @@ short CPU::EA(short encodedAddress)/*{{{*/
            */
           short value = this->memory->Read(encodedAddress);
           decodedAddress = value - this->memory->Read(PC);
+          modeType = "Deferred Relative PC";
         }
 
         else
@@ -157,6 +158,7 @@ short CPU::EA(short encodedAddress)/*{{{*/
            */
           short value = this->memory->Read(encodedAddress);
           decodedAddress = this->memory->Read(PC + 02) + this->memory->Read(value);
+          modeType = "Deferred Indexed";
         }
 
         break;
@@ -213,12 +215,21 @@ int CPU::FDE()/*{{{*/
 
   // Fetch the instruction
   instruction = memory->ReadInstruction(pc);
+  ++instructionCount;
 
   // Optional instruction fetch state dump/*{{{*/
   if (debugLevel == Verbosity::verbose)
   {
     std::cout << "********************************************************************************" << std::endl;
-    std::cout << "                              INSTRUCTION #" << instructionCount << std::endl;
+    std::cout << "                                        BREAK" << std::endl;
+    std::cout << "********************************************************************************" << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << "********************************************************************************" << std::endl;
+    std::cout << std::endl;
+    std::cout << "                              INSTRUCTION #" << std::dec << instructionCount << std::endl;
+    std::cout << std::endl;
     std::cout << "********************************************************************************" << std::endl;
     std::cout << "Fetched instruction: " << std::oct << instruction << std::endl;
     std::cout << std::endl;
@@ -237,10 +248,6 @@ int CPU::FDE()/*{{{*/
     std::cout << "Z: " << std::oct << (this->memory->Read(PS) & 0x4) << std::endl;
     std::cout << "V: " << std::oct << (this->memory->Read(PS) & 0x2) << std::endl;
     std::cout << "C: " << std::oct << (this->memory->Read(PS) & 0x1) << std::endl;
-    std::cout << "********************************************************************************" << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
   }
   /*}}}*/
   /*}}}*/
@@ -276,19 +283,16 @@ int CPU::FDE()/*{{{*/
                       {
                         case 0:
                           {
-                            ++instructionCount;
                             return 0; // HALT
                           }
 
                         case 1:
                           {
-                            ++instructionCount;
                             return 1; // WAIT
                           }
 
                         case 5:
                           {
-                            ++instructionCount;
                             return 5; // RESET
                           }
 
@@ -312,7 +316,6 @@ int CPU::FDE()/*{{{*/
                       //}
                       //}
 
-                      //++instructionCount;
                       //return instruction;
                       //default:
                       //break;
@@ -335,7 +338,6 @@ int CPU::FDE()/*{{{*/
                               tmp = (01 << 3) | instructionBits[0];
                               memory->Write(PC, EA(tmp));                 // reg --> (PC)
                               memory->Write(EA(tmp),memory->StackPop());  // pop reg
-                              ++instructionCount;
                               return instruction;
                             }
 
@@ -584,8 +586,7 @@ int CPU::FDE()/*{{{*/
                         //offset = memory->Read(dst_temp);  // Get offset 
                         //offset = offset << 2;             // Mult offset by 2
                         //tmp = memory->Read(PS);           // Get current process status
-                        //(((tmp & 0x04) >> 2) & (((tmp & 0x08) >> 3) ^ ((tmp & 0x02) >> 1))) == 1? \
-                        //memory->Write(PC,offset) : ;     // Write offset to PC if Z(N^V)
+                        //(((tmp & 0x04) >> 2) & (((tmp & 0x08) >> 3) ^ ((tmp & 0x02) >> 1))) == 1? memory->Write(PC,offset) : ;     // Write offset to PC if Z(N^V)
                         //return instruction;
                         //}
                         case 1:
@@ -874,7 +875,7 @@ int CPU::FDE()/*{{{*/
           {
             case 1:
               { // MOV src, dst (src) -> (dst)
-                src_temp = EA(address(dst));  // Get effective address of src
+                src_temp = EA(address(src));  // Get effective address of src
                 tmp = memory->Read(src_temp); // Get value at address of src
                 dst_temp = EA(address(dst));  // Get effective address of dst
                 memory->Write(dst_temp,tmp);   // Write value to memory

@@ -3,7 +3,7 @@
 AS = ../bin/macro11
 TRANS = ../bin/obj2ascii
 CC = g++
-CCFLAGS = -g -Wall -pipe -std=gnu++11
+CCFLAGS = -g -Wall -Wpedantic -pipe -std=gnu++11
 PY = python2
 
 # Macro11 assembly

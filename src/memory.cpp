@@ -2,7 +2,7 @@
 #include <sstream>
 #include "memory.h"
 
-// Initialize memory using the assembly source
+// Initialize memory using the assembly source/*{{{*/
 Memory::Memory(std::vector<std::string> *source)
 {
   this->RAM = new char[65536];
@@ -77,17 +77,17 @@ Memory::Memory(std::vector<std::string> *source)
     }
   }
 }
+/*}}}*/
 
-
-Memory::~Memory()
+Memory::~Memory()/*{{{*/
 {
   this->traceFile->close();
   delete [] RAM;
   delete traceFile;
 }
+/*}}}*/
 
-
-short Memory::Read(int effectiveAddress)
+short Memory::Read(int effectiveAddress)/*{{{*/
 {
   // Trace file output
   std::string buffer = "0 ";
@@ -100,9 +100,9 @@ short Memory::Read(int effectiveAddress)
   // Read both bytes from memory, and return the combined value
   return (this->RAM[effectiveAddress + 1] << 8) + (this->RAM[effectiveAddress] & 0xFF);
 }
+/*}}}*/
 
-
-short Memory::ReadInstruction(int effectiveAddress)
+short Memory::ReadInstruction(int effectiveAddress)/*{{{*/
 {
   // Trace file output
   std::string buffer = "2 ";
@@ -115,8 +115,9 @@ short Memory::ReadInstruction(int effectiveAddress)
   // Read both bytes from memory, and return the combined value
   return (this->RAM[effectiveAddress + 1] << 8) + (this->RAM[effectiveAddress] & 0xFF);
 }
+/*}}}*/
 
-void Memory::Write(int effectiveAddress, short data)
+void Memory::Write(int effectiveAddress, short data)/*{{{*/
 {
   // Write the data to the specified memory address
   this->RAM[effectiveAddress] = data & 0xFF;
@@ -132,21 +133,22 @@ void Memory::Write(int effectiveAddress, short data)
 
   return;
 }
+/*}}}*/
 
-
-void Memory::SetDebugMode(Verbosity verbosity)
+void Memory::SetDebugMode(Verbosity verbosity)/*{{{*/
 {
   this->debugLevel = verbosity;
   return;
 }
+/*}}}*/
 
-short Memory::StackPop()
+short Memory::StackPop()/*{{{*/
 {
   return 0;
 }
+/*}}}*/
 
-
-void Memory::StackPush(int _register)
+void Memory::StackPush(int _register)/*{{{*/
 {
   // Translate register number to the appropriate address
   switch(_register)
@@ -218,4 +220,4 @@ void Memory::StackPush(int _register)
 
   return;
 }
-
+/*}}}*/
