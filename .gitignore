@@ -1,5 +1,6 @@
 # PDP-11
 *.ascii
+*.PCascii
 *.lst
 *.obj
 
