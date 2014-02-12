@@ -592,6 +592,17 @@ int CPU::FDE()
               }
       default: break;
     }
+    // Check for branches
+    switch(instructionBits[3])
+    {
+      case 0: switch(instruction[2])
+              {
+                case 0: case 1: case 2:
+              }
+      case 1:
+      case 2:
+      case 3:
+
   }
 
   if(instructionBits[4] > 0)
