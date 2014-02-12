@@ -11,25 +11,20 @@
 #define Vbit 02
 #define Negbit 040
 
-
-CPU::CPU()
-{
-  this->debugLevel = Verbosity::off;
-  this->memory = new Memory();
-}
-
-CPU::CPU(Memory *memory)
+CPU::CPU(Memory *memory)/*{{{*/
 {
   this->debugLevel = Verbosity::off;
   this->memory = memory;
 }
+/*}}}*/
 
-CPU::~CPU()
+CPU::~CPU()/*{{{*/
 {
   delete this->memory;
 }
+/*}}}*/
 
-short CPU::EA(short encodedAddress)
+short CPU::EA(short encodedAddress)/*{{{*/
 {
   char mode = encodedAddress & 070;
   char reg = encodedAddress & 07;
@@ -178,17 +173,20 @@ short CPU::EA(short encodedAddress)
 
   return decodedAddress;
 }
+/*}}}*/
 
 /*
  * Takes in the program counter register value in order to
  * be able to fetch, decode, and execute the next instruction
  * .
  */ 
-int CPU::FDE()
+int CPU::FDE()/*{{{*/
 {
   short pc;                   // Program counter buffer
   short instruction;          // Instruction word buffer
   short instructionBits[6];   // Dissected instruction word
+
+  // Decoder lambda function declarations/*{{{*/
   auto address = [=] (const int i) { return (instructionBits[i] << 3) + instructionBits[i - 1]; };
   auto update_flags = [=] (const int i, const int bit) 
   {
@@ -205,25 +203,17 @@ int CPU::FDE()
   };
   auto resultIsZero = [=] (const int result) { result == 0? update_flags(1,Zbit) : update_flags(0,Zbit); };  // Update Zbit
   auto resultLTZero = [=] (const int result) { result < 0? update_flags(1,Nbit) : update_flags(0,Nbit); };  // Update Nbit
+/*}}}*/
 
-
-
-  /*
-   * BEGIN INSTRUCTION FETCH
-   *
-   */
-
+  // Instruction fetch/*{{{*/
   // Retrieve the PC value and increment by 2
   pc = memory->Read(PC);
   memory->Write(PC, pc + 02);
 
   // Fetch the instruction
-  instruction = memory->ReadInstruction(pc);
+  instruction = memory->ReadInstruction(pc);/*}}}*/
 
-  /*
-   * BEGIN INSTRUCTION DECODE & EXECUTE
-   */
-
+  // Decode & execute/*{{{*/
   /* Notes about the decoder
   */
   instructionBits[0] = (instruction & 0000007);
@@ -240,11 +230,14 @@ int CPU::FDE()
   {
     switch(instructionBits[3])
     {
-      case 0: switch(instructionBits[2])
+      case 0: 
+        switch(instructionBits[2])
               {
-                case 0: switch(instructionBits[5])
+                case 0: 
+                  switch(instructionBits[5])
                         {
-                          case 0: switch(instructionBits[0])
+                          case 0: 
+                            switch(instructionBits[0])
                                   {
                                     case 0: return 0; // HALT
                                     case 1: return 1; // WAIT
@@ -274,7 +267,8 @@ int CPU::FDE()
                                     memory->Write(PC, dst_temp); // effective address --> (PC) unconditional
                                     break;
                                   }
-                          case 2: switch(instructionBits[1])
+                          case 2: 
+                                  switch(instructionBits[1])
                                   {
                                     case 0: { // RTS reg
                                               tmp = (01 << 3) | instructionBits[0];
@@ -283,7 +277,8 @@ int CPU::FDE()
                                               return instruction;
                                             }
                                             break;
-                                    case 4: switch(instructionBits[0])
+                                    case 4: 
+                                            switch(instructionBits[0])
                                             {
                                               case 1: { update_flags (0, Cbit); return instruction; } // CLC - Clear C
                                               case 2: { update_flags (0, Vbit); return instruction; } // CLV - Clear V
@@ -291,7 +286,8 @@ int CPU::FDE()
                                               default: break;
                                             }
                                     case 5: { update_flags (0, Nbit); return instruction; }  // CLN - Clear N
-                                    case 6: switch(instructionBits[0])
+                                    case 6: 
+                                            switch(instructionBits[0])
                                             {
                                               case 1: { update_flags (1, Cbit); return instruction; } // SEC - Set C
                                               case 2: { update_flags (1, Vbit); return instruction; } // SEV - Set V
@@ -309,7 +305,8 @@ int CPU::FDE()
                                     memory->Write(dst_temp, byte_temp);      // Write to register
                                     return instruction;
                                   }
-                          case 4: switch(instructionBits[5])
+                          case 4: 
+                                  switch(instructionBits[5])
                                   {
                                     case 0: { // BR loc - unconditional branch
                                               tmp = address(dst);           // Get offset
@@ -324,9 +321,11 @@ int CPU::FDE()
                                   }
                           default: break;
                         }
-                case 1: switch(instructionBits[2])
+                case 1: 
+                  switch(instructionBits[2])
                         {
-                          case 0: switch(instructionBits[5])
+                          case 0: 
+                            switch(instructionBits[5])
                                   {
                                     case 0: { // BNE loc - Branch if Not Equal (zero)
                                               tmp = address(dst);
@@ -338,7 +337,8 @@ int CPU::FDE()
                                             }
                                     default: break;
                                   }
-                          case 4: switch(instructionBits[5])
+                          case 4: 
+                            switch(instructionBits[5])
                                   {
                                     case 0: { // BEQ loc - Brach if EQual (zero)
                                               tmp = address(dst);
@@ -352,7 +352,8 @@ int CPU::FDE()
                                   }
                           default: break;
                         }
-                case 2: switch(instructionBits[2])
+                case 2: 
+                  switch(instructionBits[2])
                         {
                           case 0: switch(instructionBits[5])
                                   {
@@ -366,7 +367,8 @@ int CPU::FDE()
                                             }
                                     default: break;
                                   }
-                          case 4: switch(instructionBits[5])
+                          case 4: 
+                                  switch(instructionBits[5])
                                   {
                                     case 0: { // BLT loc - Branch if Less Than (zero)
                                               tmp = address(dst);
@@ -380,9 +382,11 @@ int CPU::FDE()
                                   }
                           default: break;
                         }
-                case 3: switch(instructionBits[2])
+                case 3: 
+                  switch(instructionBits[2])
                         {
-                          case 0: switch(instructionBits[5])
+                          case 0: 
+                            switch(instructionBits[5])
                                   {
                                     case 0: { // BGT loc - Branch if Greater Than
                                               tmp = address(dst);
@@ -394,7 +398,8 @@ int CPU::FDE()
                                             }
                                     default: break;
                                   }
-                          case 4: switch(instructionBits[5])
+                          case 4: 
+                            switch(instructionBits[5])
                                   {
                                     /*
                                      * FIX THIS
@@ -421,9 +426,11 @@ int CPU::FDE()
                           // Need to figure this out
                           return instruction;
                         }
-                case 5: switch(instructionBits[5])
+                case 5: 
+                        switch(instructionBits[5])
                         {
-                          case 0: switch(instructionBits[2])
+                          case 0: 
+                            switch(instructionBits[2])
                                   {
                                     case 0: { // CLR dst - Clear Destination
                                               dst_temp = EA(address(dst));  // Get effective address
@@ -510,7 +517,8 @@ int CPU::FDE()
                                             }
                                     default: break;
                                   }
-                          case 1: switch(instructionBits[2])
+                          case 1: 
+                            switch(instructionBits[2])
                                   {
                                     /*
                                      * FIX THIS
@@ -573,9 +581,11 @@ int CPU::FDE()
                                   }
                           default: break;
                         }
-                case 6: switch(instructionBits[5])
+                case 6: 
+                        switch(instructionBits[5])
                         {
-                          case 0: switch(instructionBits[2])
+                          case 0: 
+                            switch(instructionBits[2])
                                   {
                                     case 0: return instruction;  // ROR dst
                                     case 1: return instruction;  // ROL dst
@@ -583,7 +593,8 @@ int CPU::FDE()
                                     case 3: return instruction;  // ASL dst
                                     default: break;
                                   }
-                          case 1: switch(instructionBits[2])
+                          case 1: 
+                            switch(instructionBits[2])
                                   {
                                     case 0: return instruction;  // RORB dst
                                     case 1: return instruction;  // ROLB dst
@@ -601,7 +612,8 @@ int CPU::FDE()
     {
       switch(instructionBits[5])
       {
-        case 0: switch(instructionBits[4])
+        case 0: 
+          switch(instructionBits[4])
                 {
                   case 1: { // MOV src, dst (src) -> (dst)
                             src_temp = EA(address(dst));  // Get effective address of src
@@ -651,7 +663,8 @@ int CPU::FDE()
                           }
                   default: break;
                 }
-        case 1: switch(instructionBits[4])
+        case 1: 
+          switch(instructionBits[4])
                 {
                   case 1: return instruction;  // MOVB src, dst
                   case 2: return instruction;  // CMPB src, dst
@@ -676,18 +689,21 @@ int CPU::FDE()
       }
     }
   }
+/*}}}*/
 
-  // For debug purposes
-  if (instruction == 0)
+  // This branch should never be reached
+  if (debugLevel == Verbosity::minimal || debugLevel == Verbosity::verbose)
   {
-    return -1;
+    std::cout << "Control fell through to bottom of execute function!" << std::endl;
   }
 
-  return 0;
+  return -2;
 }
+/*}}}*/
 
-void CPU::SetDebugMode(Verbosity verbosity)
+void CPU::SetDebugMode(Verbosity verbosity)/*{{{*/
 {
   this->debugLevel = verbosity;
   return;
 }
+/*}}}*/

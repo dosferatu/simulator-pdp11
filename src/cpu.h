@@ -3,7 +3,6 @@
 class CPU
 {
   public:
-    CPU();
     CPU(Memory *memory);
     ~CPU();
     short EA(short encodedAddress);

@@ -24,7 +24,6 @@ enum Verbosity
 class Memory
 {
   public:
-    Memory();
     Memory(std::vector<std::string> *source);
     ~Memory();
     short Read(int effectiveAddress);
