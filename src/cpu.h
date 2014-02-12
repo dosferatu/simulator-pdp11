@@ -8,8 +8,7 @@ class CPU
     ~CPU();
     short EA(short encodedAddress);
     int FDE();
-    void SetDebugMode();
-    void ClearDebugMode();
+    void SetDebugMode(Verbosity verbosity);
 
   private:
     int debugLevel;             // Debug verbosity level
