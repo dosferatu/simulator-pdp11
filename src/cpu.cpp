@@ -251,27 +251,14 @@ int CPU::FDE()
                                     case 5: return 5; // RESET
                                     default: break;
                                   }
-                          case 1: { // BPL loc - Branch if positive 
-                                    dst_temp = EA(address(dst));   // Get effective address for destination
-                                    if (memory->Read(PS) & Nbit)  // N = 0? loc --> (PC)
-                                    {
-                                      // Needs some work ***********************
-                                      if(memory->Read(PC) & Negbit) 
-                                      {
-                                        dst_temp = dst_temp + memory->Read();
-                                        memory->Write(PC, dst_temp * 2);
-                                      }
-                                    }
-                                    return instruction;
-                                  }
                         }
                 case 1: return instruction; // JMP
                 case 2: switch(instructionBits[1])
                         {
                           case 0: { // RTS reg
-                                    tmp = (01 << 3) | instructionBits[0];
-                                    memory->Write(PC, EA(tmp));                 // reg --> (PC)
-                                    memory->Write(EA(tmp),memory->StackPop());  // pop reg
+                                    tmp = memory->Read(address(dst));                 // Read register value
+                                    memory->Write(PC, tmp);                           // reg --> (PC)
+                                    memory->Write(address(dst),memory->StackPop());   // pop reg
                                     return instruction;
                                   }
                           case 4: switch(instructionBits[0])
@@ -550,9 +537,8 @@ int CPU::FDE()
                                     update_flags(0,Vbit);         // Update V bit
                                     return instruction;
                                   }
-                          case 4: { // NEGB - Negate Byte
-                                    dst_temp = EA(address(dst));  // Get effective address
-                                    tmp = memory->Read(dst_temp); // Get value at address
+                          case 4: { // NEGB - Negate Byte                              
+                                    tmp = memory->Read(dst); // Get value
                                     tmp = (tmp & 0xFF00) + (~(tmp | 0xFF00) + 1); // Get 2's comp of value
                                     memory->Write(dst_temp,tmp);  // Write to memory
                                     resultIsZero(tmp);            // Update Z bit
@@ -597,11 +583,87 @@ int CPU::FDE()
     {
       case 0: switch(instruction[2])
               {
-                case 0: case 1: case 2:
+                case 0: case 1: case 2: case 3: // BPL - Branch if PLus (positive)
+                                                {
+                                                  return instruction;
+                                                }
+                case 4: case 5: case 6: case 7: // Either BR or BMI
+                                                switch (instructionBits[5])
+                                                {
+                                                  case 0: { // BR - unconditional Branch
+                                                            return instruction;
+                                                          }
+                                                  case 1: { // BMI - Branch if negative
+                                                            return instruction;
+                                                          }
+                                                }
               }
-      case 1:
-      case 2:
-      case 3:
+      case 1: switch(instructionBits[2]) // BNE, BHI, BLOS, BEQ
+              {
+                case 0: case 1: case 2: case 3: switch(instructionBits[5]) // BNE or BHI
+                                                {
+                                                  case 0: { // BNE - Branch if Not Equal (zero)
+                                                            return instruction;
+                                                          }
+                                                  case 1: { // BHI - Branch if Higher (zero)
+                                                            return instruction;
+                                                          }
+                                                }
+                case 4: case 5: case 6: case 7: switch(instructionBits[5]) // BLOS or BEQ
+                                                {
+                                                  case 0: { // BLOS - Branch if Lower or Same
+                                                            return instruction;
+                                                          }
+                                                  case 1: { // BEQ - Branch if EQual (zero)
+                                                            return instruction;
+                                                          }
+                                                }
+              }
+                                                
+      case 2: switch(instructionBits[2]) // BVC, BGE, BVS, BLT
+              {
+                case 0: case 1: case 2: case 3: switch(instructionBits[5]) // BGE OR BVC
+                                                {
+                                                  case 0: { // BGE - Branch if Greater or Equal (zero)
+                                                            return instruction;
+                                                          }
+                                                  case 1: { // BVC - Branch if oVerflow Clear
+                                                            return instruction;
+                                                          }
+                                                }
+                case 4: case 5: case 6: case 7: switch(instructionBits[5]) // BLT OR BVS
+                                                {
+                                                  case 0: { // BLT - 
+                                                            return instruction;
+                                                          }
+                                                  case 1: { // BVS -
+                                                            return instruction;
+                                                          }
+                                                }
+              }
+              
+      case 3: switch(instructionBits[2]) // BGT, BCC, BLE, BCS
+              {
+                case 0: case 1: case 2: case 3: switch(instructionBits[5]) // BGT OR BCC
+                                                {
+                                                  case 0: { // BGT -
+                                                            return instruction;
+                                                          }
+                                                  case 1: { // BCC -
+                                                            return instruction;
+                                                          }
+                                                }
+                case 4: case 5: case 6: case 7: switch(instructionBits[5]) // BLOS or BEQ
+                                                {
+                                                  case 0: { // BLE -
+                                                            return instruction;
+                                                          }
+                                                  case 1: { // BCS - 
+                                                            return instruction;
+                                                          }
+                                                }
+              }
+              
 
   }
 
