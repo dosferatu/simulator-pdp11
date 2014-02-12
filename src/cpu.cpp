@@ -203,7 +203,7 @@ int CPU::FDE()/*{{{*/
   };
   auto resultIsZero = [=] (const int result) { result == 0? update_flags(1,Zbit) : update_flags(0,Zbit); };  // Update Zbit
   auto resultLTZero = [=] (const int result) { result < 0? update_flags(1,Nbit) : update_flags(0,Nbit); };  // Update Nbit
-/*}}}*/
+  /*}}}*/
 
   // Instruction fetch/*{{{*/
   // Retrieve the PC value and increment by 2
@@ -211,7 +211,38 @@ int CPU::FDE()/*{{{*/
   memory->Write(PC, pc + 02);
 
   // Fetch the instruction
-  instruction = memory->ReadInstruction(pc);/*}}}*/
+  instruction = memory->ReadInstruction(pc);
+
+  // Optional instruction fetch state dump/*{{{*/
+  if (debugLevel == Verbosity::verbose)
+  {
+    std::cout << "********************************************************************************" << std::endl;
+    std::cout << "                              INSTRUCTION " << "" << std::endl;
+    std::cout << "********************************************************************************" << std::endl;
+    std::cout << "Fetched instruction: " << std::oct << instruction << std::endl;
+    std::cout << std::endl;
+    std::cout << "Dumping current register contents..." << std::endl;
+    std::cout << "R0: " << std::oct << this->memory->Read(R0) << std::endl;
+    std::cout << "R1: " << std::oct << this->memory->Read(R1) << std::endl;
+    std::cout << "R2: " << std::oct << this->memory->Read(R2) << std::endl;
+    std::cout << "R3: " << std::oct << this->memory->Read(R3) << std::endl;
+    std::cout << "R4: " << std::oct << this->memory->Read(R4) << std::endl;
+    std::cout << "R5: " << std::oct << this->memory->Read(R5) << std::endl;
+    std::cout << "SP: " << std::oct << this->memory->Read(SP) << std::endl;
+    std::cout << "PC: " << std::oct << this->memory->Read(PC) << std::endl;
+    std::cout << std::endl;
+    std::cout << "Processor status word: " << std::endl;
+    std::cout << "N: " << std::oct << (this->memory->Read(PS) & 0x8) << std::endl;
+    std::cout << "Z: " << std::oct << (this->memory->Read(PS) & 0x4) << std::endl;
+    std::cout << "V: " << std::oct << (this->memory->Read(PS) & 0x2) << std::endl;
+    std::cout << "C: " << std::oct << (this->memory->Read(PS) & 0x1) << std::endl;
+    std::cout << "********************************************************************************" << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+  }
+  /*}}}*/
+  /*}}}*/
 
   // Decode & execute/*{{{*/
   /* Notes about the decoder
@@ -231,465 +262,665 @@ int CPU::FDE()/*{{{*/
     switch(instructionBits[3])
     {
       case 0: 
-        switch(instructionBits[2])
+        {
+          switch(instructionBits[2])
+          {
+            case 0: 
               {
-                case 0: 
-                  switch(instructionBits[5])
+                switch(instructionBits[5])
+                {
+                  case 0: 
+                    {
+                      switch(instructionBits[0])
+                      {
+                        case 0: return 0; // HALT
+                        case 1: return 1; // WAIT
+                        case 5: return 5; // RESET
+                        default:
+                                break;
+                      }
+                      /*
+                       * FIX THIS
+                       */
+                      //case 1:
+                      //{ // BPL loc (loc is an offset dependent on ABS or REL addressing
+                      //dst_temp = EA(address(dst));   // Get effective address for destination
+                      //if (memory->Read(PS) & Nbit)  // N = 0? loc --> (PC)
+                      //{
+                      //// Needs some work ***********************
+                      //if(memory->Read(PC) & Negbit) 
+                      //{
+                      //dst_temp = dst_temp + memory->Read();
+                      //memory->Write(PC, dst_temp * 2);
+                      //}
+                      //}
+
+                      //return instruction;
+                      //default:
+                      //break;
+                      //}
+                      case 1:
+                      { // JMP dst
+                        dst_temp = EA(address(dst)); // Get effective address
+                        memory->Write(PC, dst_temp); // effective address --> (PC) unconditional
+                        break;
+                      }
+
+
+                      case 2: 
+                      {
+                        switch(instructionBits[1])
                         {
-                          case 0: 
+                          case 0:
+                            { // RTS reg
+                              tmp = (01 << 3) | instructionBits[0];
+                              memory->Write(PC, EA(tmp));                 // reg --> (PC)
+                              memory->Write(EA(tmp),memory->StackPop());  // pop reg
+                              return instruction;
+                            }
+                            break;
+                          case 4: 
                             switch(instructionBits[0])
-                                  {
-                                    case 0: return 0; // HALT
-                                    case 1: return 1; // WAIT
-                                    case 5: return 5; // RESET
-                                    default: break;
-                                  }
-                                  /*
-                                   * FIX THIS
-                                   */
-                                  //case 1: { // BPL loc (loc is an offset dependent on ABS or REL addressing
-                                  //dst_temp = EA(address(dst));   // Get effective address for destination
-                                  //if (memory->Read(PS) & Nbit)  // N = 0? loc --> (PC)
-                                  //{
-                                  //// Needs some work ***********************
-                                  //if(memory->Read(PC) & Negbit) 
-                                  //{
-                                  //dst_temp = dst_temp + memory->Read();
-                                  //memory->Write(PC, dst_temp * 2);
-                                  //}
-                                  //}
+                            {
+                              case 1:
+                                { update_flags (0, Cbit); return instruction; } // CLC - Clear C
+                              case 2:
+                                { update_flags (0, Vbit); return instruction; } // CLV - Clear V
+                              case 4:
+                                { update_flags (0, Zbit); return instruction; } // CLZ - Clear Z
+                              default:
+                                break;
+                            }
+                          case 5:
+                            { update_flags (0, Nbit); return instruction; }  // CLN - Clear N
+                          case 6: 
+                            switch(instructionBits[0])
+                            {
+                              case 1:
+                                { update_flags (1, Cbit); return instruction; } // SEC - Set C
+                              case 2:
+                                { update_flags (1, Vbit); return instruction; } // SEV - Set V
+                              case 4:
+                                { update_flags (1, Zbit); return instruction; } // SEZ - Set Z
+                              default:
+                                break;
+                            }
+                          case 7:
+                            { update_flags (1, Nbit); return instruction; } // SEN - Set N
 
-                                  //return instruction;
-                                  //default: break;
-                                  //}
-                          case 1: { // JMP dst
-                                    dst_temp = EA(address(dst)); // Get effective address
-                                    memory->Write(PC, dst_temp); // effective address --> (PC) unconditional
-                                    break;
-                                  }
-                          case 2: 
-                                  switch(instructionBits[1])
-                                  {
-                                    case 0: { // RTS reg
-                                              tmp = (01 << 3) | instructionBits[0];
-                                              memory->Write(PC, EA(tmp));                 // reg --> (PC)
-                                              memory->Write(EA(tmp),memory->StackPop());  // pop reg
-                                              return instruction;
-                                            }
-                                            break;
-                                    case 4: 
-                                            switch(instructionBits[0])
-                                            {
-                                              case 1: { update_flags (0, Cbit); return instruction; } // CLC - Clear C
-                                              case 2: { update_flags (0, Vbit); return instruction; } // CLV - Clear V
-                                              case 4: { update_flags (0, Zbit); return instruction; } // CLZ - Clear Z
-                                              default: break;
-                                            }
-                                    case 5: { update_flags (0, Nbit); return instruction; }  // CLN - Clear N
-                                    case 6: 
-                                            switch(instructionBits[0])
-                                            {
-                                              case 1: { update_flags (1, Cbit); return instruction; } // SEC - Set C
-                                              case 2: { update_flags (1, Vbit); return instruction; } // SEV - Set V
-                                              case 4: { update_flags (1, Zbit); return instruction; } // SEZ - Set Z
-                                              default: break;
-                                            }
-                                    case 7: { update_flags (1, Nbit); return instruction; } // SEN - Set N
-                                  }
-                          case 3: { // SWAB dst - swap bytes of word at dst
-                                    dst_temp = EA(address(dst));             // Get effective address
-                                    tmp = memory->Read(dst_temp);            // Get value at effective address
-                                    short byte_temp = tmp << 8;             // Create temp and give it LSByte of value in MSByte
-                                    tmp = (tmp >> 8) & 0000777;             // Shift MSByte into LSByte and clear MSByte
-                                    tmp = byte_temp + tmp;                  // Finalize the swap byte
-                                    memory->Write(dst_temp, byte_temp);      // Write to register
-                                    return instruction;
-                                  }
-                          case 4: 
-                                  switch(instructionBits[5])
-                                  {
-                                    case 0: { // BR loc - unconditional branch
-                                              tmp = address(dst);           // Get offset
-                                              // Need to figure out the offset stuff
-                                              return instruction;
-                                            }
-                                    case 1: { // BMI loc - Branch on minus
-                                              tmp = address(dst);           // Get offset
-                                              return instruction;
-                                            }
-                                    default: break;
-                                  }
-                          default: break;
+                          default:
+                            break;
                         }
-                case 1: 
-                  switch(instructionBits[2])
-                        {
-                          case 0: 
-                            switch(instructionBits[5])
-                                  {
-                                    case 0: { // BNE loc - Branch if Not Equal (zero)
-                                              tmp = address(dst);
-                                              return instruction;
-                                            }
-                                    case 1: { // BHI loc - Branch if Higher (neither Z nor C set)
-                                              tmp = address(dst);
-                                              return instruction;  // BHI loc
-                                            }
-                                    default: break;
-                                  }
-                          case 4: 
-                            switch(instructionBits[5])
-                                  {
-                                    case 0: { // BEQ loc - Brach if EQual (zero)
-                                              tmp = address(dst);
-                                              return instruction;
-                                            }
-                                    case 1: { // BLOS loc - Branch if Lower Or Same (either C or Z set)
-                                              tmp = address(dst);
-                                              return instruction;
-                                            }
-                                    default: break;
-                                  }
-                          default: break;
-                        }
-                case 2: 
-                  switch(instructionBits[2])
-                        {
-                          case 0: switch(instructionBits[5])
-                                  {
-                                    case 0: { // BGE loc - Branch if Greater or Equal (zero)
-                                              tmp = address(dst);
-                                              return instruction;
-                                            }
-                                    case 1: { // BVC loc - Branch if oVerflow Clear
-                                              tmp = address(dst);
-                                              return instruction;
-                                            }
-                                    default: break;
-                                  }
-                          case 4: 
-                                  switch(instructionBits[5])
-                                  {
-                                    case 0: { // BLT loc - Branch if Less Than (zero)
-                                              tmp = address(dst);
-                                              return instruction;
-                                            }
-                                    case 1: { // BVS loc - Branch if oVerflow Set
-                                              tmp = address(dst);
-                                              return instruction;
-                                            }
-                                    default: break;
-                                  }
-                          default: break;
-                        }
-                case 3: 
-                  switch(instructionBits[2])
-                        {
-                          case 0: 
-                            switch(instructionBits[5])
-                                  {
-                                    case 0: { // BGT loc - Branch if Greater Than
-                                              tmp = address(dst);
-                                              return instruction;
-                                            }
-                                    case 1: { // BCC loc - Branch if Carry Clear (C = 0)
-                                              tmp = address(dst);
-                                              return instruction;
-                                            }
-                                    default: break;
-                                  }
-                          case 4: 
-                            switch(instructionBits[5])
-                                  {
-                                    /*
-                                     * FIX THIS
-                                     */
+                      }
 
-                                    //case 0: { // BLE loc - Branch if Lower or Equal (zero)
-                                    //dst_temp = EA(address(dst));      // Get effective address
-                                    //offset = memory->Read(dst_temp);  // Get offset 
-                                    //offset = offset << 2;             // Mult offset by 2
-                                    //tmp = memory->Read(PS);           // Get current process status
-                                    //(((tmp & 0x04) >> 2) & (((tmp & 0x08) >> 3) ^ ((tmp & 0x02) >> 1))) == 1? \
-                                    //memory->Write(PC,offset) : ;     // Write offset to PC if Z(N^V)
-                                    //return instruction;
-                                    //}
-                                    case 1: { // BCS loc - Branch if Carry Set (C = 1)
-                                              tmp = address(dst);
-                                              return instruction;
-                                            }
-                                    default: break;
-                                  }
-                          default: break;
-                        }
-                case 4: { // JSR reg, dst
-                          // Need to figure this out
-                          return instruction;
-                        }
-                case 5: 
+
+                      case 3:
+                      { // SWAB dst - swap bytes of word at dst
+                        dst_temp = EA(address(dst));             // Get effective address
+                        tmp = memory->Read(dst_temp);            // Get value at effective address
+                        short byte_temp = tmp << 8;             // Create temp and give it LSByte of value in MSByte
+                        tmp = (tmp >> 8) & 0000777;             // Shift MSByte into LSByte and clear MSByte
+                        tmp = byte_temp + tmp;                  // Finalize the swap byte
+                        memory->Write(dst_temp, byte_temp);      // Write to register
+                        return instruction;
+                      }
+
+
+                      case 4: 
+                      {
                         switch(instructionBits[5])
                         {
-                          case 0: 
-                            switch(instructionBits[2])
-                                  {
-                                    case 0: { // CLR dst - Clear Destination
-                                              dst_temp = EA(address(dst));  // Get effective address
-                                              memory->Write(dst_temp, 0);   // Clear value at address
-                                              update_flags(1,Zbit);         // Set Z bit - No change to other condition codes
-                                              return instruction;
-                                            }
-                                    case 1: { // COM dst - Compliment Destination
-                                              dst_temp = EA(address(dst));  // Get effective address
-                                              tmp = memory->Read(dst_temp); // Get value at address
-                                              tmp = ~tmp;                   // Compliment value
-                                              memory->Write(dst_temp, tmp); // Write compiment to memory
-                                              resultIsZero(tmp);            // Update Z bit
-                                              (tmp & 0400000) == 1? update_flags(1,Nbit) : update_flags(0,Nbit); // Update N bit
-                                              update_flags(1,Cbit);         // Update C bit
-                                              update_flags(0,Vbit);         // Update V bit
-                                              return instruction;
-                                            }
-                                    case 2: { // INC dst - Increment Destination
-                                              dst_temp = EA(address(dst));   // Get effective address
-                                              tmp = memory->Read(dst_temp);  // Get value at address
-                                              tmp == 0077777? update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
-                                              tmp++;                        // Increment value
-                                              memory->Write(dst_temp, tmp); // Write to memory
-                                              resultIsZero(tmp);            // Update Z bit
-                                              resultLTZero(tmp);            // Update N bit
-                                              return instruction;
-                                            }
-                                    case 3: { // DEC dst - Decrement Destination
-                                              dst_temp = EA(address(dst));  // Get effective address
-                                              tmp = memory->Read(dst_temp); // Get value at address
-                                              tmp--;                        // Decrement value
-                                              memory->Write(dst_temp, tmp); // Write to memory
-                                              resultIsZero(tmp);            // Update Z bit
-                                              resultLTZero(tmp);            // Update N bit
-                                              update_flags(0,Cbit);         // Update C bit
-                                              update_flags(0,Vbit);         // Update V bit
-                                              return instruction;
-                                            }
-                                    case 4: { // NEG dst - Gives 2's Compliment of destination
-                                              dst_temp = EA(address(dst));  // Get effective address
-                                              tmp = memory->Read(dst_temp); // Get value at address
-                                              tmp = ~tmp + 1;               // Get 2's comp of value
-                                              memory->Write(dst_temp,tmp);  // Write to memory
-                                              resultIsZero(tmp);            // Update Z bit
-                                              resultLTZero(tmp);            // Update N bit
-                                              tmp == 00? update_flags(0,Cbit) : update_flags(1,Cbit);       // Update C bit
-                                              tmp == 0100000? update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
-                                              return instruction;
-                                            }
-                                    case 5: { // ADC - Add the carry to destination
-                                              dst_temp = EA(address(dst));  // Get effective address
-                                              tmp = memory->Read(dst_temp); // Get value at address
-                                              short tmpC = memory->Read(PS);// Get current value of PS
-                                              tmp = tmp + (tmpC & 0000001); // Add C bit to value
-                                              memory->Write(dst_temp,tmp);  // Write to memory
-                                              resultIsZero(tmp);            // Update Z bit
-                                              resultLTZero(tmp);            // Update N bit
-                                              tmp == 0200000? update_flags(1,Cbit) : update_flags(0,Cbit);  // Update C bit
-                                              tmp == 0100000? update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
-                                              return instruction;
-                                            }
-                                    case 6: { // SBC Subtract the carry from destination
-                                              dst_temp = EA(address(dst));  // Get effective address
-                                              tmp = memory->Read(dst_temp); // Get value at address
-                                              short tmpC = memory->Read(PS);// Get current value of PS
-                                              tmp = tmp - (tmpC & 0000001); // Add C bit to value
-                                              memory->Write(dst_temp,tmp);  // Write to memory
-                                              resultIsZero(tmp);            // Update Z bit
-                                              resultLTZero(tmp);            // Update N bit
-                                              tmp == (0 & ((tmpC & 0000001) == 0))? update_flags(0,Cbit) : update_flags(1,Cbit);  // Update C bit
-                                              tmp == 0100000? update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
-                                              return instruction;  // SBC dst
-                                            }
-                                    case 7: { // TST dst - Tests if dst is 0 (0 - dst)
-                                              dst_temp = EA(address(dst));  // Get effective address
-                                              tmp = memory->Read(dst_temp); // Get value at address
-                                              tmp = 0 - tmp;                // Perform test
-                                              resultIsZero(tmp);            // Update Z bit
-                                              resultLTZero(tmp);            // Update N bit
-                                              update_flags(0,Cbit);         // Update C bit
-                                              update_flags(0,Vbit);         // Update V bit   
-                                              return instruction;
-                                            }
-                                    default: break;
-                                  }
-                          case 1: 
-                            switch(instructionBits[2])
-                                  {
-                                    /*
-                                     * FIX THIS
-                                     */
-                                    //case 0: { // CLRB dst - Clear Byte
-                                    //memory->SetByteMode;
-                                    //dst_text = EA(address(dst));
-                                    //tmp = memory->Read(dst_temp);
-                                    //tmp = tmp & 0777000;
-                                    //memory->Write(dst_temp,tmp);
-                                    //return instruction;
-                                    //}
-                                    case 1: { // COMB dst - Compliment byte at destination
-                                              dst_temp = EA(address(dst));  // Get effective address
-                                              tmp = memory->Read(dst_temp); // Get value at address
-                                              tmp = (tmp & 0xFF00) + ~(tmp | 0xFF00); // Compliment value
-                                              memory->Write(dst_temp, tmp); // Write compiment to memory
-                                              resultIsZero(tmp);            // Update Z bit
-                                              (tmp & 0400000) == 1? update_flags(1,Nbit) : update_flags(0,Nbit); // Update N bit
-                                              update_flags(1,Cbit);         // Update C bit
-                                              update_flags(0,Vbit);         // Update V bit
-                                              return instruction;
-                                            }
-                                    case 2: { // INCB dst - Increment byte at destination
-                                              dst_temp = EA(address(dst));   // Get effective address
-                                              tmp = memory->Read(dst_temp);  // Get value at address
-                                              (tmp & 0x00FF) == 0x007F? update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
-                                              tmp++;                        // Increment value
-                                              memory->Write(dst_temp, tmp);  // Write to memory
-                                              resultIsZero(tmp);            // Update Z bit
-                                              resultLTZero(tmp);            // Update N bit
-                                              return  instruction;
-                                            }
-                                    case 3: { // DECB dst
-                                              dst_temp = EA(address(dst));  // Get effective address
-                                              tmp = memory->Read(dst_temp); // Get value at address
-                                              tmp--;                        // Decrement value
-                                              memory->Write(dst_temp, tmp); // Write to memory
-                                              resultIsZero(tmp);            // Update Z bit
-                                              resultLTZero(tmp);            // Update N bit
-                                              update_flags(0,Cbit);         // Update C bit
-                                              update_flags(0,Vbit);         // Update V bit
-                                              return instruction;
-                                            }
-                                    case 4: { // NEGB - Negate Byte
-                                              dst_temp = EA(address(dst));  // Get effective address
-                                              tmp = memory->Read(dst_temp); // Get value at address
-                                              tmp = (tmp & 0xFF00) + (~(tmp | 0xFF00) + 1);               // Get 2's comp of value
-                                              memory->Write(dst_temp,tmp);  // Write to memory
-                                              resultIsZero(tmp);            // Update Z bit
-                                              resultLTZero(tmp);            // Update N bit
-                                              (tmp & 0x00FF) == 0? update_flags(0,Cbit) : update_flags(1,Cbit);       // Update C bit
-                                              (tmp & 0x00FF) == 0x0080? update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
-                                              return instruction;
-                                            }
-                                    case 5: return instruction;  // ADCB dst
-                                    case 6: return instruction;  // SBCB dst
-                                    case 7: return instruction;  // TSTB dst
-                                    default: break;
-                                  }
-                          default: break;
+                          case 0:
+                            { // BR loc - unconditional branch
+                              tmp = address(dst);           // Get offset
+                              // Need to figure out the offset stuff
+                              return instruction;
+                            }
+                          case 1:
+                            { // BMI loc - Branch on minus
+                              tmp = address(dst);           // Get offset
+                              return instruction;
+                            }
+                          default:
+                            break;
                         }
-                case 6: 
-                        switch(instructionBits[5])
-                        {
-                          case 0: 
-                            switch(instructionBits[2])
-                                  {
-                                    case 0: return instruction;  // ROR dst
-                                    case 1: return instruction;  // ROL dst
-                                    case 2: return instruction;  // ASR dst
-                                    case 3: return instruction;  // ASL dst
-                                    default: break;
-                                  }
-                          case 1: 
-                            switch(instructionBits[2])
-                                  {
-                                    case 0: return instruction;  // RORB dst
-                                    case 1: return instruction;  // ROLB dst
-                                    case 2: return instruction;  // ASRB dst
-                                    case 3: return instruction;  // ASLB dst
-                                    default: break;
-                                  }
-                          default: break;
-                        }
-                default: break;
+                      }
+
+                    }
+
+                }
               }
-    }
 
-    if(instructionBits[4] > 0)
-    {
-      switch(instructionBits[5])
-      {
-        case 0: 
-          switch(instructionBits[4])
+
+            case 1: 
+              {
+                switch(instructionBits[2])
                 {
-                  case 1: { // MOV src, dst (src) -> (dst)
-                            src_temp = EA(address(dst));  // Get effective address of src
-                            tmp = memory->Read(src_temp); // Get value at address of src
-                            dst_temp = EA(address(dst));  // Get effective address of dst
-                            memory->Write(dst_temp,tmp);   // Write value to memory
-                            resultIsZero(tmp);            // Update Z bit
-                            resultLTZero(tmp);            // Update N bit
-                            update_flags(0,Vbit);         // Update V bit
+                  case 0: 
+                    {
+                      switch(instructionBits[5])
+                      {
+                        case 0:
+                          { // BNE loc - Branch if Not Equal (zero)
+                            tmp = address(dst);
                             return instruction;
                           }
-                  case 2: { // CMP src, dst (src) + ~(dst) + 1
-                            src_temp = EA(address(src));  // Get effective address of src
-                            dst_temp = EA(address(dst));  // Get effective address of dst
-                            tmp = memory->Read(src_temp); // Get value at address of src
-                            tmp = tmp + ~(memory->Read(dst_temp)) + 1; // Compare values
-                            resultIsZero(tmp);            // Update Z bit
-                            resultLTZero(tmp);            // Update N bit
-                            (tmp & 0x80) > 0? update_flags(0,Cbit) : update_flags(1,Cbit); // Update C bit
-                            (((memory->Read(src_temp) & 0x80) ^ (memory->Read(dst_temp) & 0x80)) & \
-                             ~((memory->Read(dst_temp) & 0x80) ^ (tmp & 0x80))) == 0? \
-                              update_flags(1,Vbit) : update_flags(0,Vbit); // Update V bit
+                        case 1:
+                          { // BHI loc - Branch if Higher (neither Z nor C set)
+                            tmp = address(dst);
+                            return instruction;  // BHI loc
+                          }
+                        default:
+                          break;
+                      }
+                    }
+
+
+                  case 4: 
+                    {
+                      switch(instructionBits[5])
+                      {
+                        case 0:
+                          { // BEQ loc - Brach if EQual (zero)
+                            tmp = address(dst);
                             return instruction;
                           }
-                  case 3: { // BIT src, dst - src & dst
-                            src_temp = EA(address(src));  // Get effective address of src
-                            dst_temp = EA(address(dst));  // Get effective address of dst
-                            tmp = memory->Read(src_temp) & memory->Read(dst_temp); // Get test value
-                            resultIsZero(tmp);            // Update Z bit
-                            resultIsZero(tmp & 0x80);     // Update N bit
-                            update_flags(0,Vbit);         // Update V bit
+                        case 1:
+                          { // BLOS loc - Branch if Lower Or Same (either C or Z set)
+                            tmp = address(dst);
                             return instruction;
                           }
-                  case 4: return instruction;  // BIC src, dst
-                  case 5: return instruction;  // BIS src, dst
-                  case 6: { // ADD src, dst - (src) + (dst) -> (dst)
-                            src_temp = EA(address(src));  // Get effective address of src
-                            dst_temp = EA(address(dst));  // Get effective address of dst
-                            tmp = memory->Read(src_temp) + memory->Read(dst_temp);  // Add src and dst
-                            memory->Write(dst_temp,tmp);  // Write result to memory
-                            resultIsZero(tmp);            // Update Z bit
-                            resultLTZero(tmp);            // Update N bit
-                            ((memory->Read(dst_temp) & 0x80) | (memory->Read(src_temp) & 0x80)) \
-                              && (tmp > 0)? update_flags(1,Cbit) : update_flags(0,Cbit);  // Update C bit
-                            // Update V bit
-                            return instruction;
-                          }
-                  default: break;
+                        default:
+                          break;
+                      }
+                    }
+
+
+                  default:
+                    break;
                 }
-        case 1: 
-          switch(instructionBits[4])
+              }
+
+
+            case 2: 
+              {
+                switch(instructionBits[2])
                 {
-                  case 1: return instruction;  // MOVB src, dst
-                  case 2: return instruction;  // CMPB src, dst
-                  case 3: return instruction;  // BITB src, dst
-                  case 4: return instruction;  // BICB src, dst
-                  case 5: return instruction;  // BISB src, dst
-                  case 6: { // SUB src, dst - (dst) + ~(src) -> (dst)
-                            src_temp = EA(address(src));  // Get effective address of src
-                            dst_temp = EA(address(dst));  // Get effective address of dst
-                            tmp = memory->Read(dst_temp); // Get value of dst
-                            tmp = tmp + ~(memory->Read(src_temp)) + 1;  // Subtract
-                            memory->Write(dst_temp, tmp); // Write to memory
-                            resultIsZero(tmp);            // Update Z bit
-                            resultLTZero(tmp);            // Update N bit
-                            // Update C bit
-                            // Update V bit
+                  case 0:
+                    {
+                      switch(instructionBits[5])
+                      {
+                        case 0:
+                          { // BGE loc - Branch if Greater or Equal (zero)
+                            tmp = address(dst);
                             return instruction;
                           }
-                  default: break;
+                        case 1:
+                          { // BVC loc - Branch if oVerflow Clear
+                            tmp = address(dst);
+                            return instruction;
+                          }
+                        default:
+                          break;
+                      }
+                    }
+
+                    
+                  case 4: 
+                    {
+                      switch(instructionBits[5])
+                      {
+                        case 0:
+                          { // BLT loc - Branch if Less Than (zero)
+                            tmp = address(dst);
+                            return instruction;
+                          }
+                        case 1:
+                          { // BVS loc - Branch if oVerflow Set
+                            tmp = address(dst);
+                            return instruction;
+                          }
+                        default:
+                          break;
+                      }
+                    }
+
+
+                  default:
+                    break;
                 }
-        default: break;
-      }
+              }
+
+
+          case 3: 
+          {
+            switch(instructionBits[2])
+            {
+              case 0: 
+                {
+                  switch(instructionBits[5])
+                  {
+                    case 0:
+                      { // BGT loc - Branch if Greater Than
+                        tmp = address(dst);
+                        return instruction;
+                      }
+                    case 1:
+                      { // BCC loc - Branch if Carry Clear (C = 0)
+                        tmp = address(dst);
+                        return instruction;
+                      }
+                    default:
+                      break;
+                  }
+                }
+
+
+              case 4: 
+                {
+                  switch(instructionBits[5])
+                  {
+                    /*
+                     * FIX THIS
+                     */
+
+                    //case 0:
+                    //{ // BLE loc - Branch if Lower or Equal (zero)
+                    //dst_temp = EA(address(dst));      // Get effective address
+                    //offset = memory->Read(dst_temp);  // Get offset 
+                    //offset = offset << 2;             // Mult offset by 2
+                    //tmp = memory->Read(PS);           // Get current process status
+                    //(((tmp & 0x04) >> 2) & (((tmp & 0x08) >> 3) ^ ((tmp & 0x02) >> 1))) == 1? \
+                    //memory->Write(PC,offset) : ;     // Write offset to PC if Z(N^V)
+                    //return instruction;
+                    //}
+                    case 1:
+                      { // BCS loc - Branch if Carry Set (C = 1)
+                        tmp = address(dst);
+                        return instruction;
+                      }
+                    default:
+                      break;
+                  }
+                }
+
+
+              default:
+                break;
+            }
+          }
+
+
+          case 4:
+          { // JSR reg, dst
+            // Need to figure this out
+            return instruction;
+          }
+
+
+          case 5: 
+          {
+            switch(instructionBits[5])
+            {
+              case 0: 
+                {
+                  switch(instructionBits[2])
+                  {
+                    case 0:
+                      { // CLR dst - Clear Destination
+                        dst_temp = EA(address(dst));  // Get effective address
+                        memory->Write(dst_temp, 0);   // Clear value at address
+                        update_flags(1,Zbit);         // Set Z bit - No change to other condition codes
+                        return instruction;
+                      }
+                    case 1:
+                      { // COM dst - Compliment Destination
+                        dst_temp = EA(address(dst));  // Get effective address
+                        tmp = memory->Read(dst_temp); // Get value at address
+                        tmp = ~tmp;                   // Compliment value
+                        memory->Write(dst_temp, tmp); // Write compiment to memory
+                        resultIsZero(tmp);            // Update Z bit
+                        (tmp & 0400000) == 1? update_flags(1,Nbit) : update_flags(0,Nbit); // Update N bit
+                        update_flags(1,Cbit);         // Update C bit
+                        update_flags(0,Vbit);         // Update V bit
+                        return instruction;
+                      }
+                    case 2:
+                      { // INC dst - Increment Destination
+                        dst_temp = EA(address(dst));   // Get effective address
+                        tmp = memory->Read(dst_temp);  // Get value at address
+                        tmp == 0077777? update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
+                        tmp++;                        // Increment value
+                        memory->Write(dst_temp, tmp); // Write to memory
+                        resultIsZero(tmp);            // Update Z bit
+                        resultLTZero(tmp);            // Update N bit
+                        return instruction;
+                      }
+                    case 3:
+                      { // DEC dst - Decrement Destination
+                        dst_temp = EA(address(dst));  // Get effective address
+                        tmp = memory->Read(dst_temp); // Get value at address
+                        tmp--;                        // Decrement value
+                        memory->Write(dst_temp, tmp); // Write to memory
+                        resultIsZero(tmp);            // Update Z bit
+                        resultLTZero(tmp);            // Update N bit
+                        update_flags(0,Cbit);         // Update C bit
+                        update_flags(0,Vbit);         // Update V bit
+                        return instruction;
+                      }
+                    case 4:
+                      { // NEG dst - Gives 2's Compliment of destination
+                        dst_temp = EA(address(dst));  // Get effective address
+                        tmp = memory->Read(dst_temp); // Get value at address
+                        tmp = ~tmp + 1;               // Get 2's comp of value
+                        memory->Write(dst_temp,tmp);  // Write to memory
+                        resultIsZero(tmp);            // Update Z bit
+                        resultLTZero(tmp);            // Update N bit
+                        tmp == 00? update_flags(0,Cbit) : update_flags(1,Cbit);       // Update C bit
+                        tmp == 0100000? update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
+                        return instruction;
+                      }
+                    case 5:
+                      { // ADC - Add the carry to destination
+                        dst_temp = EA(address(dst));  // Get effective address
+                        tmp = memory->Read(dst_temp); // Get value at address
+                        short tmpC = memory->Read(PS);// Get current value of PS
+                        tmp = tmp + (tmpC & 0000001); // Add C bit to value
+                        memory->Write(dst_temp,tmp);  // Write to memory
+                        resultIsZero(tmp);            // Update Z bit
+                        resultLTZero(tmp);            // Update N bit
+                        tmp == 0200000? update_flags(1,Cbit) : update_flags(0,Cbit);  // Update C bit
+                        tmp == 0100000? update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
+                        return instruction;
+                      }
+                    case 6:
+                      { // SBC Subtract the carry from destination
+                        dst_temp = EA(address(dst));  // Get effective address
+                        tmp = memory->Read(dst_temp); // Get value at address
+                        short tmpC = memory->Read(PS);// Get current value of PS
+                        tmp = tmp - (tmpC & 0000001); // Add C bit to value
+                        memory->Write(dst_temp,tmp);  // Write to memory
+                        resultIsZero(tmp);            // Update Z bit
+                        resultLTZero(tmp);            // Update N bit
+                        tmp == (0 & ((tmpC & 0000001) == 0))? update_flags(0,Cbit) : update_flags(1,Cbit);  // Update C bit
+                        tmp == 0100000? update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
+                        return instruction;  // SBC dst
+                      }
+                    case 7:
+                      { // TST dst - Tests if dst is 0 (0 - dst)
+                        dst_temp = EA(address(dst));  // Get effective address
+                        tmp = memory->Read(dst_temp); // Get value at address
+                        tmp = 0 - tmp;                // Perform test
+                        resultIsZero(tmp);            // Update Z bit
+                        resultLTZero(tmp);            // Update N bit
+                        update_flags(0,Cbit);         // Update C bit
+                        update_flags(0,Vbit);         // Update V bit   
+                        return instruction;
+                      }
+                    default:
+                      break;
+                  }
+                }
+
+
+              case 1: 
+                {
+                  switch(instructionBits[2])
+                  {
+                    /*
+                     * FIX THIS
+                     */
+                    //case 0:
+                    //{ // CLRB dst - Clear Byte
+                    //memory->SetByteMode;
+                    //dst_text = EA(address(dst));
+                    //tmp = memory->Read(dst_temp);
+                    //tmp = tmp & 0777000;
+                    //memory->Write(dst_temp,tmp);
+                    //return instruction;
+                    //}
+                    case 1:
+                      { // COMB dst - Compliment byte at destination
+                        dst_temp = EA(address(dst));  // Get effective address
+                        tmp = memory->Read(dst_temp); // Get value at address
+                        tmp = (tmp & 0xFF00) + ~(tmp | 0xFF00); // Compliment value
+                        memory->Write(dst_temp, tmp); // Write compiment to memory
+                        resultIsZero(tmp);            // Update Z bit
+                        (tmp & 0400000) == 1? update_flags(1,Nbit) : update_flags(0,Nbit); // Update N bit
+                        update_flags(1,Cbit);         // Update C bit
+                        update_flags(0,Vbit);         // Update V bit
+                        return instruction;
+                      }
+                    case 2:
+                      { // INCB dst - Increment byte at destination
+                        dst_temp = EA(address(dst));   // Get effective address
+                        tmp = memory->Read(dst_temp);  // Get value at address
+                        (tmp & 0x00FF) == 0x007F? update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
+                        tmp++;                        // Increment value
+                        memory->Write(dst_temp, tmp);  // Write to memory
+                        resultIsZero(tmp);            // Update Z bit
+                        resultLTZero(tmp);            // Update N bit
+                        return  instruction;
+                      }
+                    case 3:
+                      { // DECB dst
+                        dst_temp = EA(address(dst));  // Get effective address
+                        tmp = memory->Read(dst_temp); // Get value at address
+                        tmp--;                        // Decrement value
+                        memory->Write(dst_temp, tmp); // Write to memory
+                        resultIsZero(tmp);            // Update Z bit
+                        resultLTZero(tmp);            // Update N bit
+                        update_flags(0,Cbit);         // Update C bit
+                        update_flags(0,Vbit);         // Update V bit
+                        return instruction;
+                      }
+                    case 4:
+                      { // NEGB - Negate Byte
+                        dst_temp = EA(address(dst));  // Get effective address
+                        tmp = memory->Read(dst_temp); // Get value at address
+                        tmp = (tmp & 0xFF00) + (~(tmp | 0xFF00) + 1);               // Get 2's comp of value
+                        memory->Write(dst_temp,tmp);  // Write to memory
+                        resultIsZero(tmp);            // Update Z bit
+                        resultLTZero(tmp);            // Update N bit
+                        (tmp & 0x00FF) == 0? update_flags(0,Cbit) : update_flags(1,Cbit);       // Update C bit
+                        (tmp & 0x00FF) == 0x0080? update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
+                        return instruction;
+                      }
+
+                    case 5:
+                      return instruction;  // ADCB dst
+
+                    case 6:
+                      return instruction;  // SBCB dst
+
+                    case 7:
+                      return instruction;  // TSTB dst
+
+                    default:
+                      break;
+                  }
+                }
+
+
+              default:
+                break;
+            }
+          }
+
+
+          case 6: 
+          {
+            switch(instructionBits[5])
+            {
+              case 0: 
+                {
+                  switch(instructionBits[2])
+                  {
+                    case 0:
+                      return instruction;  // ROR dst
+
+                    case 1:
+                      return instruction;  // ROL dst
+
+                    case 2:
+                      return instruction;  // ASR dst
+
+                    case 3:
+                      return instruction;  // ASL dst
+
+                    default:
+                      break;
+                  }
+                }
+              case 1: 
+                {
+                  switch(instructionBits[2])
+                  {
+                    case 0:
+                      return instruction;  // RORB dst
+                    case 1:
+                      return instruction;  // ROLB dst
+
+                    case 2:
+                      return instruction;  // ASRB dst
+
+                    case 3:
+                      return instruction;  // ASLB dst
+
+                    default:
+                      break;
+                  }
+                }
+
+              default:
+                break;
+            }
+          }
+
+
+          default:
+          break;
+          }
+        }
     }
   }
-/*}}}*/
+
+  else if(instructionBits[4] > 0)
+  {
+    switch(instructionBits[5])
+    {
+      case 0: 
+        {
+          switch(instructionBits[4])
+          {
+            case 1:
+              { // MOV src, dst (src) -> (dst)
+                src_temp = EA(address(dst));  // Get effective address of src
+                tmp = memory->Read(src_temp); // Get value at address of src
+                dst_temp = EA(address(dst));  // Get effective address of dst
+                memory->Write(dst_temp,tmp);   // Write value to memory
+                resultIsZero(tmp);            // Update Z bit
+                resultLTZero(tmp);            // Update N bit
+                update_flags(0,Vbit);         // Update V bit
+                return instruction;
+              }
+            case 2:
+              { // CMP src, dst (src) + ~(dst) + 1
+                src_temp = EA(address(src));  // Get effective address of src
+                dst_temp = EA(address(dst));  // Get effective address of dst
+                tmp = memory->Read(src_temp); // Get value at address of src
+                tmp = tmp + ~(memory->Read(dst_temp)) + 1; // Compare values
+                resultIsZero(tmp);            // Update Z bit
+                resultLTZero(tmp);            // Update N bit
+                (tmp & 0x80) > 0? update_flags(0,Cbit) : update_flags(1,Cbit); // Update C bit
+                (((memory->Read(src_temp) & 0x80) ^ (memory->Read(dst_temp) & 0x80)) & \
+                 ~((memory->Read(dst_temp) & 0x80) ^ (tmp & 0x80))) == 0? \
+                  update_flags(1,Vbit) : update_flags(0,Vbit); // Update V bit
+                return instruction;
+              }
+
+            case 3:
+              { // BIT src, dst - src & dst
+                src_temp = EA(address(src));  // Get effective address of src
+                dst_temp = EA(address(dst));  // Get effective address of dst
+                tmp = memory->Read(src_temp) & memory->Read(dst_temp); // Get test value
+                resultIsZero(tmp);            // Update Z bit
+                resultIsZero(tmp & 0x80);     // Update N bit
+                update_flags(0,Vbit);         // Update V bit
+                return instruction;
+              }
+
+            case 4:
+              return instruction;  // BIC src, dst
+
+            case 5:
+              return instruction;  // BIS src, dst
+
+            case 6:
+              { // ADD src, dst - (src) + (dst) -> (dst)
+                src_temp = EA(address(src));  // Get effective address of src
+                dst_temp = EA(address(dst));  // Get effective address of dst
+                tmp = memory->Read(src_temp) + memory->Read(dst_temp);  // Add src and dst
+                memory->Write(dst_temp,tmp);  // Write result to memory
+                resultIsZero(tmp);            // Update Z bit
+                resultLTZero(tmp);            // Update N bit
+                ((memory->Read(dst_temp) & 0x80) | (memory->Read(src_temp) & 0x80)) \
+                  && (tmp > 0)? update_flags(1,Cbit) : update_flags(0,Cbit);  // Update C bit
+                // Update V bit
+                return instruction;
+              }
+
+            default:
+              break;
+          }
+        }
+
+
+      case 1: 
+        {
+          switch(instructionBits[4])
+          {
+            case 1:
+              return instruction;  // MOVB src, dst
+
+            case 2:
+              return instruction;  // CMPB src, dst
+
+            case 3:
+              return instruction;  // BITB src, dst
+
+            case 4:
+              return instruction;  // BICB src, dst
+
+            case 5:
+              return instruction;  // BISB src, dst
+
+            case 6:
+              { // SUB src, dst - (dst) + ~(src) -> (dst)
+                src_temp = EA(address(src));  // Get effective address of src
+                dst_temp = EA(address(dst));  // Get effective address of dst
+                tmp = memory->Read(dst_temp); // Get value of dst
+                tmp = tmp + ~(memory->Read(src_temp)) + 1;  // Subtract
+                memory->Write(dst_temp, tmp); // Write to memory
+                resultIsZero(tmp);            // Update Z bit
+                resultLTZero(tmp);            // Update N bit
+                // Update C bit
+                // Update V bit
+                return instruction;
+              }
+
+            default:
+              break;
+          }
+        }
+
+
+      default:
+        break;
+    }
+  }
+
+  /*}}}*/
 
   // This branch should never be reached
   if (debugLevel == Verbosity::minimal || debugLevel == Verbosity::verbose)
