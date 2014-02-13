@@ -603,6 +603,7 @@ int CPU::FDE()
                                           }
                                 }
               }
+      default: break;
   }
 
   if(instructionBits[4] > 0)
