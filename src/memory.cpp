@@ -2,23 +2,7 @@
 #include <sstream>
 #include "memory.h"
 
-Memory::Memory()
-{
-  this->RAM = new char[65536];
-
-  // Open trace file for output
-  try
-  {
-    traceFile = new std::ofstream("trace.txt", std::ios::out);
-  }
-
-  catch (const std::ios_base::failure &e)
-  {
-    std::cout << "Error opening trace file for output mode!" << std::endl;
-  }
-}
-
-// Initialize memory with the obj2ascii translated MACRO11 assembly source instructions.
+// Initialize memory using the assembly source/*{{{*/
 Memory::Memory(std::vector<std::string> *source)
 {
   this->RAM = new char[65536];
@@ -93,15 +77,39 @@ Memory::Memory(std::vector<std::string> *source)
     }
   }
 }
+/*}}}*/
 
-Memory::~Memory()
+Memory::~Memory()/*{{{*/
 {
   this->traceFile->close();
   delete [] RAM;
   delete traceFile;
 }
+/*}}}*/
 
-short Memory::Read(int effectiveAddress)
+void Memory::DecrementPC()/*{{{*/
+{
+  --this->RAM[PC];
+  --this->RAM[PC];
+  return;
+}
+/*}}}*/
+
+void Memory::IncrementPC()/*{{{*/
+{
+  ++this->RAM[PC];
+  ++this->RAM[PC];
+  return;
+}
+/*}}}*/
+
+short Memory::RetrievePC()/*{{{*/
+{
+  return (this->RAM[PC + 1] << 8) + (this->RAM[PC] & 0xFF);
+}
+/*}}}*/
+
+short Memory::Read(int effectiveAddress)/*{{{*/
 {
   // Trace file output
   std::string buffer = "0 ";
@@ -114,22 +122,25 @@ short Memory::Read(int effectiveAddress)
   // Read both bytes from memory, and return the combined value
   return (this->RAM[effectiveAddress + 1] << 8) + (this->RAM[effectiveAddress] & 0xFF);
 }
+/*}}}*/
 
-short Memory::ReadInstruction(int effectiveAddress)
+short Memory::ReadInstruction()/*{{{*/
 {
+  short pc = this->RetrievePC();
+  
   // Trace file output
   std::string buffer = "2 ";
   std::stringstream stream;
-  stream << std::oct << effectiveAddress;
+  stream << std::oct << pc;
   buffer.append(stream.str());
   buffer.append("\n");
   *traceFile << buffer;
 
-  // Read both bytes from memory, and return the combined value
-  return (this->RAM[effectiveAddress + 1] << 8) + (this->RAM[effectiveAddress] & 0xFF);
+  return pc;
 }
+/*}}}*/
 
-void Memory::Write(int effectiveAddress, short data)
+void Memory::Write(int effectiveAddress, short data)/*{{{*/
 {
   // Write the data to the specified memory address
   this->RAM[effectiveAddress] = data & 0xFF;
@@ -145,19 +156,22 @@ void Memory::Write(int effectiveAddress, short data)
 
   return;
 }
+/*}}}*/
 
-void Memory::SetDebugMode(Verbosity verbosity)
+void Memory::SetDebugMode(Verbosity verbosity)/*{{{*/
 {
   this->debugLevel = verbosity;
   return;
 }
+/*}}}*/
 
-short Memory::StackPop()
+short Memory::StackPop()/*{{{*/
 {
   return 0;
 }
+/*}}}*/
 
-void Memory::StackPush(int _register)
+void Memory::StackPush(int _register)/*{{{*/
 {
   // Translate register number to the appropriate address
   switch(_register)
@@ -229,3 +243,4 @@ void Memory::StackPush(int _register)
 
   return;
 }
+/*}}}*/

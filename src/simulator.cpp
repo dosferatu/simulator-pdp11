@@ -29,6 +29,7 @@ int main(int argc, char *argv[])
   Verbosity verbosity = Verbosity::off;
   macFile = new std::fstream();
 
+  // Parse command line arguments/*{{{*/
   if (argc > 3)
   {
     std::cout << "Usage: simulator <ascii file>" << std::endl;
@@ -113,6 +114,7 @@ int main(int argc, char *argv[])
         }
       }
   }
+  /*}}}*/
 
   /*
    * Ideally would perform validation on input name and check to see if the file exists
@@ -120,8 +122,7 @@ int main(int argc, char *argv[])
    * right now so it isn't implemented.
    */
 
-  // Parse in .ascii file and retrieve instructions until EOF
-
+  // Parse in .ascii file and retrieve instructions until EOF/*{{{*/
   try
   {
     macFile->open(argv[sourceArg]);
@@ -149,6 +150,7 @@ int main(int argc, char *argv[])
   }
   // Remove the last item in the vector that contains only a '\n' character
   source->pop_back();
+  /*}}}*/
 
   memory = new Memory(source);
   memory->SetDebugMode(verbosity);
@@ -178,10 +180,10 @@ int main(int argc, char *argv[])
   } while (status >= 0);
 
 
-  // Garbage collection
+  // Garbage collection/*{{{*/
   delete cpu;
   delete macFile;
   delete source;
-
+/*}}}*/
   return 0;
 }

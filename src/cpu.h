@@ -3,7 +3,6 @@
 class CPU
 {
   public:
-    CPU();
     CPU(Memory *memory);
     ~CPU();
     short EA(short encodedAddress);
@@ -12,6 +11,7 @@ class CPU
 
   private:
     int debugLevel;             // Debug verbosity level
+    int instructionCount;       // Statistics
     Memory *memory;             // RAM
     short reg[9];               // General-purpose registers
                                 // R6 is the processor stack pointer

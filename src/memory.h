@@ -24,11 +24,13 @@ enum Verbosity
 class Memory
 {
   public:
-    Memory();
     Memory(std::vector<std::string> *source);
     ~Memory();
+    void DecrementPC();
+    void IncrementPC();
+    short RetrievePC();
     short Read(int effectiveAddress);
-    short ReadInstruction(int effectiveAddress);
+    short ReadInstruction();
     void Write(int effectiveAddress, short data);
     void SetDebugMode(Verbosity verbosity);
     short StackPop();
