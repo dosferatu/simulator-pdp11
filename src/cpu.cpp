@@ -465,105 +465,144 @@ int CPU::FDE()
     {
       case 0: switch(instruction[2])
               {
-                case 0: case 1: case 2: case 3: // BPL - Branch if PLus (positive)
-                                                {
-                                                  tmp = memory->Read(address(dst));   // Get address for branch
-                                                  memory->ReadPS() & Nbit == 0? \
-                                                   memory->Write(007,tmp) : ;         // Branch if positive
-                                                  return instruction;
-                                                }
-                case 4: case 5: case 6: case 7: // Either BR or BMI
-                                                switch (instructionBits[5])
-                                                {
-                                                  case 0: { // BR - unconditional Branch
-                                                            tmp = memory->Read(address(dst)); // Get address for branch
-                                                            memory->Write(007,tmp);           // Branch
-                                                            return instruction;
-                                                          }
-                                                  case 1: { // BMI - Branch if negative
-                                                            tmp = memory->Read(address(dst)); // Get address for branch
-                                                            memory->ReadPS() & Nbit == 1? \
-                                                             memory->Write(007,tmp) : ;       // Branch if negative
-                                                            return instruction;
-                                                          }
-                                                }
+                case 0: case 1: 
+                case 2: case 3: // BPL - Branch if PLus (positive)
+                                {
+                                  tmp = memory->Read(address(dst));   // Get address for branch
+                                  memory->ReadPS() & Nbit == 0? \
+                                   memory->Write(007,tmp) : ;         // Branch if positive
+                                  return instruction;
+                                }
+                case 4: case 5: 
+                case 6: case 7: // Either BR or BMI
+                                switch (instructionBits[5])
+                                {
+                                  case 0: { // BR - unconditional Branch
+                                            tmp = memory->Read(address(dst)); // Get address for branch
+                                            memory->Write(007,tmp);           
+                                            return instruction;
+                                          }
+                                  case 1: { // BMI - Branch if negative
+                                            tmp = memory->Read(address(dst)); // Get address for branch
+                                            memory->ReadPS() & Nbit > 0? \
+                                              memory->Write(007,tmp) : ;
+                                            return instruction;
+                                          }
+                                }
+                default: break;
               }
       case 1: switch(instructionBits[2]) // BNE, BHI, BLOS, BEQ
               {
-                case 0: case 1: case 2: case 3: switch(instructionBits[5]) // BNE or BHI
-                                                {
-                                                  case 0: { // BNE - Branch if Not Equal (zero)
-                                                            return instruction;
-                                                          }
-                                                  case 1: { // BHI - Branch if Higher (zero)
-                                                            return instruction;
-                                                          }
-                                                }
-                case 4: case 5: case 6: case 7: switch(instructionBits[5]) // BLOS or BEQ
-                                                {
-                                                  case 0: { // BLOS - Branch if Lower or Same
-                                                            return instruction;
-                                                          }
-                                                  case 1: { // BEQ - Branch if EQual (zero)
-                                                            return instruction;
-                                                          }
-                                                }
+                case 0: case 1: 
+                case 2: case 3: switch(instructionBits[5]) // BNE or BHI
+                                {
+                                  case 0: { // BNE - Branch if Not Equal (zero)
+                                            tmp = memory->Read(address(dst)); // Get address for branch
+                                            memory->ReadPS() & Zbit == 0? \
+                                              memory->Write(007,tmp) : ;      // Z = 0
+                                            return instruction;
+                                          }
+                                  case 1: { // BHI - Branch if Higher (zero)
+                                            tmp = memory->Read(address(dst)); // Get address for branch
+                                            (memory->ReadPS() & (Zbit | Cbit)) == 0? \
+                                               memory->Write(007,tmp) :       // C & Z = 0
+                                             return instruction;
+                                          }
+                                }
+                case 4: case 5: 
+                case 6: case 7: switch(instructionBits[5]) // BLOS or BEQ
+                                {
+                                  case 0: { // BLOS - Branch if Lower or Same
+                                            tmp = memory->Read(address(dst)); // Get address for branch
+                                            (memory->ReadPS() & (Zbit | Cbit)) > 0? \
+                                               memory->Write(007,tmp) : ;     // C | Z = 1
+                                            return instruction;
+                                          }
+                                  case 1: { // BEQ - Branch if EQual (zero)
+                                            tmp = memory->Read(address(dst)); // Get address for branch
+                                            memory->ReadPS() & Zbit > 0? \
+                                              memory->Write(007,tmp) : ;      // Z = 0
+                                            return instruction;
+                                          }
+                                }
+                default: break;
               }
                                                 
       case 2: switch(instructionBits[2]) // BVC, BGE, BVS, BLT
               {
-                case 0: case 1: case 2: case 3: switch(instructionBits[5]) // BGE OR BVC
-                                                {
-                                                  case 0: { // BGE - Branch if Greater or Equal (zero)
-                                                            return instruction;
-                                                          }
-                                                  case 1: { // BVC - Branch if oVerflow Clear
-                                                            return instruction;
-                                                          }
-                                                }
-                case 4: case 5: case 6: case 7: switch(instructionBits[5]) // BLT OR BVS
-                                                {
-                                                  case 0: { // BLT - 
-                                                            return instruction;
-                                                          }
-                                                  case 1: { // BVS -
-                                                            return instruction;
-                                                          }
-                                                }
+                case 0: case 1: 
+                case 2: case 3: switch(instructionBits[5]) // BGE OR BVC
+                                {
+                                  case 0: { // BGE - Branch if Greater or Equal (zero)
+                                            tmp = memory->Read(address(dst)); // Get address for branch
+                                            ((memory->ReadPS() & Nbit) >> 3) ^ ((memory->ReadPS() & Vbit) >> 1) == 0? \
+                                              memory->Write(007,tmp) : ;      // N ^ V = 0
+                                            return instruction;
+                                          }
+                                  case 1: { // BVC - Branch if oVerflow Clear
+                                            tmp = memory->Read(address(dst)); // Get address for branch
+                                            memory->ReadPS() & Vbit == 0? \
+                                              memory->Write(007,tmp) : ;      // V = 0
+                                            return instruction;
+                                          }
+                                }
+                case 4: case 5: 
+                case 6: case 7: switch(instructionBits[5]) // BLT OR BVS
+                                {
+                                  case 0: { // BLT - Branch if Less Than
+                                            tmp = memory->Read(address(dst)); // Get address for branch
+                                            ((memory->ReadPS() & Nbit) >> 3) ^ ((memory->ReadPS() & Vbit) >> 1) == 1? \
+                                              memory->Write(007,tmp) : ;      // N ^ V == 1
+                                            return instruction;
+                                          }
+                                  case 1: { // BVS - Branch if oVerflow Set
+                                            tmp = memory->Read(address(dst)); // Get address for branch
+                                            memory->Read(PS) & Vbit > 0? \
+                                              memory->Write(007,tmp) : ;      // V = 1
+                                            return instruction;
+                                          }
+                                }
+                default: break;
               }
-              
       case 3: switch(instructionBits[2]) // BGT, BCC, BLE, BCS
               {
-                case 0: case 1: case 2: case 3: switch(instructionBits[5]) // BGT OR BCC
-                                                {
-                                                  case 0: { // BGT -
-                                                            return instruction;
-                                                          }
-                                                  case 1: { // BCC -
-                                                            return instruction;
-                                                          }
-                                                }
-                case 4: case 5: case 6: case 7: switch(instructionBits[5]) // BLOS or BEQ
-                                                {
-                                                  case 0: { // BLE -
-                                                            //case 0: { // BLE loc - Branch if Lower or Equal (zero)
-                                                            //dst_temp = EA(address(dst));      // Get effective address
-                                                            //offset = memory->Read(dst_temp);  // Get offset 
-                                                            //offset = offset << 2;             // Mult offset by 2
-                                                            //tmp = memory->Read(PS);           // Get current process status
-                                                            //(((tmp & 0x04) >> 2) & (((tmp & 0x08) >> 3) ^ ((tmp & 0x02) >> 1))) == 1? \
-                                                            //memory->Write(PC,offset) : ;     // Write offset to PC if Z(N^V)
-                                                            //return instruction;
-                                                            //}
-      return instruction;
-                                                          }
-                                                  case 1: { // BCS - 
-                                                            return instruction;
-                                                          }
-                                                }
+                case 0: case 1: 
+                case 2: case 3: switch(instructionBits[5]) // BGT OR BCC
+                                {
+                                  case 0: { // BGT - Branch if Greater Than
+                                            tmp = memory->Read(address(dst)); // Get address for branch
+                                            ((memory->ReadPS() & Zbit) >> 2) | \
+                                              ((memory->ReadPS() & Nbit) >> 3) ^ ((memory->ReadPS() & Vbit) >> 1) == 0?
+                                              memory->Write(007,tmp) : ;      // Z | (N ^ V) = 0
+                                            return instruction;
+                                          }
+                                  case 1: { // BCC - Branch if C is Clear
+                                            tmp = memory->Read(address(dst)); // Get address for branch
+                                            memory->ReadPS() & Cbit = 0? \
+                                              memory->Write(007,tmp) : ;      // C = 0
+                                            return instruction;
+                                          }
+                                }
+                case 4: case 5: 
+                case 6: case 7: switch(instructionBits[5]) // BLE or BCS
+                                {
+                                  case 0: { // BLE - Branch if Less 
+                                            //case 0: { // BLE loc - Branch if Lower or Equal (zero)
+                                            //dst_temp = EA(address(dst));      // Get effective address
+                                            //offset = memory->Read(dst_temp);  // Get offset 
+                                            //offset = offset << 2;             // Mult offset by 2
+                                            //tmp = memory->Read(PS);           // Get current process status
+                                            //(((tmp & 0x04) >> 2) & (((tmp & 0x08) >> 3) ^ ((tmp & 0x02) >> 1))) == 1? \
+                                            //memory->Write(PC,offset) : ;     // Write offset to PC if Z(N^V)
+                                            //return instruction;
+                                            //}
+                                            return instruction;
+                                          }
+                                  case 1: { // BCS - 
+                                            return instruction;
+                                          }
+                                }
               }
-              
-
   }
 
   if(instructionBits[4] > 0)
