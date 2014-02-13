@@ -27,23 +27,35 @@ CPU::~CPU()/*{{{*/
 
 short CPU::EA(short encodedAddress)/*{{{*/
 {
-  char mode = (encodedAddress & 070) >> 3;
-  char reg = encodedAddress & 07;
+  int mode = (encodedAddress & 070) >> 3;
+  int reg = encodedAddress & 07;
   short decodedAddress = 0;
   std::string modeType = "Not Set!";
+
+  // Save us from making a case statement for R operands
+  int regArray[8] = {
+    R0,
+    R1,
+    R2,
+    R3,
+    R4,
+    R5,
+    SP,
+    PC
+  };
 
   switch(mode)
   {
     case 0: // General Register
       {
-        decodedAddress = encodedAddress;
+        decodedAddress = regArray[reg];
         modeType = "General Register";
         break;
       }
 
     case 1: // Deferred Register
       {
-        decodedAddress = this->memory->Read(encodedAddress);
+        decodedAddress = this->memory->Read(regArray[reg]);
         modeType = "Deferred Register";
         break;
       }
@@ -54,8 +66,8 @@ short CPU::EA(short encodedAddress)/*{{{*/
         if (reg == 07)
         {
           // Point to the word after the instruction word
-          decodedAddress = this->memory->Read(PC) + 02;
-          this->memory->Write(PC, decodedAddress);
+          decodedAddress = this->memory->RetrievePC();
+          this->memory->IncrementPC();
           modeType = "Immediate PC";
         }
 
@@ -65,8 +77,8 @@ short CPU::EA(short encodedAddress)/*{{{*/
            * Retrieve the memory address from encodedAddress
            * and then increment the pointer stored in encodedAddress
            */
-          decodedAddress = this->memory->Read(encodedAddress);
-          this->memory->Write(encodedAddress, decodedAddress + 02);
+          decodedAddress = this->memory->Read(regArray[reg]);
+          this->memory->Write(regArray[reg], decodedAddress + 02);
           modeType = "Autoincrement";
         }
 
@@ -78,17 +90,17 @@ short CPU::EA(short encodedAddress)/*{{{*/
         // Check for absolute PC addressing
         if (reg == 07)
         {
-          // Retrieve the operand from the address given
-          decodedAddress = this->memory->Read(encodedAddress);
+          // The address is the word following the instruction
+          decodedAddress = this->memory->Read(this->memory->RetrievePC());
+          this->memory->IncrementPC();
           modeType = "Absolute PC";
         }
 
         else
         {
-          // Do we increment the pointer or address?
-          short pointer = memory->Read(encodedAddress);
-          short decodedAddress = memory->Read(pointer);
-          memory->Write(encodedAddress, decodedAddress + 02);
+          short address = this->memory->Read(regArray[reg]);
+          decodedAddress = this->memory->Read(address);
+          this->memory->Write(regArray[reg], address + 02);
           modeType = "Autoincrement Deferred";
         }
 
@@ -97,18 +109,24 @@ short CPU::EA(short encodedAddress)/*{{{*/
 
     case 4: // Autodecrement
       {
-        decodedAddress = this->memory->Read(encodedAddress);
-        this->memory->Write(encodedAddress, decodedAddress - 02);
+        /*
+         * decrement address
+         * then return value
+         */
+          //decodedAddress = this->memory->Read(regArray[reg]);
+          //this->memory->Write(regArray[reg], decodedAddress + 02);
+
         modeType = "Autodecrement Deferred";
         break;
       }
 
     case 5: // Autodecrement Deferred
       {
+          //short address = this->memory->Read(regArray[reg]);
+          //decodedAddress = this->memory->Read(address);
+          //this->memory->Write(regArray[reg], address + 02);
+
         // Do we decrement the pointer or address?
-        short pointer = memory->Read(encodedAddress);
-        short decodedAddress = memory->Read(pointer);
-        memory->Write(encodedAddress, decodedAddress - 02);
         modeType = "Autodecrement Deferred";
         break;
       }
@@ -118,18 +136,17 @@ short CPU::EA(short encodedAddress)/*{{{*/
         // Check for relative PC addressing
         if (reg == 07)
         {
-          // Calculate the distance between address of operand and the PC
-          decodedAddress = encodedAddress - this->memory->Read(PC);
+          decodedAddress = this->memory->Read(this->memory->RetrievePC()); 
+          this->memory->IncrementPC();
           modeType = "Relative PC";
         }
 
         else
         {
-          /*
-           * The address is the some of the contents of the operand plus the specified
-           * offset which is the word following the instruction
-           */
-          decodedAddress = this->memory->Read(PC + 02) + this->memory->Read(encodedAddress);
+          // Retrieve the index offset from memory
+          short base = this->memory->Read(this->memory->RetrievePC());
+          this->memory->IncrementPC();
+          decodedAddress = base + this->memory->Read(this->memory->RetrievePC());
           modeType = "Indexed";
         }
 
@@ -141,12 +158,9 @@ short CPU::EA(short encodedAddress)/*{{{*/
         // Check for deferred relative PC addressing
         if (reg == 07)
         {
-          /*
-           * Calculate the distance between value at address pointed
-           * to by operand and the PC
-           */
-          short value = this->memory->Read(encodedAddress);
-          decodedAddress = value - this->memory->Read(PC);
+          short addr = this->memory->Read(this->memory->RetrievePC()); 
+          decodedAddress = this->memory->Read(addr);
+          this->memory->IncrementPC();
           modeType = "Deferred Relative PC";
         }
 
@@ -157,8 +171,10 @@ short CPU::EA(short encodedAddress)/*{{{*/
            * operand plus the specified offset which is the word following
            * the instruction
            */
-          short value = this->memory->Read(encodedAddress);
-          decodedAddress = this->memory->Read(PC + 02) + this->memory->Read(value);
+          short addr = this->memory->Read(this->memory->RetrievePC());
+          short base = this->memory->Read(addr);
+          this->memory->IncrementPC();
+          decodedAddress = base + this->memory->Read(this->memory->RetrievePC());
           modeType = "Deferred Indexed";
         }
 
