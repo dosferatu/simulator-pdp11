@@ -257,7 +257,7 @@ int CPU::FDE()
                         {
                           case 0: { // RTS reg
                                     tmp = memory->Read(address(dst));                 // Read register value
-                                    memory->Write(PC, tmp);                           // reg --> (PC)
+                                    memory->Write(007, tmp);                          // reg --> (PC)
                                     memory->Write(address(dst),memory->StackPop());   // pop reg
                                     return instruction;
                                   }
@@ -280,26 +280,12 @@ int CPU::FDE()
                           default: break;
                         }
                 case 3: { // SWAB dst - swap bytes of word at dst
-                          dst_temp = EA(address(dst));            // Get effective address
-                          tmp = memory->Read(dst_temp);           // Get value at effective address
+                          tmp = memory->Read(address(dst));       // Get value at effective address
                           short byte_temp = tmp << 8;             // Create temp and give it LSByte of value in MSByte
                           tmp = (tmp >> 8) & 0000777;             // Shift MSByte into LSByte and clear MSByte
                           tmp = byte_temp + tmp;                  // Finalize the swap byte
-                          memory->Write(dst_temp, byte_temp);     // Write to register
+                          memory->Write(address(dst), byte_temp); // Write to register
                           return instruction;
-                        }
-                case 4: switch(instructionBits[5])
-                        {
-                          case 0: { // BR loc - unconditional branch
-                                    tmp = address(dst);           // Get offset
-                                    // Need to figure out the offset stuff
-                                    return instruction;
-                                  }
-                          case 1: { // BMI loc - Branch on minus
-                                    tmp = address(dst);           // Get offset
-                                    return instruction;
-                                  }
-                          default: break;
                         }
                 default: break;
               }    
@@ -379,16 +365,7 @@ int CPU::FDE()
                            * FIX THIS
                            */
 
-                          //case 0: { // BLE loc - Branch if Lower or Equal (zero)
-                          //dst_temp = EA(address(dst));      // Get effective address
-                          //offset = memory->Read(dst_temp);  // Get offset 
-                          //offset = offset << 2;             // Mult offset by 2
-                          //tmp = memory->Read(PS);           // Get current process status
-                          //(((tmp & 0x04) >> 2) & (((tmp & 0x08) >> 3) ^ ((tmp & 0x02) >> 1))) == 1? \
-                          //memory->Write(PC,offset) : ;     // Write offset to PC if Z(N^V)
-                          //return instruction;
-                          //}
-                          case 1: { // BCS loc - Branch if Carry Set (C = 1)
+                         case 1: { // BCS loc - Branch if Carry Set (C = 1)
                                     tmp = address(dst);
                                     return instruction;
                                   }
@@ -656,7 +633,16 @@ int CPU::FDE()
                 case 4: case 5: case 6: case 7: switch(instructionBits[5]) // BLOS or BEQ
                                                 {
                                                   case 0: { // BLE -
-                                                            return instruction;
+                                                            //case 0: { // BLE loc - Branch if Lower or Equal (zero)
+                                                            //dst_temp = EA(address(dst));      // Get effective address
+                                                            //offset = memory->Read(dst_temp);  // Get offset 
+                                                            //offset = offset << 2;             // Mult offset by 2
+                                                            //tmp = memory->Read(PS);           // Get current process status
+                                                            //(((tmp & 0x04) >> 2) & (((tmp & 0x08) >> 3) ^ ((tmp & 0x02) >> 1))) == 1? \
+                                                            //memory->Write(PC,offset) : ;     // Write offset to PC if Z(N^V)
+                                                            //return instruction;
+                                                            //}
+      return instruction;
                                                           }
                                                   case 1: { // BCS - 
                                                             return instruction;
