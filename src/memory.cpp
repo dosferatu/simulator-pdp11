@@ -240,12 +240,11 @@ unsigned short Memory::EA(unsigned short encodedAddress)/*{{{*/
           modeType = "Indexed";
 
           // Retrieve the index offset from memory
-          unsigned short address = this->RetrievePC();
-          unsigned short base = (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);
-
-          decodedAddress = (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);
+          unsigned short base = (this->RAM[regArray[reg] + 1] << 8) + (this->RAM[regArray[reg]] & 0xFF);
+          unsigned short offsetAddress = this->RetrievePC();
+          unsigned short offset = (this->RAM[offsetAddress + 1] << 8) + (this->RAM[offsetAddress] & 0xFF);
+          decodedAddress = offset + base;
           this->IncrementPC();
-          decodedAddress = base + this->RAM[this->RetrievePC()];
         }
 
         break;
@@ -272,10 +271,13 @@ unsigned short Memory::EA(unsigned short encodedAddress)/*{{{*/
            * operand plus the specified offset which is the word following
            * the instruction
            */
-          unsigned short address = this->RAM[this->RetrievePC()];
-          unsigned short base = this->RAM[address];
+          unsigned short base = (this->RAM[regArray[reg] + 1] << 8) + (this->RAM[regArray[reg]] & 0xFF);
+          unsigned short offsetAddress = this->RetrievePC();
+          unsigned short offset = (this->RAM[offsetAddress + 1] << 8) + (this->RAM[offsetAddress] & 0xFF);
+          unsigned short address = offset + base;
+          decodedAddress = (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);
+          this->TraceDump(Transaction::read, address);
           this->IncrementPC();
-          decodedAddress = base + this->RAM[this->RetrievePC()];
         }
 
         break;
