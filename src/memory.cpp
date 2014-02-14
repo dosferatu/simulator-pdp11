@@ -422,6 +422,7 @@ void Memory::TraceDump(Transaction type, unsigned short address)/*{{{*/
 
   return;
 }/*}}}*/
+
 // ReadPS() and WritePS(unsigned short)/*{{{*/
 // ReadPS()
 unsigned short Memory::ReadPS()
@@ -430,8 +431,8 @@ unsigned short Memory::ReadPS()
 }
 
 // WritePS()
-void Memory::WritePS(unsigned short newPS)
+void Memory::WritePS(unsigned short status)
 {
-  this->RAM[PS] = newPS & 0xFF;
-  this->RAM[PS + 1] = (newPS >> 8);
+  this->RAM[PS] = status & 0xFF;
+  this->RAM[PS + 1] = (status >> 8);
 } /*}}}*/
