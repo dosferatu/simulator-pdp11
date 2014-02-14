@@ -9,6 +9,15 @@ Memory::Memory(std::vector<std::string> *source)
   this->byteMode = 02;          // Default to word addressing
   int addressIndex = 0;
 
+  regArray[0] = R0;
+  regArray[1] = R1;
+  regArray[2] = R2;
+  regArray[3] = R3;
+  regArray[4] = R4;
+  regArray[5] = R5;
+  regArray[6] = SP;
+  regArray[7] = PC;
+
   try
   {
     traceFile = new std::ofstream("trace.txt", std::ios::out);
@@ -97,7 +106,7 @@ unsigned short Memory::RetrievePC()/*{{{*/
 unsigned short Memory::EA(unsigned short encodedAddress)/*{{{*/
 {
   unsigned short mode = (encodedAddress & 070) >> 3;
-  unsigned short reg = encodedAddress & 07;
+  unsigned short reg = (encodedAddress & 07);
   unsigned short decodedAddress = 0;
   std::string modeType = "Not Set!";
 

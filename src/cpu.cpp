@@ -38,8 +38,8 @@ int CPU::FDE()/*{{{*/
   unsigned short instructionBits[6];   // Dissected instruction word
 
   // Lambda declarations and definitions/*{{{*/
-  auto address = [=] (const int i) { return (instructionBits[i] << 3) + instructionBits[i - 1]; };
-  auto update_flags = [=] (const int i, const int bit) 
+  auto address = [&] (const int i) { return (instructionBits[i] << 3) + instructionBits[i - 1]; };
+  auto update_flags = [&] (const int i, const int bit) 
   {
     if (i == 0) { 
       unsigned short temp = memory->ReadPS();
@@ -52,11 +52,11 @@ int CPU::FDE()/*{{{*/
       memory->WritePS(temp);
     }
   };
-  auto resultIsZero = [=] (const int result) \
+  auto resultIsZero = [&] (const int result) \
   { result == 0? update_flags(1,Zbit) : update_flags(0,Zbit); };  // Update Zbit where result is zero
-  auto resultLTZero = [=] (const int result) { result < 0? \
+  auto resultLTZero = [&] (const int result) { result < 0? \
     update_flags(1,Nbit) : update_flags(0,Nbit); };                 // Update Nbit where result is negative
-  auto resultMSBIsOne = [=] (const int result) { result >> 15 > 0? \
+  auto resultMSBIsOne = [&] (const int result) { result >> 15 > 0? \
     update_flags(1,Nbit) : update_flags(0,Nbit); };                 // Update Nbit where result MSB is 1 (negative)
   auto NOP = [] () {;}; // For NOPping
   /*}}}*/
@@ -90,8 +90,6 @@ int CPU::FDE()/*{{{*/
   /*}}}*/
 
   // Decode & execute/*{{{*/
-  /* Notes about the decoder
-  */
   instructionBits[0] = (instruction & 0000007);
   instructionBits[1] = (instruction & 0000070) >> 3; 
   instructionBits[2] = (instruction & 0000700) >> 6;
@@ -103,7 +101,7 @@ int CPU::FDE()/*{{{*/
   unsigned short src_temp = 0; // Used for storing temporary source values
   unsigned short dst_temp = 0; // Used for storing temporary destination values
 
-  if(instructionBits[4] == 0) /*{{{*/
+  if(instructionBits[4] == 0)/*{{{*/
   {
     switch(instructionBits[3])
     {
