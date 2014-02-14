@@ -1,11 +1,11 @@
 ;Test auto inc/dec deferred
 START:
 MOV #1, R0
-MOV #8348, R1
-MOV #16820, (R1)+
-MOV #3820, (R1)+
-MOV #4260, (R1)
-MOV #8348, R1
+MOV #20234, R1
+MOV #40664, (R1)+
+MOV #7354, (R1)+
+MOV #10244, (R1)
+MOV #20234, R1
 MOV R0, @(R1)+
 MOV R0, @(R1)+
 MOV R0, @(R1)+
