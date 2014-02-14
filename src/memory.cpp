@@ -323,7 +323,7 @@ void Memory::Write(unsigned short encodedAddress, unsigned short data)/*{{{*/
   }
 
   // Write the data to the specified memory address
-  if (this->byteMode)
+  if (this->byteMode == 01)
   {
     this->RAM[address] = data & 0xFF;
   }
@@ -418,17 +418,17 @@ void Memory::StackPush(int _register)/*{{{*/
 }
 /*}}}*/
 
-void Memory::RegDump()
+void Memory::RegDump()/*{{{*/
 {
     std::cout << "Dumping current register contents..." << std::endl;
-    std::cout << "R0: " << std::oct << static_cast<unsigned short>(this->RAM[R0]) << std::endl;
-    std::cout << "R1: " << std::oct << static_cast<unsigned short>(this->RAM[R1]) << std::endl;
-    std::cout << "R2: " << std::oct << static_cast<unsigned short>(this->RAM[R2]) << std::endl;
-    std::cout << "R3: " << std::oct << static_cast<unsigned short>(this->RAM[R3]) << std::endl;
-    std::cout << "R4: " << std::oct << static_cast<unsigned short>(this->RAM[R4]) << std::endl;
-    std::cout << "R5: " << std::oct << static_cast<unsigned short>(this->RAM[R5]) << std::endl;
-    std::cout << "SP: " << std::oct << static_cast<unsigned short>(this->RAM[SP]) << std::endl;
-    std::cout << "PC: " << std::oct << static_cast<unsigned short>(this->RAM[PC]) << std::endl;
+    std::cout << "R0: " << std::oct << static_cast<unsigned short>((this->RAM[R0 + 1] << 8) | (this->RAM[R0] & 0xFF)) << std::endl;
+    std::cout << "R1: " << std::oct << static_cast<unsigned short>((this->RAM[R1 + 1] << 8) | (this->RAM[R1] & 0xFF)) << std::endl;
+    std::cout << "R2: " << std::oct << static_cast<unsigned short>((this->RAM[R2 + 1] << 8) | (this->RAM[R2] & 0xFF)) << std::endl;
+    std::cout << "R3: " << std::oct << static_cast<unsigned short>((this->RAM[R3 + 1] << 8) | (this->RAM[R3] & 0xFF)) << std::endl;
+    std::cout << "R4: " << std::oct << static_cast<unsigned short>((this->RAM[R4 + 1] << 8) | (this->RAM[R4] & 0xFF)) << std::endl;
+    std::cout << "R5: " << std::oct << static_cast<unsigned short>((this->RAM[R5 + 1] << 8) | (this->RAM[R5] & 0xFF)) << std::endl;
+    std::cout << "SP: " << std::oct << static_cast<unsigned short>((this->RAM[SP + 1] << 8) | (this->RAM[SP] & 0xFF)) << std::endl;
+    std::cout << "PC: " << std::oct << static_cast<unsigned short>((this->RAM[PC + 1] << 8) | (this->RAM[PC] & 0xFF)) << std::endl;
     std::cout << std::endl;
     std::cout << "Processor status word: " << std::endl;
     std::cout << "N: " << std::oct << (static_cast<unsigned short>(this->RAM[PS]) & 0x8) << std::endl;
@@ -436,7 +436,7 @@ void Memory::RegDump()
     std::cout << "V: " << std::oct << (static_cast<unsigned short>(this->RAM[PS]) & 0x2) << std::endl;
     std::cout << "C: " << std::oct << (static_cast<unsigned short>(this->RAM[PS]) & 0x1) << std::endl;
   return;
-}
+}/*}}}*/
 
 void Memory::TraceDump(Transaction type, unsigned short address)/*{{{*/
 {
