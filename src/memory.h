@@ -44,7 +44,7 @@ class Memory
     void Write(unsigned short encodedAddress, unsigned short data);
     void SetDebugMode(Verbosity verbosity) { debugLevel = verbosity; };
     unsigned short StackPop();
-    void StackPush(int _register);
+    void StackPush(unsigned short _register);
     void RegDump();
     void TraceDump(Transaction type, unsigned short address);
     void SetByteMode() { byteMode = 01; };

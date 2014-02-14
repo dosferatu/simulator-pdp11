@@ -427,79 +427,48 @@ void Memory::Write(unsigned short encodedAddress, unsigned short data)/*{{{*/
 
 unsigned short Memory::StackPop()/*{{{*/
 {
-  return 0;
+  // Read stack
+  unsigned short address = (this->RAM[SP + 1] << 8) + (this->RAM[SP] & 0xFF);
+  
+  // Increment stack pointer
+  address += 02;
+  this->RAM[SP] = address & 0xFF;
+  this->RAM[SP + 1] = address >> 8;
+  
+  // Return data
+  return (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);
 }
 /*}}}*/
 
-void Memory::StackPush(int _register)/*{{{*/
+void Memory::StackPush(unsigned short _register)/*{{{*/
 {
-  // Translate register number to the appropriate address
-  switch(_register)
-  {
-    case 0:
-      {
-        _register = R0;
-        break;
-      }
-
-    case 1:
-      {
-        _register = R1;
-        break;
-      }
-
-    case 2:
-      {
-        _register = R2;
-        break;
-      }
-
-    case 3:
-      {
-        _register = R3;
-        break;
-      }
-
-    case 4:
-      {
-        _register = R4;
-        break;
-      }
-
-    case 5:
-      {
-        _register = R5;
-        break;
-      }
-
-    case 6:
-      {
-        _register = SP;
-        break;
-      }
-
-    case 7:
-      {
-        _register = PC;
-        break;
-      }
-
-    default:
-      break;
-  }
-
+  
+  unsigned short address = (this->RAM[SP + 1] << 8) + (this->RAM[SP] & 0xFF);
   /*
    * Check if stack pointer has exceeded it's limit.
    * If it has then we need to crash and burn.
-   * Limit is 0160000
+   * Limit is 0400
    */
-  //if (this->Read(SP) < 0160000)
-  //{
-  //short sp = this->Read(SP);
-  //sp += byteMode;
-  //this->Write(sp, _register);
-  //this->Write(SP, this->Read(sp));
-  //}
+  if (address > 0400)
+  {
+    // Decrement stack pointer
+    address -= 02;
+    this->RAM[SP] = address & 0xFF;
+    this->RAM[SP + 1] = address >> 8;
+
+    // Get location in memory to write to
+    this->TraceDump(Transaction::write, address);
+    unsigned short location = (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);
+
+    // Write the data
+    this->RAM[location] = _register & 0xFF;
+    this->RAM[location + 1] = _register >> 8;
+  }
+
+  else
+  {
+    std::cout << "Warning: stack overflow has occurred!" << std::endl;
+  }
 
   return;
 }
