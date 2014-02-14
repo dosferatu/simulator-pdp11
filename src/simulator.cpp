@@ -163,6 +163,7 @@ int main(int argc, char *argv[])
   do
   {
     status = cpu->FDE();
+    memory->IncrementPC();
 
     if (status == 0)
     { 

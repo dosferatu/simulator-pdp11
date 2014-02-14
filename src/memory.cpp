@@ -285,7 +285,7 @@ unsigned short Memory::EA(unsigned short encodedAddress, Transaction type)/*{{{*
 
           unsigned short address = this->RetrievePC();
           unsigned short relativeAddress = (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);
-          decodedAddress = address + relativeAddress;
+          decodedAddress = address + relativeAddress + 02;
         }
 
         else
