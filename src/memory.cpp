@@ -18,6 +18,10 @@ Memory::Memory(std::vector<std::string> *source)
   regArray[6] = SP;
   regArray[7] = PC;
 
+  // Initialize the SP
+  this->RAM[SP] = 0160000 & 0xFF;
+  this->RAM[SP + 1] = 0160000 >> 8;
+
   try
   {
     traceFile = new std::ofstream("trace.txt", std::ios::out);
@@ -259,6 +263,7 @@ unsigned short Memory::EA(unsigned short encodedAddress)/*{{{*/
 
           unsigned short address = this->RAM[this->RetrievePC()];
           decodedAddress = this->RAM[address];
+
           this->IncrementPC();
         }
 

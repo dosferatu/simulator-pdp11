@@ -11,7 +11,7 @@ class CPU
 
   private:
     int debugLevel;             // Debug verbosity level
-    int instructionCount;       // Statistics
+    unsigned long long instructionCount;       // Statistics
     Memory *memory;             // RAM
     short reg[9];               // General-purpose registers
                                 // R6 is the processor stack pointer
