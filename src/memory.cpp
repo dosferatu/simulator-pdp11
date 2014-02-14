@@ -429,12 +429,12 @@ unsigned short Memory::StackPop()/*{{{*/
 {
   // Read stack
   unsigned short address = (this->RAM[SP + 1] << 8) + (this->RAM[SP] & 0xFF);
-  
+
   // Increment stack pointer
   address += 02;
   this->RAM[SP] = address & 0xFF;
   this->RAM[SP + 1] = address >> 8;
-  
+
   // Return data
   return (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);
 }
@@ -442,7 +442,7 @@ unsigned short Memory::StackPop()/*{{{*/
 
 void Memory::StackPush(unsigned short _register)/*{{{*/
 {
-  
+
   unsigned short address = (this->RAM[SP + 1] << 8) + (this->RAM[SP] & 0xFF);
   /*
    * Check if stack pointer has exceeded it's limit.
