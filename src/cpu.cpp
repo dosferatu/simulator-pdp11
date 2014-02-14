@@ -148,7 +148,7 @@ int CPU::FDE()/*{{{*/
                         }
                 case 3: { // SWAB dst - swap bytes of word at dst
                           tmp = memory->Read(address(dst));       // Get value at effective address
-                          unsigned short byte_temp = tmp << 8;             // Create temp and give it LSByte of value in MSByte
+                          unsigned short byte_temp = tmp << 8;    // Create temp and give it LSByte of value in MSByte
                           tmp = (tmp >> 8) & 0000777;             // Shift MSByte into LSByte and clear MSByte
                           tmp = byte_temp + tmp;                  // Finalize the swap byte
                           memory->Write(address(dst), byte_temp); // Write to register
