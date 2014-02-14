@@ -271,7 +271,8 @@ unsigned short Memory::EA(unsigned short encodedAddress)/*{{{*/
           modeType = "Relative PC";
 
           unsigned short address = this->RetrievePC();
-          decodedAddress = (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);
+          unsigned short relativeAddress = (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);
+          decodedAddress = address + relativeAddress;
           this->IncrementPC();
         }
 
