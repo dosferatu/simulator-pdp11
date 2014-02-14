@@ -185,7 +185,7 @@ unsigned short Memory::EA(unsigned short encodedAddress)/*{{{*/
           this->TraceDump(Transaction::read, decodedAddress);
 
           // Possibly case for byteMode?
-          unsigned short incrementedAddress = decodedAddress + byteMode;
+          unsigned short incrementedAddress = address + byteMode;
           this->RAM[regArray[reg]] = incrementedAddress & 0xFF;
           this->RAM[regArray[reg] + 1] = incrementedAddress >> 8;
         }
