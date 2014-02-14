@@ -38,8 +38,8 @@ int CPU::FDE()/*{{{*/
   unsigned short instructionBits[6];   // Dissected instruction word
 
   // Lambda declarations and definitions/*{{{*/
-  auto address = [=] (const int i) { return (instructionBits[i] << 3) + instructionBits[i - 1]; };
-  auto update_flags = [=] (const int i, const int bit) 
+  auto address = [&] (const int i) { return (instructionBits[i] << 3) + instructionBits[i - 1]; };
+  auto update_flags = [&] (const int i, const int bit) 
   {
     if (i == 0) { 
       unsigned short temp = memory->ReadPS();

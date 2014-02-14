@@ -55,7 +55,7 @@ class Memory
   private:
     int byteMode;
     int debugLevel;
-    const int regArray[8] = {R0, R1, R2, R3, R4, R5, SP, PC};
+    int regArray[8];
     char *RAM;
     std::ofstream *traceFile;
 };

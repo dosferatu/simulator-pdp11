@@ -172,9 +172,9 @@ int main(int argc, char *argv[])
        *  presses continue on the console.  In this case we are using the
        *  enter key to denote the continue key on the console.
        */
-      std::cout << "Press Enter to continue\n" << std::endl;
-      std::cin.get();
-      status = 0;  // Reset status to allow process to continue.
+      //std::cout << "Press Enter to continue\n" << std::endl;
+      //std::cin.get();
+      //status = 0;  // Reset status to allow process to continue.
     }
   } while (status > 0);
 
