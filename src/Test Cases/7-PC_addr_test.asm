@@ -1,0 +1,1 @@
+;The fibonacci sequence is a good test of PC addressing modes

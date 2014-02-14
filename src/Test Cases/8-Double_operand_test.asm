@@ -1,0 +1,21 @@
+;Double operand test
+
+MOV #4083, R0
+MOV R0, R1	;R1 = 4083
+CMP R0, R1	;Z flag should be set
+MOV #7, R2	;R2 = 7
+BIC R2, R1	;R1 = 4080
+CMP R1, R0	;Z flag should not be set, N flag set
+MOV #12, R2	;R2 = 12
+BIS R2, R1	;R1 = 4092
+SUB R0, R1	;(R1 - R0 = R1) 4092 - 4083 => R1 = 9
+ADD #5235, R0 ;5235 + 4083 => R0 = 9318
+SUB R0, R1	;9 - 9318 = -9309, N should be set and R1 = -9309
+MOV #9308, R0	;9308 and -9309 share no bits in common
+BIT R0, R1	;Z should be set, N should be cleared
+MOV #-905, R2	;N should be set
+BIT R2, R1	;Z should not be set, N should be set
+MOV #4, R4	;Z should not be set
+MOV #0, R4	;Z should be set
+ADD #905, R2	;Z should be set, N not set
+ADD #0, R4	;Z should be set

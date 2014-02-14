@@ -1,0 +1,9 @@
+;Test Registers
+
+MOV #6, R0
+MOV R0, R1
+MOV R1, R2
+MOV R2, R3
+MOV R3, R4
+MOV R4, R5
+MOV R5, R6
