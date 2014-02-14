@@ -21,23 +21,38 @@ enum Verbosity
   verbose
 };
 
+// Transaction types
+enum Transaction
+{
+  read,
+  write,
+  instruction
+};
+
+
 class Memory
 {
   public:
     Memory(std::vector<std::string> *source);
     ~Memory();
-    void DecrementPC();
-    void IncrementPC();
-    short RetrievePC();
-    short Read(int effectiveAddress);
-    short ReadInstruction();
-    void Write(int effectiveAddress, short data);
-    void SetDebugMode(Verbosity verbosity);
-    short StackPop();
+    void DecrementPC() { RAM[PC] = RAM[PC] - 2; };
+    void IncrementPC() { RAM[PC] = RAM[PC] + 2; };
+    unsigned short RetrievePC();
+    unsigned short EA(unsigned short encodedAddress);
+    unsigned short Read(unsigned short encodedAddress);
+    unsigned short ReadInstruction();
+    void Write(unsigned short encodedAddress, unsigned short data);
+    void SetDebugMode(Verbosity verbosity) { debugLevel = verbosity; };
+    unsigned short StackPop();
     void StackPush(int _register);
+    void TraceDump(Transaction type, unsigned short address);
+    void SetByteMode() { byteMode = true; };
+    void ClearByteMode() { byteMode = false; };
 
   private:
+    bool byteMode;
     int debugLevel;
+    const int regArray[8] = {R0, R1, R2, R3, R4, R5, SP, PC};
     char *RAM;
     std::ofstream *traceFile;
 };

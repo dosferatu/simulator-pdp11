@@ -6,7 +6,7 @@
 Memory::Memory(std::vector<std::string> *source)
 {
   this->RAM = new char[65536];
-  short addressIndex;
+  int addressIndex = 0;
 
   try
   {
@@ -87,85 +87,249 @@ Memory::~Memory()/*{{{*/
 }
 /*}}}*/
 
-void Memory::DecrementPC()/*{{{*/
-{
-  --this->RAM[PC];
-  --this->RAM[PC];
-  return;
-}
-/*}}}*/
-
-void Memory::IncrementPC()/*{{{*/
-{
-  ++this->RAM[PC];
-  ++this->RAM[PC];
-  return;
-}
-/*}}}*/
-
-short Memory::RetrievePC()/*{{{*/
+unsigned short Memory::RetrievePC()/*{{{*/
 {
   return (this->RAM[PC + 1] << 8) + (this->RAM[PC] & 0xFF);
 }
 /*}}}*/
 
-short Memory::Read(int effectiveAddress)/*{{{*/
+unsigned short Memory::EA(unsigned short encodedAddress)/*{{{*/
 {
-  // Trace file output
-  std::string buffer = "0 ";
-  std::stringstream stream;
-  stream << std::oct << effectiveAddress;
-  buffer.append(stream.str());
-  buffer.append("\n");
-  *traceFile << buffer;
+  int mode = (encodedAddress & 070) >> 3;
+  int reg = encodedAddress & 07;
+  short decodedAddress = 0;
+  std::string modeType = "Not Set!";
 
-  // Read both bytes from memory, and return the combined value
-  return (this->RAM[effectiveAddress + 1] << 8) + (this->RAM[effectiveAddress] & 0xFF);
+  switch(mode)
+  {
+    case 0: // General Register
+      {
+        modeType = "General Register";
+
+        decodedAddress = regArray[reg];
+        break;
+      }
+
+    case 1: // Deferred Register
+      {
+        modeType = "Deferred Register";
+
+        decodedAddress = this->RAM[regArray[reg]];
+        this->TraceDump(Transaction::read, decodedAddress);
+        break;
+      }
+
+    case 2: // Autoincrement
+      {
+        // Check for immediate PC addressing
+        if (reg == 07)
+        {
+          modeType = "Immediate PC";
+
+          // Point to the word after the instruction word
+          decodedAddress = this->RetrievePC();
+          this->IncrementPC();
+        }
+
+        else
+        {
+          /*
+           * Retrieve the memory address from encodedAddress
+           * and then increment the pointer stored in encodedAddress
+           */
+          modeType = "Autoincrement";
+
+          decodedAddress = this->RAM[regArray[reg]];
+          this->TraceDump(Transaction::read, decodedAddress);
+          this->RAM[regArray[reg]] = decodedAddress + 02;
+          this->TraceDump(Transaction::write, regArray[reg]);
+        }
+
+        break;
+      }
+
+    case 3: // Autoincrement Deferred
+      {
+        // Check for absolute PC addressing
+        if (reg == 07)
+        {
+          modeType = "Absolute PC";
+
+          decodedAddress = this->RAM[this->RetrievePC()];
+          this->TraceDump(Transaction::read, decodedAddress);
+          this->IncrementPC();
+        }
+
+        else
+        {
+          modeType = "Autoincrement Deferred";
+
+          unsigned short address = this->RAM[regArray[reg]];
+          this->TraceDump(Transaction::read, decodedAddress);
+          decodedAddress = this->RAM[address];
+          this->TraceDump(Transaction::read, decodedAddress);
+          this->RAM[regArray[reg]] = address + 02;
+          this->TraceDump(Transaction::write, regArray[reg]);
+        }
+
+        break;
+      }
+
+    case 4: // Autodecrement
+      {
+        modeType = "Autodecrement Deferred";
+
+        /*
+         * decrement address
+         * then return value
+         */
+        //decodedAddress = this->Read(regArray[reg]);
+        //this->Write(regArray[reg], decodedAddress + 02);
+        break;
+      }
+
+    case 5: // Autodecrement Deferred
+      {
+        modeType = "Autodecrement Deferred";
+
+        //short address = this->Read(regArray[reg]);
+        //decodedAddress = this->Read(address);
+        //this->Write(regArray[reg], address + 02);
+
+        // Do we decrement the pointer or address?
+        break;
+      }
+
+    case 6: // Indexed
+      {
+        // Check for relative PC addressing
+        if (reg == 07)
+        {
+          modeType = "Relative PC";
+
+          decodedAddress = this->RAM[this->RetrievePC()];
+          this->IncrementPC();
+        }
+
+        else
+        {
+          modeType = "Indexed";
+
+          // Retrieve the index offset from memory
+          unsigned short base = this->RAM[this->RetrievePC()];
+          this->IncrementPC();
+          decodedAddress = base + this->RAM[this->RetrievePC()];
+        }
+
+        break;
+      }
+
+    case 7: // Deferred Indexed
+      {
+        // Check for deferred relative PC addressing
+        if (reg == 07)
+        {
+          modeType = "Deferred Relative PC";
+
+          unsigned short address = this->RAM[this->RetrievePC()];
+          decodedAddress = this->RAM[address];
+          this->IncrementPC();
+        }
+
+        else
+        {
+          modeType = "Deferred Indexed";
+
+          /*
+           * The address is the some of the contents pointed to by the
+           * operand plus the specified offset which is the word following
+           * the instruction
+           */
+          unsigned short address = this->RAM[this->RetrievePC()];
+          unsigned short base = this->RAM[address];
+          this->IncrementPC();
+          decodedAddress = base + this->RAM[this->RetrievePC()];
+        }
+
+        break;
+      }
+
+    default:
+      break;
+  }
+
+  if (this->debugLevel == Verbosity::verbose)
+  {
+    std::cout << "Mode Type: " << modeType << "(" << static_cast<int>(mode) << ")" << std::endl;
+    std::cout << "Register: " << static_cast<int>(reg) << std::endl;
+  }
+
+  return decodedAddress;
+}/*}}}*/
+
+unsigned short Memory::Read(unsigned short encodedAddress)/*{{{*/
+{
+  unsigned short address = this->EA(encodedAddress);
+
+  // If not a general register operand then do a trace dump
+  if (!(address > R0 && address < PC))
+  {
+    this->TraceDump(Transaction::read, address);
+  }
+
+  /*
+   * Read either a byte or a word from memory depending on the value
+   * of the internal byteMode flag.
+   */
+  if (this->byteMode)
+  {
+    return this->RAM[address];
+  }
+
+  else
+  {
+    return (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);
+  }
 }
 /*}}}*/
 
-short Memory::ReadInstruction()/*{{{*/
+unsigned short Memory::ReadInstruction()/*{{{*/
 {
-  short pc = this->RetrievePC();
-  
-  // Trace file output
-  std::string buffer = "2 ";
-  std::stringstream stream;
-  stream << std::oct << pc;
-  buffer.append(stream.str());
-  buffer.append("\n");
-  *traceFile << buffer;
+  unsigned short pc = this->RetrievePC();
 
+  // Trace file output
+  this->TraceDump(Transaction::instruction, pc);
   return pc;
 }
 /*}}}*/
 
-void Memory::Write(int effectiveAddress, short data)/*{{{*/
+void Memory::Write(unsigned short encodedAddress, unsigned short data)/*{{{*/
 {
+  unsigned short address = this->EA(encodedAddress);
+
+  // If not a general register operand then do a trace dump
+  if (!(address > R0 && address < PC))
+  {
+    this->TraceDump(Transaction::write, address);
+  }
+
   // Write the data to the specified memory address
-  this->RAM[effectiveAddress] = data & 0xFF;
-  this->RAM[effectiveAddress + 1] = data >> 8;
+  if (this->byteMode)
+  {
+    this->RAM[address] = data & 0xFF;
+  }
 
-  // Trace file output
-  std::string buffer = "1 ";
-  std::stringstream stream;
-  stream << std::oct << effectiveAddress;
-  buffer.append(stream.str());
-  buffer.append("\n");
-  *traceFile << buffer;
+  else
+  {
+    this->RAM[address] = data & 0xFF;
+    this->RAM[address + 1] = data >> 8;
+  }
 
   return;
 }
 /*}}}*/
 
-void Memory::SetDebugMode(Verbosity verbosity)/*{{{*/
-{
-  this->debugLevel = verbosity;
-  return;
-}
-/*}}}*/
-
-short Memory::StackPop()/*{{{*/
+unsigned short Memory::StackPop()/*{{{*/
 {
   return 0;
 }
@@ -235,12 +399,27 @@ void Memory::StackPush(int _register)/*{{{*/
    */
   //if (this->Read(SP) < 0160000)
   //{
-    //short sp = this->Read(SP);
-    //sp += 02;
-    //this->Write(sp, _register);
-    //this->Write(SP, this->Read(sp));
+  //short sp = this->Read(SP);
+  //sp += 02;
+  //this->Write(sp, _register);
+  //this->Write(SP, this->Read(sp));
   //}
 
   return;
 }
 /*}}}*/
+
+void Memory::TraceDump(Transaction type, unsigned short address)/*{{{*/
+{
+  std::string buffer;
+  std::stringstream stream;
+  stream << std::oct << type;
+  buffer.append(stream.str());
+  stream.clear();
+  stream << std::oct << address;
+  buffer.append(stream.str());
+  buffer.append("\n");
+  *traceFile << buffer;
+
+  return;
+}/*}}}*/
