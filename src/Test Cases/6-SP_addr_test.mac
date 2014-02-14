@@ -5,7 +5,7 @@ MOV R0, -(SP)	;Push 5 on the stack
 MOV #142736, -(SP) ;Push 142736 on the stack
 MOV #14, @(SP)	;Store 14 at address 142740
 MOV #15, @2(SP) ;Store 15 at address 142742
-MOV @2(SP), R1	;R1 = 14
-MOV @(SP)+, R2	;R2 = 15
+MOV @2(SP), R1	;R1 = 15
+MOV @(SP)+, R2	;R2 = 14
 MOV (SP)+, R3	;R3 = 5
 .END START

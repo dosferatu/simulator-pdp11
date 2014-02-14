@@ -38,13 +38,13 @@ class Memory
     void DecrementPC() { RAM[PC] = RAM[PC] - 2; };
     void IncrementPC() { RAM[PC] = RAM[PC] + 2; };
     unsigned short RetrievePC();
-    unsigned short EA(unsigned short encodedAddress);
+    unsigned short EA(unsigned short encodedAddress, Transaction type = Transaction::read);
     unsigned short Read(unsigned short encodedAddress);
     unsigned short ReadInstruction();
     void Write(unsigned short encodedAddress, unsigned short data);
     void SetDebugMode(Verbosity verbosity) { debugLevel = verbosity; };
     unsigned short StackPop();
-    void StackPush(int _register);
+    void StackPush(unsigned short _register);
     void RegDump();
     void TraceDump(Transaction type, unsigned short address);
     void SetByteMode() { byteMode = 01; };

@@ -18,6 +18,10 @@ Memory::Memory(std::vector<std::string> *source)
   regArray[6] = SP;
   regArray[7] = PC;
 
+  // Initialize the SP
+  this->RAM[SP] = 0160000 & 0xFF;
+  this->RAM[SP + 1] = 0160000 >> 8;
+
   try
   {
     traceFile = new std::ofstream("trace.txt", std::ios::out);
@@ -103,7 +107,7 @@ unsigned short Memory::RetrievePC()/*{{{*/
 }
 /*}}}*/
 
-unsigned short Memory::EA(unsigned short encodedAddress)/*{{{*/
+unsigned short Memory::EA(unsigned short encodedAddress, Transaction type)/*{{{*/
 {
   unsigned short mode = (encodedAddress & 070) >> 3;
   unsigned short reg = (encodedAddress & 07);
@@ -124,7 +128,7 @@ unsigned short Memory::EA(unsigned short encodedAddress)/*{{{*/
       {
         modeType = "Deferred Register";
 
-        decodedAddress = this->RAM[regArray[reg]];
+        decodedAddress = (this->RAM[regArray[reg] + 1] << 8) + (this->RAM[regArray[reg]] & 0xFF);
         this->TraceDump(Transaction::read, decodedAddress);
         break;
       }
@@ -136,9 +140,13 @@ unsigned short Memory::EA(unsigned short encodedAddress)/*{{{*/
         {
           modeType = "Immediate PC";
 
+          if (type == Transaction::read)
+          {
+            this->IncrementPC();
+          }
+
           // Point to the word after the instruction word
           decodedAddress = this->RetrievePC();
-          this->IncrementPC();
         }
 
         else
@@ -149,10 +157,22 @@ unsigned short Memory::EA(unsigned short encodedAddress)/*{{{*/
            */
           modeType = "Autoincrement";
 
-          decodedAddress = this->RAM[regArray[reg]];
+          decodedAddress = (this->RAM[regArray[reg] + 1] << 8) + (this->RAM[regArray[reg]] & 0xFF);
           this->TraceDump(Transaction::read, decodedAddress);
-          this->RAM[regArray[reg]] = decodedAddress + byteMode;
-          this->TraceDump(Transaction::write, regArray[reg]);
+
+          unsigned short  incrementedAddress;
+          if (regArray[reg] == SP)
+          {
+            incrementedAddress = decodedAddress + 02;
+          }
+
+          else
+          {
+            incrementedAddress = decodedAddress + byteMode;
+          }
+
+          this->RAM[regArray[reg]] = incrementedAddress & 0xFF;
+          this->RAM[regArray[reg] + 1] = incrementedAddress >> 8;
         }
 
         break;
@@ -165,21 +185,39 @@ unsigned short Memory::EA(unsigned short encodedAddress)/*{{{*/
         {
           modeType = "Absolute PC";
 
-          decodedAddress = this->RAM[this->RetrievePC()];
-          this->TraceDump(Transaction::read, decodedAddress);
-          this->IncrementPC();
+          if (type == Transaction::read)
+          {
+            this->IncrementPC();
+          }
+
+          unsigned short address = this->RetrievePC();
+          decodedAddress = (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);
         }
 
         else
         {
           modeType = "Autoincrement Deferred";
 
-          unsigned short address = this->RAM[regArray[reg]];
-          this->TraceDump(Transaction::read, address);
-          decodedAddress = this->RAM[address];
+          // Read in address from reg
+          unsigned short address = (this->RAM[regArray[reg] + 1] << 8) + (this->RAM[regArray[reg]] & 0xFF);
+
+          // Read in value from address
+          decodedAddress = (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);
           this->TraceDump(Transaction::read, decodedAddress);
-          this->RAM[regArray[reg]] = address + byteMode;
-          this->TraceDump(Transaction::write, regArray[reg]);
+
+          // Possibly case for byteMode?
+          unsigned short incrementedAddress = address + byteMode;
+          if (regArray[reg] == SP)
+          {
+            incrementedAddress = address + 02;
+          }
+
+          else
+          {
+            incrementedAddress = address + byteMode;
+          }
+          this->RAM[regArray[reg]] = incrementedAddress & 0xFF;
+          this->RAM[regArray[reg] + 1] = incrementedAddress >> 8;
         }
 
         break;
@@ -187,14 +225,26 @@ unsigned short Memory::EA(unsigned short encodedAddress)/*{{{*/
 
     case 4: // Autodecrement
       {
-        modeType = "Autodecrement Deferred";
+        modeType = "Autodecrement";
 
         /*
          * decrement address
          * then return value
          */
-        //decodedAddress = this->Read(regArray[reg]);
-        //this->Write(regArray[reg], decodedAddress + byteMode);
+
+        // Possibly case for byteMode?
+        unsigned short address = (this->RAM[regArray[reg] + 1] << 8) + (this->RAM[regArray[reg]] & 0xFF);
+        if (regArray[reg] == SP)
+        {
+          decodedAddress = address - 02;
+        }
+
+        else
+        {
+          decodedAddress = address - byteMode;
+        }
+        this->RAM[regArray[reg]] = decodedAddress & 0xFF;
+        this->RAM[regArray[reg] + 1] = decodedAddress >> 8;
         break;
       }
 
@@ -203,10 +253,21 @@ unsigned short Memory::EA(unsigned short encodedAddress)/*{{{*/
         modeType = "Autodecrement Deferred";
 
         // Decrement Rn, and return the address in Rn
-        this->RAM[regArray[reg]] = this->RAM[regArray[reg]] - byteMode;
-        unsigned short address = this->RAM[regArray[reg]];
-        decodedAddress = this->RAM[address];
-        this->TraceDump(Transaction::read, decodedAddress);
+        unsigned short address = (this->RAM[regArray[reg] + 1] << 8) + (this->RAM[regArray[reg]] & 0xFF);
+        unsigned short decrementedAddress;
+        if (regArray[reg] == SP)
+        {
+          decrementedAddress = address - 02;
+        }
+
+        else
+        {
+          decrementedAddress = address - byteMode;
+        }
+        decodedAddress = (this->RAM[decrementedAddress + 1] << 8) + (this->RAM[decrementedAddress] & 0xFF);
+        this->RAM[regArray[reg]] = decrementedAddress & 0xFF;
+        this->RAM[regArray[reg] + 1] = decrementedAddress >> 8;
+        this->TraceDump(Transaction::read, decrementedAddress);
         break;
       }
 
@@ -217,18 +278,30 @@ unsigned short Memory::EA(unsigned short encodedAddress)/*{{{*/
         {
           modeType = "Relative PC";
 
-          decodedAddress = this->RAM[this->RetrievePC()];
-          this->IncrementPC();
+          if (type == Transaction::read)
+          {
+            this->IncrementPC();
+          }
+
+          unsigned short address = this->RetrievePC();
+          unsigned short relativeAddress = (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);
+          decodedAddress = address + relativeAddress;
         }
 
         else
         {
           modeType = "Indexed";
 
+          if (type == Transaction::read)
+          {
+            this->IncrementPC();
+          }
+
           // Retrieve the index offset from memory
-          unsigned short base = this->RAM[this->RetrievePC()];
-          this->IncrementPC();
-          decodedAddress = base + this->RAM[this->RetrievePC()];
+          unsigned short base = (this->RAM[regArray[reg] + 1] << 8) + (this->RAM[regArray[reg]] & 0xFF);
+          unsigned short offsetAddress = this->RetrievePC();
+          unsigned short offset = (this->RAM[offsetAddress + 1] << 8) + (this->RAM[offsetAddress] & 0xFF);
+          decodedAddress = offset + base;
         }
 
         break;
@@ -241,9 +314,15 @@ unsigned short Memory::EA(unsigned short encodedAddress)/*{{{*/
         {
           modeType = "Deferred Relative PC";
 
-          unsigned short address = this->RAM[this->RetrievePC()];
-          decodedAddress = this->RAM[address];
-          this->IncrementPC();
+          if (type == Transaction::read)
+          {
+            this->IncrementPC();
+          }
+
+          unsigned short address = this->RetrievePC();
+          unsigned short relativeAddress = (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);
+          unsigned short relativeAddressAddress = address + relativeAddress;
+          decodedAddress = (this->RAM[relativeAddressAddress + 1] << 8) + (this->RAM[relativeAddressAddress] & 0xFF);
         }
 
         else
@@ -255,10 +334,18 @@ unsigned short Memory::EA(unsigned short encodedAddress)/*{{{*/
            * operand plus the specified offset which is the word following
            * the instruction
            */
-          unsigned short address = this->RAM[this->RetrievePC()];
-          unsigned short base = this->RAM[address];
-          this->IncrementPC();
-          decodedAddress = base + this->RAM[this->RetrievePC()];
+
+          if (type == Transaction::read)
+          {
+            this->IncrementPC();
+          }
+
+          unsigned short base = (this->RAM[regArray[reg] + 1] << 8) + (this->RAM[regArray[reg]] & 0xFF);
+          unsigned short offsetAddress = this->RetrievePC();
+          unsigned short offset = (this->RAM[offsetAddress + 1] << 8) + (this->RAM[offsetAddress] & 0xFF);
+          unsigned short address = offset + base;
+          decodedAddress = (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);
+          this->TraceDump(Transaction::read, address);
         }
 
         break;
@@ -314,7 +401,7 @@ unsigned short Memory::ReadInstruction()/*{{{*/
 
 void Memory::Write(unsigned short encodedAddress, unsigned short data)/*{{{*/
 {
-  unsigned short address = this->EA(encodedAddress);
+  unsigned short address = this->EA(encodedAddress, Transaction::write);
 
   // If not a general register operand then do a trace dump
   if (!(address > R0 && address < PC))
@@ -340,79 +427,48 @@ void Memory::Write(unsigned short encodedAddress, unsigned short data)/*{{{*/
 
 unsigned short Memory::StackPop()/*{{{*/
 {
-  return 0;
+  // Read stack
+  unsigned short address = (this->RAM[SP + 1] << 8) + (this->RAM[SP] & 0xFF);
+
+  // Increment stack pointer
+  address += 02;
+  this->RAM[SP] = address & 0xFF;
+  this->RAM[SP + 1] = address >> 8;
+
+  // Return data
+  return (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);
 }
 /*}}}*/
 
-void Memory::StackPush(int _register)/*{{{*/
+void Memory::StackPush(unsigned short _register)/*{{{*/
 {
-  // Translate register number to the appropriate address
-  switch(_register)
-  {
-    case 0:
-      {
-        _register = R0;
-        break;
-      }
 
-    case 1:
-      {
-        _register = R1;
-        break;
-      }
-
-    case 2:
-      {
-        _register = R2;
-        break;
-      }
-
-    case 3:
-      {
-        _register = R3;
-        break;
-      }
-
-    case 4:
-      {
-        _register = R4;
-        break;
-      }
-
-    case 5:
-      {
-        _register = R5;
-        break;
-      }
-
-    case 6:
-      {
-        _register = SP;
-        break;
-      }
-
-    case 7:
-      {
-        _register = PC;
-        break;
-      }
-
-    default:
-      break;
-  }
-
+  unsigned short address = (this->RAM[SP + 1] << 8) + (this->RAM[SP] & 0xFF);
   /*
    * Check if stack pointer has exceeded it's limit.
    * If it has then we need to crash and burn.
-   * Limit is 0160000
+   * Limit is 0400
    */
-  //if (this->Read(SP) < 0160000)
-  //{
-  //short sp = this->Read(SP);
-  //sp += byteMode;
-  //this->Write(sp, _register);
-  //this->Write(SP, this->Read(sp));
-  //}
+  if (address > 0400)
+  {
+    // Decrement stack pointer
+    address -= 02;
+    this->RAM[SP] = address & 0xFF;
+    this->RAM[SP + 1] = address >> 8;
+
+    // Get location in memory to write to
+    this->TraceDump(Transaction::write, address);
+    unsigned short location = (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);
+
+    // Write the data
+    this->RAM[location] = _register & 0xFF;
+    this->RAM[location + 1] = _register >> 8;
+  }
+
+  else
+  {
+    std::cout << "Warning: stack overflow has occurred!" << std::endl;
+  }
 
   return;
 }
@@ -420,21 +476,21 @@ void Memory::StackPush(int _register)/*{{{*/
 
 void Memory::RegDump()/*{{{*/
 {
-    std::cout << "Dumping current register contents..." << std::endl;
-    std::cout << "R0: " << std::oct << static_cast<unsigned short>((this->RAM[R0 + 1] << 8) | (this->RAM[R0] & 0xFF)) << std::endl;
-    std::cout << "R1: " << std::oct << static_cast<unsigned short>((this->RAM[R1 + 1] << 8) | (this->RAM[R1] & 0xFF)) << std::endl;
-    std::cout << "R2: " << std::oct << static_cast<unsigned short>((this->RAM[R2 + 1] << 8) | (this->RAM[R2] & 0xFF)) << std::endl;
-    std::cout << "R3: " << std::oct << static_cast<unsigned short>((this->RAM[R3 + 1] << 8) | (this->RAM[R3] & 0xFF)) << std::endl;
-    std::cout << "R4: " << std::oct << static_cast<unsigned short>((this->RAM[R4 + 1] << 8) | (this->RAM[R4] & 0xFF)) << std::endl;
-    std::cout << "R5: " << std::oct << static_cast<unsigned short>((this->RAM[R5 + 1] << 8) | (this->RAM[R5] & 0xFF)) << std::endl;
-    std::cout << "SP: " << std::oct << static_cast<unsigned short>((this->RAM[SP + 1] << 8) | (this->RAM[SP] & 0xFF)) << std::endl;
-    std::cout << "PC: " << std::oct << static_cast<unsigned short>((this->RAM[PC + 1] << 8) | (this->RAM[PC] & 0xFF)) << std::endl;
-    std::cout << std::endl;
-    std::cout << "Processor status word: " << std::endl;
-    std::cout << "N: " << std::oct << ((static_cast<unsigned short>(this->RAM[PS]) & 0x8) >> 3) << std::endl;
-    std::cout << "Z: " << std::oct << ((static_cast<unsigned short>(this->RAM[PS]) & 0x4) >> 2) << std::endl;
-    std::cout << "V: " << std::oct << ((static_cast<unsigned short>(this->RAM[PS]) & 0x2) >> 1) << std::endl;
-    std::cout << "C: " << std::oct << (static_cast<unsigned short>(this->RAM[PS]) & 0x1)        << std::endl;
+  std::cout << "Dumping current register contents..." << std::endl;
+  std::cout << "R0: " << std::oct << static_cast<unsigned short>((this->RAM[R0 + 1] << 8) | (this->RAM[R0] & 0xFF)) << std::endl;
+  std::cout << "R1: " << std::oct << static_cast<unsigned short>((this->RAM[R1 + 1] << 8) | (this->RAM[R1] & 0xFF)) << std::endl;
+  std::cout << "R2: " << std::oct << static_cast<unsigned short>((this->RAM[R2 + 1] << 8) | (this->RAM[R2] & 0xFF)) << std::endl;
+  std::cout << "R3: " << std::oct << static_cast<unsigned short>((this->RAM[R3 + 1] << 8) | (this->RAM[R3] & 0xFF)) << std::endl;
+  std::cout << "R4: " << std::oct << static_cast<unsigned short>((this->RAM[R4 + 1] << 8) | (this->RAM[R4] & 0xFF)) << std::endl;
+  std::cout << "R5: " << std::oct << static_cast<unsigned short>((this->RAM[R5 + 1] << 8) | (this->RAM[R5] & 0xFF)) << std::endl;
+  std::cout << "SP: " << std::oct << static_cast<unsigned short>((this->RAM[SP + 1] << 8) | (this->RAM[SP] & 0xFF)) << std::endl;
+  std::cout << "PC: " << std::oct << static_cast<unsigned short>((this->RAM[PC + 1] << 8) | (this->RAM[PC] & 0xFF)) << std::endl;
+  std::cout << std::endl;
+  std::cout << "Processor status word: " << std::endl;
+  std::cout << "N: " << std::oct << ((static_cast<unsigned short>(this->RAM[PS]) & 0x8) >> 3) << std::endl;
+  std::cout << "Z: " << std::oct << ((static_cast<unsigned short>(this->RAM[PS]) & 0x4) >> 2) << std::endl;
+  std::cout << "V: " << std::oct << ((static_cast<unsigned short>(this->RAM[PS]) & 0x2) >> 1) << std::endl;
+  std::cout << "C: " << std::oct << (static_cast<unsigned short>(this->RAM[PS]) & 0x1)        << std::endl;
   return;
 }/*}}}*/
 
