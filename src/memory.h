@@ -56,6 +56,6 @@ class Memory
     int byteMode;
     int debugLevel;
     int regArray[8];
-    char *RAM;
+    unsigned char *RAM;
     std::ofstream *traceFile;
 };

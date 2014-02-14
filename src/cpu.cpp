@@ -65,7 +65,6 @@ int CPU::FDE()/*{{{*/
 
   // Fetch the instruction and increment PC
   instruction = this->memory->ReadInstruction();
-  this->memory->IncrementPC();
   ++this->instructionCount;
 
   // Optional instruction fetch state dump/*{{{*/
@@ -86,6 +85,8 @@ int CPU::FDE()/*{{{*/
     std::cout << std::endl;
     this->memory->RegDump();
   }
+
+  this->memory->IncrementPC();
   /*}}}*/
   /*}}}*/
 
