@@ -510,9 +510,8 @@ int CPU::FDE()/*{{{*/
                             default: break;
                           } /*}}}*/
                 }
-      }
-      case 1: switch(instructionBits[2]) // BNE, BHI, BLOS, BEQ
-              {
+        case 1: switch(instructionBits[2]) // BNE, BHI, BLOS, BEQ
+                {
                 case 0: case 1: 
                 case 2: case 3: switch(instructionBits[5]) // BNE or BHI
                                 {
@@ -556,7 +555,7 @@ int CPU::FDE()/*{{{*/
                 default: break;
               }
 
-      case 2: switch(instructionBits[2]) // BVC, BGE, BVS, BLT
+        case 2: switch(instructionBits[2]) // BVC, BGE, BVS, BLT
               {
                 case 0: case 1: 
                 case 2: case 3: switch(instructionBits[5]) // BGE OR BVC
@@ -600,7 +599,7 @@ int CPU::FDE()/*{{{*/
                                 }
                 default: break;
               }
-      case 3: switch(instructionBits[2]) // BGT, BCC, BLE, BCS
+        case 3: switch(instructionBits[2]) // BGT, BCC, BLE, BCS
               {
                 case 0: case 1: 
                 case 2: case 3: switch(instructionBits[5]) // BGT OR BCC
@@ -647,8 +646,8 @@ int CPU::FDE()/*{{{*/
                                 }
                 default: break;
               }
-      default: break;
-    } /*}}}*/
+        default: break;
+      } /*}}}*/
 
     // instructionBits[4] > 0 /*{{{*/
     if(instructionBits[4] > 0)
