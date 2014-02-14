@@ -6,6 +6,7 @@
 Memory::Memory(std::vector<std::string> *source)
 {
   this->RAM = new char[65536];
+  this->byteMode = 02;          // Default to word addressing
   int addressIndex = 0;
 
   try
@@ -141,7 +142,7 @@ unsigned short Memory::EA(unsigned short encodedAddress)/*{{{*/
 
           decodedAddress = this->RAM[regArray[reg]];
           this->TraceDump(Transaction::read, decodedAddress);
-          this->RAM[regArray[reg]] = decodedAddress + 02;
+          this->RAM[regArray[reg]] = decodedAddress + byteMode;
           this->TraceDump(Transaction::write, regArray[reg]);
         }
 
@@ -165,10 +166,10 @@ unsigned short Memory::EA(unsigned short encodedAddress)/*{{{*/
           modeType = "Autoincrement Deferred";
 
           unsigned short address = this->RAM[regArray[reg]];
-          this->TraceDump(Transaction::read, decodedAddress);
+          this->TraceDump(Transaction::read, address);
           decodedAddress = this->RAM[address];
           this->TraceDump(Transaction::read, decodedAddress);
-          this->RAM[regArray[reg]] = address + 02;
+          this->RAM[regArray[reg]] = address + byteMode;
           this->TraceDump(Transaction::write, regArray[reg]);
         }
 
@@ -184,7 +185,7 @@ unsigned short Memory::EA(unsigned short encodedAddress)/*{{{*/
          * then return value
          */
         //decodedAddress = this->Read(regArray[reg]);
-        //this->Write(regArray[reg], decodedAddress + 02);
+        //this->Write(regArray[reg], decodedAddress + byteMode);
         break;
       }
 
@@ -192,11 +193,11 @@ unsigned short Memory::EA(unsigned short encodedAddress)/*{{{*/
       {
         modeType = "Autodecrement Deferred";
 
-        //short address = this->Read(regArray[reg]);
-        //decodedAddress = this->Read(address);
-        //this->Write(regArray[reg], address + 02);
-
-        // Do we decrement the pointer or address?
+        // Decrement Rn, and return the address in Rn
+        this->RAM[regArray[reg]] = this->RAM[regArray[reg]] - byteMode;
+        unsigned short address = this->RAM[regArray[reg]];
+        decodedAddress = this->RAM[address];
+        this->TraceDump(Transaction::read, decodedAddress);
         break;
       }
 
@@ -400,7 +401,7 @@ void Memory::StackPush(int _register)/*{{{*/
   //if (this->Read(SP) < 0160000)
   //{
   //short sp = this->Read(SP);
-  //sp += 02;
+  //sp += byteMode;
   //this->Write(sp, _register);
   //this->Write(SP, this->Read(sp));
   //}

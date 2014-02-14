@@ -46,11 +46,13 @@ class Memory
     unsigned short StackPop();
     void StackPush(int _register);
     void TraceDump(Transaction type, unsigned short address);
-    void SetByteMode() { byteMode = true; };
-    void ClearByteMode() { byteMode = false; };
+    void SetByteMode() { byteMode = 01; };
+    void ClearByteMode() { byteMode = 02; };
+    unsigned short ReadPS();
+    void WritePS(unsigned short);
 
   private:
-    bool byteMode;
+    int byteMode;
     int debugLevel;
     const int regArray[8] = {R0, R1, R2, R3, R4, R5, SP, PC};
     char *RAM;

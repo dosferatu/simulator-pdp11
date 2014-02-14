@@ -34,10 +34,10 @@ CPU::~CPU()/*{{{*/
  */ 
 int CPU::FDE()/*{{{*/
 {
-  unsigned short pc;                   // Program counter buffer
   unsigned short instruction;          // Instruction word buffer
   unsigned short instructionBits[6];   // Dissected instruction word
-  /*>>>>>>>>>>>>>*/
+
+  // Lambda declarations and definitions/*{{{*/
   auto address = [=] (const int i) { return (instructionBits[i] << 3) + instructionBits[i - 1]; };
   auto update_flags = [=] (const int i, const int bit) 
   {
@@ -58,6 +58,7 @@ int CPU::FDE()/*{{{*/
     update_flags(1,Nbit) : update_flags(0,Nbit); };                 // Update Nbit where result is negative
   auto resultMSBIsOne = [=] (const int result) { result >> 15 > 0? \
     update_flags(1,Nbit) : update_flags(0,Nbit); };                 // Update Nbit where result MSB is 1 (negative)
+  auto NOP = [] () {;}; // For NOPping
   /*}}}*/
 
 // Instruction fetch/*{{{*/
@@ -379,7 +380,7 @@ if(instructionBits[4] == 0)
                       {
                         case 0: { // ROR dst: ROtate Rigtht - include C bit as MSB -> (dst)
                                   dst_temp = memory->Read(address(dst));  // Get value at dst
-                                  unsigned short tempCN = memoryReadPS() & 0x9;    // Get C and N bits
+                                  unsigned short tempCN = memory->ReadPS() & 0x9; // Get C and N bits
                                   tmp = (dst_temp >> 1) | ((tempCN & 01) << 15);  // Rotate bits to the right
                                   memory->Write(address(dst),tmp);         // Write to memory
                                   resultIsZero(tmp);                      // Update Z bit
@@ -390,7 +391,7 @@ if(instructionBits[4] == 0)
                                 }
                         case 1: { // ROL dst: ROtate Left - include C bit as LSB -> (dst)
                                   dst_temp = memory->Read(address(dst));  // Get value at dst
-                                  unsigned short tempCN = memoryReadPS() & 0x9;    // Get C and N bits
+                                  unsigned short tempCN = memory->ReadPS() & 0x9; // Get C and N bits
                                   tmp = (dst_temp << 1) | (tempCN & 01);  // Rotate bits to the right
                                   memory->Write(address(dst),tmp);         // Write to memory
                                   resultIsZero(tmp);                      // Update Z bit
@@ -401,7 +402,7 @@ if(instructionBits[4] == 0)
                                 }
                         case 2: { // ASR dst: Arithmetic Shift Right
                                   dst_temp = memory->Read(address(dst));  // Get value at dst
-                                  unsigned short tempCN = memoryReadPS() & 0x9;     // Get C and N bits
+                                  unsigned short tempCN = memory->ReadPS() & 0x9;     // Get C and N bits
                                   tmp = dst_temp >> 1;                    // Rotate bits to the right
                                   memory->Write(address(dst),tmp);         // Write to memory
                                   resultIsZero(tmp);                      // Update Z bit
@@ -412,7 +413,7 @@ if(instructionBits[4] == 0)
                                 }
                         case 3:  { // ASL dst: Arithmetic Shift Left 
                                    dst_temp = memory->Read(address(dst));  // Get value at dst
-                                   unsigned short tempCN = memoryReadPS() & 0x9;    // Get C and N bits
+                                   unsigned short tempCN = memory->ReadPS() & 0x9;    // Get C and N bits
                                    tmp = dst_temp << 1;                    // Rotate bits to the right
                                    memory->Write(address(dst),tmp);         // Write to memory
                                    resultIsZero(tmp);                      // Update Z bit
@@ -428,7 +429,7 @@ if(instructionBits[4] == 0)
                         case 0: { // RORB dst: ROtate Rigtht - include C bit as MSB -> (dst)
                                   memory->SetByteMode();                  // Set byte mode
                                   dst_temp = memory->Read(address(dst));  // Get value at dst
-                                  unsigned short tempCN = memoryReadPS() & 0x9;    // Get C and N bits
+                                  unsigned short tempCN = memory->ReadPS() & 0x9;    // Get C and N bits
                                   tmp = (dst_temp >> 1) | ((tempCN & 01) << 7);  // Rotate bits to the right
                                   memory->Write(address(dst),tmp);         // Write to memory
                                   resultIsZero(tmp);                      // Update Z bit
@@ -441,7 +442,7 @@ if(instructionBits[4] == 0)
                         case 1: { // ROLB dst: ROtate Left - include C bit as LSB -> (dst)
                                   memory->SetByteMode();                  // Set byte mode
                                   dst_temp = memory->Read(address(dst));  // Get value at dst
-                                  unsigned short tempCN = memoryReadPS() & 0x9;    // Get C and N bits
+                                  unsigned short tempCN = memory->ReadPS() & 0x9;    // Get C and N bits
                                   tmp = (dst_temp << 1) | (tempCN & 01);  // Rotate bits to the right
                                   memory->Write(address(dst),tmp & 0x00FF);// Write to memory
                                   resultIsZero(tmp);                      // Update Z bit
@@ -454,7 +455,7 @@ if(instructionBits[4] == 0)
                         case 2: { // ASRB dst: Arithmetic Shift Right
                                   memory->SetByteMode();                  // Set byte mode
                                   dst_temp = memory->Read(address(dst));  // Get value at dst
-                                  unsigned short tempCN = memoryReadPS() & 0x9;     // Get C and N bits
+                                  unsigned short tempCN = memory->ReadPS() & 0x9;     // Get C and N bits
                                   tmp = dst_temp >> 1;                    // Rotate bits to the right
                                   memory->Write(address(dst),tmp);         // Write to memory
                                   resultIsZero(tmp);                      // Update Z bit
@@ -467,7 +468,7 @@ if(instructionBits[4] == 0)
                         case 3:  { // ASLB dst: Arithmetic Shift Left 
                                    memory->SetByteMode();                 // Set byte mode
                                    dst_temp = memory->Read(address(dst));  // Get value at dst
-                                   unsigned short tempCN = memoryReadPS() & 0x9;    // Get C and N bits
+                                   unsigned short tempCN = memory->ReadPS() & 0x9;    // Get C and N bits
                                    tmp = dst_temp << 1;                    // Rotate bits to the right
                                    memory->Write(address(dst),tmp & 0x00FF);// Write to memory
                                    resultIsZero(tmp);                      // Update Z bit
@@ -495,8 +496,8 @@ if(instructionBits[4] == 0)
                   offset = memory->Read(address(dst));  // Get address for branch
                   tmp = memory->Read(007);              // Get current address in PC
                   tmp = tmp + (offset << 2);            // Get new address for branch
-                  memory->ReadPS() & Nbit == 0? \
-                                           memory->Write(007,tmp) : ;           // N = 0
+                  (memory->ReadPS() & Nbit) == 0? \
+                    memory->Write(007,tmp) : NOP();  // N = 0
                   return instruction;
                 }
               case 4: case 5: 
@@ -514,8 +515,8 @@ if(instructionBits[4] == 0)
                             offset = memory->Read(address(dst));  // Get address for branch
                             tmp = memory->Read(007);              // Get current address in PC
                             tmp = tmp + (offset << 2);            // Get new address for branch
-                            memory->ReadPS() & Nbit > 0? \
-                              memory->Write(007,tmp) : ;          // N = 1
+                            (memory->ReadPS() & Nbit) > 0? \
+                              memory->Write(007,tmp) : NOP();     // N = 1
                             return instruction;
                           }
                 }
@@ -530,8 +531,8 @@ if(instructionBits[4] == 0)
                                           offset = memory->Read(address(dst));  // Get address for branch
                                           tmp = memory->Read(007);              // Get current address in PC
                                           tmp = tmp + (offset << 2);            // Get new address for branch
-                                          memory->ReadPS() & Zbit == 0? \
-                                                                   memory->Write(007,tmp) : ;          // Z = 0
+                                          (memory->ReadPS() & Zbit) == 0? \
+                                                                   memory->Write(007,tmp) : NOP();          // Z = 0
                                           return instruction;
                                         }
                                 case 1: { // BHI - Branch if Higher (zero)
@@ -539,8 +540,8 @@ if(instructionBits[4] == 0)
                                           tmp = memory->Read(007);              // Get current address in PC
                                           tmp = tmp + (offset << 2);            // Get new address for branch
                                           (memory->ReadPS() & (Zbit | Cbit)) == 0? \
-                                                                              memory->Write(007,tmp) :           // C & Z = 0
-                                                                              return instruction;
+                                            memory->Write(007,tmp) : NOP();          // C & Z = 0
+                                          return instruction;
                                         }
                               }
               case 4: case 5: 
@@ -551,15 +552,15 @@ if(instructionBits[4] == 0)
                                           tmp = memory->Read(007);              // Get current address in PC
                                           tmp = tmp + (offset << 2);            // Get new address for branch
                                           (memory->ReadPS() & (Zbit | Cbit)) > 0? \
-                                            memory->Write(007,tmp) : ;         // C | Z = 1
+                                            memory->Write(007,tmp) : NOP();         // C | Z = 1
                                           return instruction;
                                         }
                                 case 1: { // BEQ - Branch if EQual (zero)
                                           offset = memory->Read(address(dst));  // Get address for branch
                                           tmp = memory->Read(007);              // Get current address in PC
                                           tmp = tmp + (offset << 2);            // Get new address for branch
-                                          memory->ReadPS() & Zbit > 0? \
-                                            memory->Write(007,tmp) : ;          // Z = 0
+                                          (memory->ReadPS() & Zbit) > 0? \
+                                            memory->Write(007,tmp) : NOP();          // Z = 0
                                           return instruction;
                                         }
                               }
@@ -575,16 +576,16 @@ if(instructionBits[4] == 0)
                                           offset = memory->Read(address(dst));  // Get address for branch
                                           tmp = memory->Read(007);              // Get current address in PC
                                           tmp = tmp + (offset << 2);            // Get new address for branch
-                                          ((memory->ReadPS() & Nbit) >> 3) ^ ((memory->ReadPS() & Vbit) >> 1) == 0? \
-                                                                                                               memory->Write(007,tmp) : ;          // N ^ V = 0
+                                          (((memory->ReadPS() & Nbit) >> 3) ^ ((memory->ReadPS() & Vbit) >> 1)) == 0? \
+                                            memory->Write(007,tmp) : NOP();          // N ^ V = 0
                                           return instruction;
                                         }
                                 case 1: { // BVC - Branch if oVerflow Clear
                                           offset = memory->Read(address(dst));  // Get address for branch
                                           tmp = memory->Read(007);              // Get current address in PC
                                           tmp = tmp + (offset << 2);            // Get new address for branch
-                                          memory->ReadPS() & Vbit == 0? \
-                                                                   memory->Write(007,tmp) : ;          // V = 0
+                                          (memory->ReadPS() & Vbit) == 0? \
+                                            memory->Write(007,tmp) : NOP();          // V = 0
                                           return instruction;
                                         }
                               }
@@ -595,16 +596,16 @@ if(instructionBits[4] == 0)
                                           offset = memory->Read(address(dst));  // Get address for branch
                                           tmp = memory->Read(007);              // Get current address in PC
                                           tmp = tmp + (offset << 2);            // Get new address for branch
-                                          ((memory->ReadPS() & Nbit) >> 3) ^ ((memory->ReadPS() & Vbit) >> 1) == 1? \
-                                                                                                               memory->Write(007,tmp) : ;          // N ^ V == 1
+                                          (((memory->ReadPS() & Nbit) >> 3) ^ ((memory->ReadPS() & Vbit) >> 1)) == 1? \
+                                            memory->Write(007,tmp) : NOP();          // N ^ V == 1
                                           return instruction;
                                         }
                                 case 1: { // BVS - Branch if oVerflow Set
                                           offset = memory->Read(address(dst));  // Get address for branch
                                           tmp = memory->Read(007);              // Get current address in PC
                                           tmp = tmp + (offset << 2);            // Get new address for branch
-                                          memory->Read(PS) & Vbit > 0? \
-                                            memory->Write(007,tmp) : ;          // V = 1
+                                          (memory->Read(PS) & Vbit) > 0? \
+                                            memory->Write(007,tmp) : NOP();          // V = 1
                                           return instruction;
                                         }
                               }
@@ -619,41 +620,38 @@ if(instructionBits[4] == 0)
                                           offset = memory->Read(address(dst));  // Get address for branch
                                           tmp = memory->Read(007);              // Get current address in PC
                                           tmp = tmp + (offset << 2);            // Get new address for branch
-                                          ((memory->ReadPS() & Zbit) >> 2) | \
-                                            ((memory->ReadPS() & Nbit) >> 3) ^ ((memory->ReadPS() & Vbit) >> 1) == 0?
-                                            memory->Write(007,tmp) : ;          // Z | (N ^ V) = 0
+                                          (((memory->ReadPS() & Zbit) >> 2) | \
+                                            ((memory->ReadPS() & Nbit) >> 3) ^ ((memory->ReadPS() & Vbit) >> 1)) == 0?
+                                            memory->Write(007,tmp) : NOP();          // Z | (N ^ V) = 0
                                           return instruction;
                                         }
                                 case 1: { // BCC - Branch if C is Clear
                                           offset = memory->Read(address(dst));  // Get address for branch
                                           tmp = memory->Read(007);              // Get current address in PC
                                           tmp = tmp + (offset << 2);            // Get new address for branch
-                                          memory->ReadPS() & Cbit = 0? \
-                                                                    memory->Write(007,tmp) : ;          // C = 0
+                                          (memory->ReadPS() & Cbit) == 0? \
+                                            memory->Write(007,tmp) : NOP();          // C = 0
                                           return instruction;
                                         }
                               }
               case 4: case 5: 
               case 6: case 7: switch(instructionBits[5]) // BLE or BCS
                               {
-                                case 0: { // BLE - Branch if Less 
-                                          case 0: { // BLE loc - Branch if Lower or Equal (zero)
-                                                    offset = memory->Read(address(dst));  // Get address for branch
-                                                    tmp = memory->Read(007);              // Get current address in PC
-                                                    offset = tmp + (offset << 2);         // Get new address for branch
-                                                    tmp = memory->ReadPS();               // Get current process status
-                                                    (((tmp & Zbit) >> 2) & (((tmp & Nbit) >> 3) ^ ((tmp & Vbit) >> 1))) == 1? \
-                                                                                                                         memory->Write(007,offset) : ;        // Z(N^V) = 1
-                                                    return instruction;
-                                                  }
-                                                  return instruction;
+                                case 0: { // BLE loc - Branch if Lower or Equal (zero)
+                                          offset = memory->Read(address(dst));  // Get address for branch
+                                          tmp = memory->Read(007);              // Get current address in PC
+                                          offset = tmp + (offset << 2);         // Get new address for branch
+                                          tmp = memory->ReadPS();               // Get current process status
+                                          (((tmp & Zbit) >> 2) & (((tmp & Nbit) >> 3) ^ ((tmp & Vbit) >> 1))) == 1? \
+                                            memory->Write(007,offset) : NOP();        // Z(N^V) = 1
+                                          return instruction;
                                         }
                                 case 1: { // BCS - Branch if C Set
-                                          offset = memory->Read(addres(dst));             // Get address for branch
+                                          offset = memory->Read(address(dst));             // Get address for branch
                                           tmp = memory->Read(007);                        // Get current address in PC
                                           offset = tmp + (offset << 2);                   // Calc new address for branch
-                                          memory->ReadPS() & Cbit > 0? \
-                                            memory->Write(007,offset) : ;                 // C = 1
+                                          (memory->ReadPS() & Cbit) > 0? \
+                                            memory->Write(007,offset) : NOP();                 // C = 1
                                           return instruction;
                                         }
                                 default: break;
@@ -693,8 +691,8 @@ if(instructionBits[4] == 0)
                 case 3: { // BIT src, dst:  src & dst
                           tmp = memory->Read(address(src)) & memory->Read(address(dst)); // Get test value
                           resultIsZero(tmp);            // Update Z bit
-                          tmp & WORD = 0? \
-                                       update_flags(1,Nbit) : update_flags(0,Nbit);  // Update N bit if positive (weird)
+                          (tmp & WORD) == 0? \
+                            update_flags(1,Nbit) : update_flags(0,Nbit);  // Update N bit if positive (weird)
                           update_flags(0,Vbit);         // Update V bit
                           return instruction;
                         }
@@ -702,29 +700,29 @@ if(instructionBits[4] == 0)
                           tmp = ~(memory->Read(address(src))) & memory->Read(address(dst)); // Get ~src & dst value
                           memory->Write(address(dst),tmp);                                  // Write value to dst
                           resultIsZero(tmp);                                                // Update Z bit
-                          resultMSBISOne(tmp);                                              // Update N bit
+                          resultMSBIsOne(tmp);                                              // Update N bit
                           update_flags(0,Vbit);                                             // Update V bit
                           return instruction;
                         }
                 case 5: { // BIS src, dst: Bit Set
-                          tmp = (memory->Read(address(src)) & memory->Read(address(dst));   // Get src & dst value
-                              memory->Write(address(dst),tmp);                                  // Write value to dst
-                              resultIsZero(tmp);                                                // Update Z bit
-                              resultLTZero(tmp);                                                // Update N bit
-                              update_flags(0,Vbit);                                             // Update V bit
-                              return instruction;
-                              }
-                              case 6: { // ADD src, dst:  (src) + (dst) -> (dst)
-                              src_temp = memory->Read(address(src));  // Get source value
-                              dst_temp = memory->Read(address(dst));  // Get destination value
-                              tmp = src_temp + dst_temp               // Add src and dst
-                              memory->Write(addres(dst),tmp);         // Write result to memory
-                              resultIsZero(tmp);                      // Update Z bit
-                              resultLTZero(tmp);                      // Update N bit
-                              (src_temp & WORD) | (dst_temp & WORD)) \
-                            & (tmp > 0)? update_flags(1,Cbit) : update_flags(0,Cbit);  // Update C bit
-                          (src_temp & WORD) !^ (dst_temp & WORD))) \
-                            & ~(tmp & WORD) > 0? update_flags(1,Vbit) : update_flags(0,Vbit) // Update V bit (src !^ dst) & ~result
+                          tmp = (memory->Read(address(src)) & memory->Read(address(dst)));   // Get src & dst value
+                          memory->Write(address(dst),tmp);                               // Write value to dst
+                          resultIsZero(tmp);                                             // Update Z bit
+                          resultLTZero(tmp);                                             // Update N bit
+                          update_flags(0,Vbit);                                          // Update V bit
+                          return instruction;
+                        }
+                case 6: { // ADD src, dst:  (src) + (dst) -> (dst)
+                          src_temp = memory->Read(address(src));  // Get source value
+                          dst_temp = memory->Read(address(dst));  // Get destination value
+                          tmp = src_temp + dst_temp;              // Add src and dst
+                            memory->Write(address(dst),tmp);      // Write result to memory
+                          resultIsZero(tmp);                      // Update Z bit
+                          resultLTZero(tmp);                      // Update N bit
+                          ((src_temp & WORD) | (dst_temp & WORD)) && (tmp > 0)? \
+                            update_flags(1,Cbit) : update_flags(0,Cbit);  // Update C bit
+                          (~((src_temp & WORD) ^ (dst_temp & WORD)) \
+                            & ~(tmp & WORD)) > 0? update_flags(1,Vbit) : update_flags(0,Vbit); // Update V bit (src !^ dst) & ~result
                             return instruction;
                                       }
                               default: break;
@@ -734,7 +732,7 @@ if(instructionBits[4] == 0)
                 case 1: { // MOVB src, dst: (src) -> (dst)
                           memory->SetByteMode();                  // Set byte mode
                           src_temp = memory->Read(address(src));  // Get value at address of src
-                          memory->Write(address(dst),src_tmp);    // Write value to memory
+                          memory->Write(address(dst),src_temp);   // Write value to memory
                           resultIsZero(src_temp);                 // Update Z bit
                           resultLTZero(src_temp << 8);            // Update N bit
                           update_flags(0,Vbit);                   // Update V bit
@@ -749,57 +747,56 @@ if(instructionBits[4] == 0)
                           resultIsZero(tmp);                              // Update Z bit
                           resultLTZero(tmp);                              // Update N bit
                           (src_temp >= 0) & (dst_temp >= 0) & (tmp < 0)? \
-                                       update_flags(0,Cbit) : update_flags(1,Cbit);  // Update C bit
-                          ((src_temp & BYTE) ^ (dst_temp & BYTE)) & \
-                            ~((dst_temp & BYTE) ^ (tmp & BYTE))) == 0? \
+                          update_flags(0,Cbit) : update_flags(1,Cbit);  // Update C bit
+                          (((src_temp & BYTE) ^ (dst_temp & BYTE)) & ~((dst_temp & BYTE) ^ (tmp & BYTE))) == 0? \
                             update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
                           memory->ClearByteMode();                        // Clear byte mode
                           return instruction;
                         }
                 case 3: { // BITB src, dst:  src & dst
-                          memory->SetByteMode;          // Set byte mode
+                          memory->SetByteMode();        // Set byte mode
                           tmp = memory->Read(address(src)) & memory->Read(address(dst)); // Get test value
                           resultIsZero(tmp);            // Update Z bit
-                          tmp & BYTE = 0? \
-                                       update_flags(1,Nbit) : update_flags(0,Nbit);  // Update N bit if positive (weird)
+                          (tmp & BYTE) == 0? \
+                            update_flags(1,Nbit) : update_flags(0,Nbit);  // Update N bit if positive (weird)
                           update_flags(0,Vbit);         // Update V bit
-                          memory->ClearByteMode;        // Clear byte mode
+                          memory->ClearByteMode();      // Clear byte mode
                           return instruction;
                         }
                 case 4: { // BICB src, dst:  Bit Clear
-                          memory->SetByteMode;          // Set byte mode
+                          memory->SetByteMode();          // Set byte mode
                           tmp = ~(memory->Read(address(src))) & memory->Read(address(dst)); // Get ~src & dst value
                           memory->Write(address(dst),tmp);                                  // Write value to dst
                           resultIsZero(tmp);                                                // Update Z bit
-                          resultMSBISOne(tmp << 8);                                         // Update N bit
+                          resultMSBIsOne(tmp << 8);                                         // Update N bit
                           update_flags(0,Vbit);                                             // Update V bit
-                          memory->ClearByteMode;        // Clear byte mode
+                          memory->ClearByteMode();        // Clear byte mode
                           return instruction;
                         }
                 case 5: { // BIS src, dst: Bit Set
-                          memory->SetByteMode;          // Set byte mode
-                          tmp = (memory->Read(address(src)) & memory->Read(address(dst));   // Get src & dst value
-                              memory->Write(address(dst),tmp);                                  // Write value to dst
-                              resultIsZero(tmp);                                                // Update Z bit
-                              resultLTZero(tmp);                                                // Update N bit
-                              update_flags(0,Vbit);                                             // Update V bit
-                              memory->ClearByteMode;        // Clear byte mode
-                              return instruction;
-                              }
-                              case 6: { // SUB src, dst: (dst) + ~(src) -> (dst)
-                              dst_temp = memory->Read(address(dst));  // Get value of dst
-                              src_temp = memory->Read(address(src));  // Get value of src
-                              tmp = dst_temp + ~(src_temp) + 1;       // Subtract
-                              memory->Write(address(dst), tmp);       // Write to memory
-                              resultIsZero(tmp);                      // Update Z bit
-                              resultLTZero(tmp);                      // Update N bit
-                              (dst_temp & WORD) !^ (src_temp & WORD) \
-                              & (tmp & WORD) == 0? update_flags(0,Cbit) : update_flags(1,Cbit);   // Update C bit
-                              ((dst_temp & WORD) ^ (src_temp) & WORD)) & ((tmp & WORD) & (src_temp & WORD)) > 1? \
+                          memory->SetByteMode();          // Set byte mode
+                          tmp = (memory->Read(address(src)) & memory->Read(address(dst)));  // Get src & dst value
+                          memory->Write(address(dst),tmp);                                  // Write value to dst
+                          resultIsZero(tmp);                                                // Update Z bit
+                          resultLTZero(tmp);                                                // Update N bit
+                          update_flags(0,Vbit);                                             // Update V bit
+                          memory->ClearByteMode();        // Clear byte mode
+                          return instruction;
+                        }
+                case 6: { // SUB src, dst: (dst) + ~(src) -> (dst)
+                          dst_temp = memory->Read(address(dst));  // Get value of dst
+                          src_temp = memory->Read(address(src));  // Get value of src
+                          tmp = dst_temp + ~(src_temp) + 1;       // Subtract
+                          memory->Write(address(dst), tmp);       // Write to memory
+                          resultIsZero(tmp);                      // Update Z bit
+                          resultLTZero(tmp);                      // Update N bit
+                          (~((dst_temp & WORD) ^ (src_temp & WORD))& (tmp & WORD)) == 0? \
+                            update_flags(0,Cbit) : update_flags(1,Cbit);   // Update C bit
+                          (((dst_temp & WORD) ^ (src_temp & WORD)) & ((tmp & WORD) & (src_temp & WORD))) > 1? \
                             update_flags(1,Vbit) : update_flags(0,Vbit);                          // Update V bit
                           return instruction;
-                                      }
-                              default: break;
+                        }
+                default: break;
               }
       default: break;
     }
