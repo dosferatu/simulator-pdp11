@@ -409,6 +409,26 @@ void Memory::StackPush(int _register)/*{{{*/
 }
 /*}}}*/
 
+void Memory::RegDump()
+{
+    std::cout << "Dumping current register contents..." << std::endl;
+    std::cout << "R0: " << std::oct << static_cast<int>(this->RAM[R0]) << std::endl;
+    std::cout << "R1: " << std::oct << static_cast<int>(this->RAM[R1]) << std::endl;
+    std::cout << "R2: " << std::oct << static_cast<int>(this->RAM[R2]) << std::endl;
+    std::cout << "R3: " << std::oct << static_cast<int>(this->RAM[R3]) << std::endl;
+    std::cout << "R4: " << std::oct << static_cast<int>(this->RAM[R4]) << std::endl;
+    std::cout << "R5: " << std::oct << static_cast<int>(this->RAM[R5]) << std::endl;
+    std::cout << "SP: " << std::oct << static_cast<int>(this->RAM[SP]) << std::endl;
+    std::cout << "PC: " << std::oct << static_cast<int>(this->RAM[PC]) << std::endl;
+    std::cout << std::endl;
+    std::cout << "Processor status word: " << std::endl;
+    std::cout << "N: " << std::oct << (static_cast<int>(this->RAM[PS]) & 0x8) << std::endl;
+    std::cout << "Z: " << std::oct << (static_cast<int>(this->RAM[PS]) & 0x4) << std::endl;
+    std::cout << "V: " << std::oct << (static_cast<int>(this->RAM[PS]) & 0x2) << std::endl;
+    std::cout << "C: " << std::oct << (static_cast<int>(this->RAM[PS]) & 0x1) << std::endl;
+  return;
+}
+
 void Memory::TraceDump(Transaction type, unsigned short address)/*{{{*/
 {
   std::string buffer;

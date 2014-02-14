@@ -45,6 +45,7 @@ class Memory
     void SetDebugMode(Verbosity verbosity) { debugLevel = verbosity; };
     unsigned short StackPop();
     void StackPush(int _register);
+    void RegDump();
     void TraceDump(Transaction type, unsigned short address);
     void SetByteMode() { byteMode = 01; };
     void ClearByteMode() { byteMode = 02; };
