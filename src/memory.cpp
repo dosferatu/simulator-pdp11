@@ -96,9 +96,9 @@ unsigned short Memory::RetrievePC()/*{{{*/
 
 unsigned short Memory::EA(unsigned short encodedAddress)/*{{{*/
 {
-  int mode = (encodedAddress & 070) >> 3;
-  int reg = encodedAddress & 07;
-  short decodedAddress = 0;
+  unsigned short mode = (encodedAddress & 070) >> 3;
+  unsigned short reg = encodedAddress & 07;
+  unsigned short decodedAddress = 0;
   std::string modeType = "Not Set!";
 
   switch(mode)
