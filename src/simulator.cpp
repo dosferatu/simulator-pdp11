@@ -160,12 +160,12 @@ int main(int argc, char *argv[])
   // Loop the CPU which will handle state changes internally.
   // Need to make sure program halting is handled in CPU.
   int status = 0;
-  //char cont;
+  char cont;
   do
   {
     status = cpu->FDE();
 
-    if (status == -1)
+    if (status == 0)
     { 
       std::cout << "PDP 11/20 received HALT instruction\n" << std::endl;
 
@@ -173,11 +173,11 @@ int main(int argc, char *argv[])
        *  presses continue on the console.  In this case we are using the
        *  enter key to denote the continue key on the console.
        */
-      //std::cout << "Press Enter to continue\n" << std::endl;
-      //std::cin >> cont;
-      //status = 0;  // Reset status to allow process to continue.
+      std::cout << "Press Enter to continue\n" << std::endl;
+      std::cin >> cont;
+      status = 0;  // Reset status to allow process to continue.
     }
-  } while (status >= 0);
+  } while (status > 0);
 
 
   // Garbage collection/*{{{*/

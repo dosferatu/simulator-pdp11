@@ -48,8 +48,8 @@ class Memory
     void TraceDump(Transaction type, unsigned short address);
     void SetByteMode() { byteMode = 01; };
     void ClearByteMode() { byteMode = 02; };
-    unsigned short ReadPS();
-    void WritePS(unsigned short);
+    unsigned short ReadPS() { return RAM[PS]; };
+    void WritePS(unsigned short status) { RAM[PS] = status; };
 
   private:
     int byteMode;

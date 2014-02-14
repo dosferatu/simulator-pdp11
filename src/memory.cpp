@@ -296,11 +296,9 @@ unsigned short Memory::Read(unsigned short encodedAddress)/*{{{*/
 
 unsigned short Memory::ReadInstruction()/*{{{*/
 {
-  unsigned short pc = this->RetrievePC();
-
   // Trace file output
-  this->TraceDump(Transaction::instruction, pc);
-  return pc;
+  this->TraceDump(Transaction::instruction, RetrievePC());
+  return this->RAM[this->RetrievePC()];
 }
 /*}}}*/
 
