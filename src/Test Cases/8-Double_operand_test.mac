@@ -1,5 +1,5 @@
 ;Double operand test
-
+START:
 MOV #4083, R0
 MOV R0, R1	;R1 = 4083
 CMP R0, R1	;Z flag should be set
@@ -19,3 +19,4 @@ MOV #4, R4	;Z should not be set
 MOV #0, R4	;Z should be set
 ADD #905, R2	;Z should be set, N not set
 ADD #0, R4	;Z should be set
+.END START

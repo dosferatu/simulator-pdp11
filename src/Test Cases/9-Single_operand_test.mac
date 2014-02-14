@@ -1,4 +1,5 @@
 ;Single operand test
+START:
 MOV #20, R0
 CLR R0	;R0 = 0, Z gets set, all other flags cleared
 MOV #-2, R0	;R0 = -2
@@ -52,3 +53,4 @@ MOV #-6, R0
 ASL R0	;R0 = -12, N is set, C is set, V cleared
 MOV #-32768, R0
 ASL R0	;R0 = 0, Z is set, N is cleared, C set, V set
+.END START
