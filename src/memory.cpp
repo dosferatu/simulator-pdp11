@@ -156,8 +156,17 @@ unsigned short Memory::EA(unsigned short encodedAddress)/*{{{*/
           decodedAddress = (this->RAM[regArray[reg] + 1] << 8) + (this->RAM[regArray[reg]] & 0xFF);
           this->TraceDump(Transaction::read, decodedAddress);
 
-          // Possibly case for byteMode?
-          unsigned short incrementedAddress = decodedAddress + byteMode;
+          unsigned short  incrementedAddress;
+          if (regArray[reg] == SP)
+          {
+            incrementedAddress = decodedAddress + 02;
+          }
+
+          else
+          {
+            incrementedAddress = decodedAddress + byteMode;
+          }
+
           this->RAM[regArray[reg]] = incrementedAddress & 0xFF;
           this->RAM[regArray[reg] + 1] = incrementedAddress >> 8;
         }
@@ -190,6 +199,15 @@ unsigned short Memory::EA(unsigned short encodedAddress)/*{{{*/
 
           // Possibly case for byteMode?
           unsigned short incrementedAddress = address + byteMode;
+          if (regArray[reg] == SP)
+          {
+            incrementedAddress = address + 02;
+          }
+
+          else
+          {
+            incrementedAddress = address + byteMode;
+          }
           this->RAM[regArray[reg]] = incrementedAddress & 0xFF;
           this->RAM[regArray[reg] + 1] = incrementedAddress >> 8;
         }
@@ -205,9 +223,18 @@ unsigned short Memory::EA(unsigned short encodedAddress)/*{{{*/
          * decrement address
          * then return value
          */
-          // Possibly case for byteMode?
+
+        // Possibly case for byteMode?
         unsigned short address = (this->RAM[regArray[reg] + 1] << 8) + (this->RAM[regArray[reg]] & 0xFF);
-        decodedAddress = address - byteMode;
+        if (regArray[reg] == SP)
+        {
+          decodedAddress = address - 02;
+        }
+
+        else
+        {
+          decodedAddress = address - byteMode;
+        }
         this->RAM[regArray[reg]] = decodedAddress & 0xFF;
         this->RAM[regArray[reg] + 1] = decodedAddress >> 8;
         break;
@@ -219,7 +246,16 @@ unsigned short Memory::EA(unsigned short encodedAddress)/*{{{*/
 
         // Decrement Rn, and return the address in Rn
         unsigned short address = (this->RAM[regArray[reg] + 1] << 8) + (this->RAM[regArray[reg]] & 0xFF);
-        unsigned short decrementedAddress = address - byteMode;
+        unsigned short decrementedAddress;
+        if (regArray[reg] == SP)
+        {
+          decrementedAddress = address - 02;
+        }
+
+        else
+        {
+          decrementedAddress = address - byteMode;
+        }
         decodedAddress = (this->RAM[decrementedAddress + 1] << 8) + (this->RAM[decrementedAddress] & 0xFF);
         this->RAM[regArray[reg]] = decrementedAddress & 0xFF;
         this->RAM[regArray[reg] + 1] = decrementedAddress >> 8;
