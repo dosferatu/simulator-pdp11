@@ -183,7 +183,7 @@ int CPU::FDE()/*{{{*/
                                     resultIsZero(tmp);                // Update Z bit
                                     resultLTZero(tmp);                // Update N bit
                                     tmp == 0? \
-                                         update_flags(0,Cbit) : update_flags(1,Cbit);  // Update C bit
+                                      update_flags(0,Cbit) : update_flags(1,Cbit);  // Update C bit
                                     (tmp & WORD) > 0? \
                                       update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
                                     return instruction;
@@ -227,7 +227,7 @@ int CPU::FDE()/*{{{*/
                                     resultIsZero(tmp);                     // Update Z bit
                                     resultLTZero(tmp);                     // Update N bit
                                     (dst_temp == 0177777) && (tmpC == 1)? \
-                                               update_flags(1,Cbit) : update_flags(0,Cbit);                // Update C bit
+                                      update_flags(1,Cbit) : update_flags(0,Cbit);  // Update C bit
                                     tmp == 0077777? update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
                                     return instruction;
                                   }
@@ -239,8 +239,7 @@ int CPU::FDE()/*{{{*/
                                     memory->Write(address(dst),tmp);  // Write to memory
                                     resultIsZero(tmp);                // Update Z bit
                                     resultLTZero(tmp);                // Update N bit
-                                    (tmp == 0) && (tmpC == 1)? \
-                                          update_flags(0,Cbit) : update_flags(1,Cbit);  // Update C bit
+                                    (tmp == 0) && (tmpC == 1)? update_flags(0,Cbit) : update_flags(1,Cbit);  // Update C bit
                                     (tmp & WORD) > 0? update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
                                     return instruction;
                                   }
@@ -272,10 +271,8 @@ int CPU::FDE()/*{{{*/
                                     memory->Write(address(dst), tmp); // Write compiment to memory
                                     resultIsZero(tmp);                // Update Z bit
                                     resultLTZero(tmp << 8);           // Update N bit
-                                    tmp == 0? \
-                                         update_flags(0,Cbit) : update_flags(1,Cbit);  // Update C bit
-                                    tmp == BYTE? \
-                                         update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
+                                    tmp == 0? update_flags(0,Cbit) : update_flags(1,Cbit);  // Update C bit
+                                    tmp == BYTE? update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
                                     memory->ClearByteMode();                        // Clear byte mode
                                     return instruction;
                                   }
@@ -325,7 +322,7 @@ int CPU::FDE()/*{{{*/
                                     resultIsZero(tmp);                     // Update Z bit
                                     resultLTZero(tmp << 8);                // Update N bit
                                     (dst_temp == 0x00FF) && (tmpC == 1)? \
-                                               update_flags(1,Cbit) : update_flags(0,Cbit);                // Update C bit
+                                      update_flags(1,Cbit) : update_flags(0,Cbit);                // Update C bit
                                     tmp == 0x007F? update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
                                     memory->ClearByteMode();              // Clear byte mode
                                     return instruction;
@@ -482,7 +479,7 @@ int CPU::FDE()/*{{{*/
                     tmp = memory->Read(007);              // Get current address in PC
                     tmp = tmp + (offset << 2);            // Get new address for branch
                     (memory->ReadPS() & Nbit) == 0? \
-                                               memory->Write(007,tmp) : NOP();  // N = 0
+                       memory->Write(007,tmp) : NOP();  // N = 0
                     return instruction;
                   }
                 case 4: case 5: 
@@ -517,7 +514,7 @@ int CPU::FDE()/*{{{*/
                                             tmp = memory->Read(007);              // Get current address in PC
                                             tmp = tmp + (offset << 2);            // Get new address for branch
                                             (memory->ReadPS() & Zbit) == 0? \
-                                                                       memory->Write(007,tmp) : NOP();          // Z = 0
+                                              memory->Write(007,tmp) : NOP();          // Z = 0
                                             return instruction;
                                           }
                                   case 1: { // BHI - Branch if Higher (zero)
@@ -525,7 +522,7 @@ int CPU::FDE()/*{{{*/
                                             tmp = memory->Read(007);              // Get current address in PC
                                             tmp = tmp + (offset << 2);            // Get new address for branch
                                             (memory->ReadPS() & (Zbit | Cbit)) == 0? \
-                                                                                memory->Write(007,tmp) : NOP();          // C & Z = 0
+                                              memory->Write(007,tmp) : NOP();          // C & Z = 0
                                             return instruction;
                                           }
                                 }
@@ -562,7 +559,7 @@ int CPU::FDE()/*{{{*/
                                             tmp = memory->Read(007);              // Get current address in PC
                                             tmp = tmp + (offset << 2);            // Get new address for branch
                                             (((memory->ReadPS() & Nbit) >> 3) ^ ((memory->ReadPS() & Vbit) >> 1)) == 0? \
-                                                                                                                   memory->Write(007,tmp) : NOP();          // N ^ V = 0
+                                              memory->Write(007,tmp) : NOP();          // N ^ V = 0
                                             return instruction;
                                           }
                                   case 1: { // BVC - Branch if oVerflow Clear
@@ -570,7 +567,7 @@ int CPU::FDE()/*{{{*/
                                             tmp = memory->Read(007);              // Get current address in PC
                                             tmp = tmp + (offset << 2);            // Get new address for branch
                                             (memory->ReadPS() & Vbit) == 0? \
-                                                                       memory->Write(007,tmp) : NOP();          // V = 0
+                                               memory->Write(007,tmp) : NOP();          // V = 0
                                             return instruction;
                                           }
                                 }
@@ -582,7 +579,7 @@ int CPU::FDE()/*{{{*/
                                             tmp = memory->Read(007);              // Get current address in PC
                                             tmp = tmp + (offset << 2);            // Get new address for branch
                                             (((memory->ReadPS() & Nbit) >> 3) ^ ((memory->ReadPS() & Vbit) >> 1)) == 1? \
-                                                                                                                   memory->Write(007,tmp) : NOP();          // N ^ V == 1
+                                              memory->Write(007,tmp) : NOP();          // N ^ V == 1
                                             return instruction;
                                           }
                                   case 1: { // BVS - Branch if oVerflow Set
@@ -606,7 +603,7 @@ int CPU::FDE()/*{{{*/
                                             tmp = memory->Read(007);              // Get current address in PC
                                             tmp = tmp + (offset << 2);            // Get new address for branch
                                             (((memory->ReadPS() & Zbit) >> 2) | \
-                                             (((memory->ReadPS() & Nbit) >> 3) ^ ((memory->ReadPS() & Vbit) >> 1))) == 0? \
+                                              (((memory->ReadPS() & Nbit) >> 3) ^ ((memory->ReadPS() & Vbit) >> 1))) == 0? \
                                               memory->Write(007,tmp) : NOP();          // Z | (N ^ V) = 0
                                             return instruction;
                                           }
@@ -615,7 +612,7 @@ int CPU::FDE()/*{{{*/
                                             tmp = memory->Read(007);              // Get current address in PC
                                             tmp = tmp + (offset << 2);            // Get new address for branch
                                             (memory->ReadPS() & Cbit) == 0? \
-                                                                       memory->Write(007,tmp) : NOP();          // C = 0
+                                              memory->Write(007,tmp) : NOP();          // C = 0
                                             return instruction;
                                           }
                                 }
@@ -628,7 +625,7 @@ int CPU::FDE()/*{{{*/
                                             offset = tmp + (offset << 2);         // Get new address for branch
                                             tmp = memory->ReadPS();               // Get current process status
                                             (((tmp & Zbit) >> 2) & (((tmp & Nbit) >> 3) ^ ((tmp & Vbit) >> 1))) == 1? \
-                                                                                                                 memory->Write(007,offset) : NOP();        // Z(N^V) = 1
+                                              memory->Write(007,offset) : NOP();        // Z(N^V) = 1
                                             return instruction;
                                           }
                                   case 1: { // BCS - Branch if C Set
@@ -645,8 +642,9 @@ int CPU::FDE()/*{{{*/
               }
       default: break;
     }
-  }
+  } /*}}}*/
 
+  // instructionBits[4] > 0 /*{{{*/
   if(instructionBits[4] > 0)
   {
     switch(instructionBits[5])
@@ -667,10 +665,9 @@ int CPU::FDE()/*{{{*/
                           tmp = src_temp + ~(dst_temp) + 1;               // Compare values
                           resultIsZero(tmp);                              // Update Z bit
                           resultLTZero(tmp);                              // Update N bit
-                          (src_temp >= 0) & (dst_temp >= 0) & (tmp < 0)? \
-                                       update_flags(0,Cbit) : update_flags(1,Cbit);  // Update C bit
-                          (((src_temp & WORD) ^ (dst_temp & WORD)) & \
-                           ~((dst_temp & WORD) ^ (tmp & WORD))) == 0? \
+                          (((src_temp & WORD) & (dst_temp & WORD)) && ((dst_temp & WORD)^(tmp & WORD)))? \
+                            update_flags(0,Cbit) : update_flags(1,Cbit);  // Update C bit
+                          (((src_temp & WORD) ^ (dst_temp & WORD)) && (~((dst_temp & WORD) ^ (tmp & WORD)) & WORD))? \
                             update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
                           return instruction;
                         }
@@ -678,7 +675,7 @@ int CPU::FDE()/*{{{*/
                           tmp = memory->Read(address(src)) & memory->Read(address(dst)); // Get test value
                           resultIsZero(tmp);            // Update Z bit
                           (tmp & WORD) == 0? \
-                                        update_flags(1,Nbit) : update_flags(0,Nbit);  // Update N bit if positive (weird)
+                            update_flags(1,Nbit) : update_flags(0,Nbit);  // Update N bit if positive (weird)
                           update_flags(0,Vbit);         // Update V bit
                           return instruction;
                         }
@@ -707,8 +704,8 @@ int CPU::FDE()/*{{{*/
                           resultLTZero(tmp);                      // Update N bit
                           ((src_temp & WORD) | (dst_temp & WORD)) && (tmp > 0)? \
                             update_flags(1,Cbit) : update_flags(0,Cbit);  // Update C bit
-                          (~((src_temp & WORD) ^ (dst_temp & WORD)) \
-                           & ~(tmp & WORD)) > 0? update_flags(1,Vbit) : update_flags(0,Vbit); // Update V bit (src !^ dst) & ~result
+                          ((~((src_temp & WORD) ^ (dst_temp & WORD)) & WORD) & (~(tmp & WORD) & WORD))? \
+                            update_flags(1,Vbit) : update_flags(0,Vbit); // Update V bit (src !^ dst) & ~result
                           return instruction;
                         }
                 default: break;
@@ -732,10 +729,10 @@ int CPU::FDE()/*{{{*/
                           tmp = src_temp + ~(dst_temp) + 1;               // Compare values
                           resultIsZero(tmp);                              // Update Z bit
                           resultLTZero(tmp);                              // Update N bit
-                          (src_temp >= 0) & (dst_temp >= 0) & (tmp < 0)? \
-                                       update_flags(0,Cbit) : update_flags(1,Cbit);  // Update C bit
-                          (((src_temp & BYTE) ^ (dst_temp & BYTE)) & ~((dst_temp & BYTE) ^ (tmp & BYTE))) == 0? \
-                                                                                                           update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
+                           (((src_temp & BYTE) & (dst_temp & BYTE)) && ((dst_temp & BYTE)^(tmp & BYTE)))? \
+                            update_flags(0,Cbit) : update_flags(1,Cbit);  // Update C bit
+                          (((src_temp & BYTE) ^ (dst_temp & BYTE)) && (~((dst_temp & WORD) ^ (tmp & BYTE)) & BYTE))? \
+                            update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
                           memory->ClearByteMode();                        // Clear byte mode
                           return instruction;
                         }
@@ -744,7 +741,7 @@ int CPU::FDE()/*{{{*/
                           tmp = memory->Read(address(src)) & memory->Read(address(dst)); // Get test value
                           resultIsZero(tmp);            // Update Z bit
                           (tmp & BYTE) == 0? \
-                                        update_flags(1,Nbit) : update_flags(0,Nbit);  // Update N bit if positive (weird)
+                            update_flags(1,Nbit) : update_flags(0,Nbit);  // Update N bit if positive (weird)
                           update_flags(0,Vbit);         // Update V bit
                           memory->ClearByteMode();      // Clear byte mode
                           return instruction;
@@ -776,9 +773,9 @@ int CPU::FDE()/*{{{*/
                           memory->Write(address(dst), tmp);       // Write to memory
                           resultIsZero(tmp);                      // Update Z bit
                           resultLTZero(tmp);                      // Update N bit
-                          (~((dst_temp & WORD) ^ (src_temp & WORD))& (tmp & WORD)) == 0? \
-                                                                                    update_flags(0,Cbit) : update_flags(1,Cbit);   // Update C bit
-                          (((dst_temp & WORD) ^ (src_temp & WORD)) & ((tmp & WORD) & (src_temp & WORD))) > 1? \
+                          ((~((dst_temp & WORD) ^ (src_temp & WORD)) & WORD) & (~(tmp & WORD) & WORD))? \
+                            update_flags(0,Cbit) : update_flags(1,Cbit);   // Update C bit
+                          (((dst_temp & WORD) ^ (src_temp & WORD)) & (~((tmp & WORD) ^ (src_temp & WORD)) & WORD))? \
                             update_flags(1,Vbit) : update_flags(0,Vbit);                          // Update V bit
                           return instruction;
                         }
@@ -786,9 +783,9 @@ int CPU::FDE()/*{{{*/
               }
       default: break;
     }
-  }
+  }/*}}}*/
 
-  // For debug purposes
+  // For debug purposes /*{{{*/
   if (instruction == 0)
   {
     return -1;
