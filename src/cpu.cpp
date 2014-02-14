@@ -34,7 +34,7 @@ CPU::~CPU()/*{{{*/
  */ 
 int CPU::FDE()/*{{{*/
 {
-  unsigned short instruction;          // Instruction word buffer
+  unsigned short instruction = 0;          // Instruction word buffer
   unsigned short instructionBits[6];   // Dissected instruction word
 
   // Lambda declarations and definitions/*{{{*/
