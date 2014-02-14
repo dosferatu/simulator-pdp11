@@ -621,7 +621,7 @@ if(instructionBits[4] == 0)
                                           tmp = memory->Read(007);              // Get current address in PC
                                           tmp = tmp + (offset << 2);            // Get new address for branch
                                           (((memory->ReadPS() & Zbit) >> 2) | \
-                                            ((memory->ReadPS() & Nbit) >> 3) ^ ((memory->ReadPS() & Vbit) >> 1)) == 0?
+                                            (((memory->ReadPS() & Nbit) >> 3) ^ ((memory->ReadPS() & Vbit) >> 1))) == 0? \
                                             memory->Write(007,tmp) : NOP();          // Z | (N ^ V) = 0
                                           return instruction;
                                         }
