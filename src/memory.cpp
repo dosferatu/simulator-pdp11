@@ -261,8 +261,8 @@ unsigned short Memory::EA(unsigned short encodedAddress)/*{{{*/
 
   if (this->debugLevel == Verbosity::verbose)
   {
-    std::cout << "Mode Type: " << modeType << "(" << static_cast<int>(mode) << ")" << std::endl;
-    std::cout << "Register: " << static_cast<int>(reg) << std::endl;
+    //std::cout << "Mode Type: " << modeType << "(" << static_cast<int>(mode) << ")" << std::endl;
+    //std::cout << "Register: " << static_cast<int>(reg) << std::endl;
   }
 
   return decodedAddress;

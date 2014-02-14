@@ -160,7 +160,6 @@ int main(int argc, char *argv[])
   // Loop the CPU which will handle state changes internally.
   // Need to make sure program halting is handled in CPU.
   int status = 0;
-  char cont;
   do
   {
     status = cpu->FDE();
@@ -174,7 +173,7 @@ int main(int argc, char *argv[])
        *  enter key to denote the continue key on the console.
        */
       std::cout << "Press Enter to continue\n" << std::endl;
-      std::cin >> cont;
+      std::cin.get();
       status = 0;  // Reset status to allow process to continue.
     }
   } while (status > 0);
