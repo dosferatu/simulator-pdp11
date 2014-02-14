@@ -291,7 +291,7 @@ unsigned short Memory::Read(unsigned short encodedAddress)/*{{{*/
    * Read either a byte or a word from memory depending on the value
    * of the internal byteMode flag.
    */
-  if (this->byteMode)
+  if (this->byteMode == 01)
   {
     return this->RAM[address];
   }
