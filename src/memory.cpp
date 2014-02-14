@@ -431,10 +431,10 @@ void Memory::RegDump()
     std::cout << "PC: " << std::oct << static_cast<unsigned short>(this->RAM[PC]) << std::endl;
     std::cout << std::endl;
     std::cout << "Processor status word: " << std::endl;
-    std::cout << "N: " << std::oct << (static_cast<unsigned short>(this->RAM[PS]) & 0x8) << std::endl;
-    std::cout << "Z: " << std::oct << (static_cast<unsigned short>(this->RAM[PS]) & 0x4) << std::endl;
-    std::cout << "V: " << std::oct << (static_cast<unsigned short>(this->RAM[PS]) & 0x2) << std::endl;
-    std::cout << "C: " << std::oct << (static_cast<unsigned short>(this->RAM[PS]) & 0x1) << std::endl;
+    std::cout << "N: " << std::oct << ((static_cast<unsigned short>(this->RAM[PS]) & 0x8) >> 3) << std::endl;
+    std::cout << "Z: " << std::oct << ((static_cast<unsigned short>(this->RAM[PS]) & 0x4) >> 2) << std::endl;
+    std::cout << "V: " << std::oct << ((static_cast<unsigned short>(this->RAM[PS]) & 0x2) >> 1) << std::endl;
+    std::cout << "C: " << std::oct << (static_cast<unsigned short>(this->RAM[PS]) & 0x1)        << std::endl;
   return;
 }
 
