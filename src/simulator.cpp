@@ -165,6 +165,11 @@ int main(int argc, char *argv[])
     status = cpu->FDE();
     memory->IncrementPC();
 
+    if (memory->RetrievePC() % 2 != 0)
+    {
+      std::cout << "Warning: program counter is not an even number!" << std::endl;
+    }
+
     if (status == 0)
     { 
       std::cout << "PDP 11/20 received HALT instruction\n" << std::endl;
