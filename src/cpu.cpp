@@ -54,7 +54,7 @@ int CPU::FDE()/*{{{*/
   };
   auto resultIsZero = [&] (unsigned short result) \
   { result == 0? update_flags(1,Zbit) : update_flags(0,Zbit); };  // Update Zbit where result is zero
-  auto resultLTZero = [&] (unsigned short result) { result < 0? \
+  auto resultLTZero = [&] (unsigned short result) { result & WORD? \
     update_flags(1,Nbit) : update_flags(0,Nbit); };                 // Update Nbit where result is negative
   auto resultMSBIsOne = [&] (unsigned short result) { result >> 15 > 0? \
     update_flags(1,Nbit) : update_flags(0,Nbit); };                 // Update Nbit where result MSB is 1 (negative)
@@ -241,9 +241,12 @@ int CPU::FDE()/*{{{*/
               if(iB[2] >= 3)
               {
                 //BMI
-                offset = memory->Read(address(dst));  // Get address for branch
-                tmp = memory->Read(007);              // Get current address in PC
-                tmp = tmp + (offset << 2);            // Get new address for branch
+                offset = (instruction & 0x00FF);          // Get address for branch
+                tmp = memory->Read(007);                // Get current address in PC
+                offset = offset << 1;                   // Multiply offset by 2
+                if (offset & 0400)                      // Check if neg
+                  offset = offset | (07777000);        // Pad with ones
+                tmp = tmp + offset;                     // Get new address for branch
                 (memory->ReadPS() & Nbit) > 0? \
                   memory->Write(007,tmp) : NOP();     // N = 1
                 return instruction;
@@ -251,21 +254,27 @@ int CPU::FDE()/*{{{*/
               else if(iB[2] < 3)
               {
                 //BPL
-                offset = memory->Read(address(dst));  // Get address for branch
+                offset = (instruction & 0x00FF);      // Get address for branch
                 tmp = memory->Read(007);              // Get current address in PC
-                tmp = tmp + (offset << 2);            // Get new address for branch
+                offset = offset << 1;                 // Multiply offset by 2
+                if (offset & 0400)                    // Check if neg
+                  offset = offset | (07777000);       // Pad with ones
+                tmp = tmp + offset;                   // Get new address for branch
                 (memory->ReadPS() & Nbit) == 0? \
-                                           memory->Write(007,tmp) : NOP();  // N = 0
+                  memory->Write(007,tmp) : NOP();  // N = 0
                 return instruction;
               }
             }
             else if(!iB[5] && iB[2] > 3)
             {
               //BR
-              offset = memory->Read(address(dst));  // Get address for branch
-              tmp = memory->Read(007);              // Get current address in PC
-              tmp = tmp + (offset << 2);            // Get new address for branch
-              memory->Write(007,tmp);               // Branch always
+              offset = (instruction & 0x00FF);          // Get address for branch
+              tmp = memory->Read(007);                // Get current address in PC
+              offset = offset << 1;                   // Multiply offset by 2
+              if (offset & 0400)                      // Check if neg
+                offset = offset | (07777000);        // Pad with ones
+              tmp = tmp + offset;                     // Get new address for branch
+              memory->Write(007,tmp);                 // Branch always
               return instruction;
             }
           }/*}}}*/
@@ -277,19 +286,25 @@ int CPU::FDE()/*{{{*/
               if(iB[2] <= 3)
               {
                 //BHI
-                offset = memory->Read(address(dst));  // Get address for branch
-                tmp = memory->Read(007);              // Get current address in PC
-                tmp = tmp + (offset << 2);            // Get new address for branch
+                offset = (instruction & 0x00FF);          // Get address for branch
+                tmp = memory->Read(007);                // Get current address in PC
+                offset = offset << 1;                   // Multiply offset by 2
+                if (offset & 0400)                      // Check if neg
+                  offset = offset | (07777000);        // Pad with ones
+                tmp = tmp + offset;                     // Get new address for branch
                 (memory->ReadPS() & (Zbit | Cbit)) == 0? \
-                                                    memory->Write(007,tmp) : NOP();          // C & Z = 0
+                  memory->Write(007,tmp) : NOP();          // C & Z = 0
                 return instruction;
               }
               else if(iB[2] > 3)
               {
                 //BLOS
-                offset = memory->Read(address(dst));  // Get address for branch
-                tmp = memory->Read(007);              // Get current address in PC
-                tmp = tmp + (offset << 2);            // Get new address for branch
+                offset = (instruction & 0x00FF);          // Get address for branch
+                tmp = memory->Read(007);                // Get current address in PC
+                offset = offset << 1;                   // Multiply offset by 2
+                if (offset & 0400)                      // Check if neg
+                  offset = offset | (07777000);        // Pad with ones
+                tmp = tmp + offset;                     // Get new address for branch
                 (memory->ReadPS() & (Zbit | Cbit)) > 0? \
                   memory->Write(007,tmp) : NOP();         // C | Z = 1
                 return instruction;
@@ -300,19 +315,25 @@ int CPU::FDE()/*{{{*/
               if(iB[2] <= 3)
               {
                 //BNE
-                offset = memory->Read(address(dst));  // Get address for branch
-                tmp = memory->Read(007);              // Get current address in PC
-                tmp = tmp + (offset << 2);            // Get new address for branch
+                offset = (instruction & 0x00FF);          // Get address for branch
+                tmp = memory->Read(007);                // Get current address in PC
+                offset = offset << 1;                   // Multiply offset by 2
+                if (offset & 0400)                      // Check if neg
+                  offset = offset | (07777000);        // Pad with ones
+                tmp = tmp + offset;                     // Get new address for branch
                 (memory->ReadPS() & Zbit) == 0? \
-                                           memory->Write(007,tmp) : NOP();       // Z = 0
+                  memory->Write(007,tmp) : NOP();       // Z = 0
                 return instruction;
               }
               else if(iB[2] > 3)
               {
                 //BEQ
-                offset = memory->Read(address(dst));  // Get address for branch
-                tmp = memory->Read(007);              // Get current address in PC
-                tmp = tmp + (offset << 2);            // Get new address for branch
+                offset = (instruction & 0x00FF);          // Get address for branch
+                tmp = memory->Read(007);                // Get current address in PC
+                offset = offset << 1;                   // Multiply offset by 2
+                if (offset & 0400)                      // Check if neg
+                  offset = offset | (07777000);        // Pad with ones
+                tmp = tmp + offset;                     // Get new address for branch
                 (memory->ReadPS() & Zbit) > 0? \
                   memory->Write(007,tmp) : NOP();          // Z = 0
                 return instruction;
@@ -327,19 +348,25 @@ int CPU::FDE()/*{{{*/
               if(iB[2] <= 3)
               {
                 //BVC
-                offset = memory->Read(address(dst));  // Get address for branch
-                tmp = memory->Read(007);              // Get current address in PC
-                tmp = tmp + (offset << 2);            // Get new address for branch
+                offset = (instruction & 0x00FF);          // Get address for branch
+                tmp = memory->Read(007);                // Get current address in PC
+                offset = offset << 1;                   // Multiply offset by 2
+                if (offset & 0400)                      // Check if neg
+                  offset = offset | (07777000);        // Pad with ones
+                tmp = tmp + offset;                     // Get new address for branch
                 (memory->ReadPS() & Vbit) == 0? \
-                                           memory->Write(007,tmp) : NOP();          // V = 0
+                  memory->Write(007,tmp) : NOP();          // V = 0
                 return instruction;
               }
               else if(iB[2] > 3)
               {
                 //BVS
-                offset = memory->Read(address(dst));  // Get address for branch
-                tmp = memory->Read(007);              // Get current address in PC
-                tmp = tmp + (offset << 2);            // Get new address for branch
+                offset = (instruction & 0x00FF);          // Get address for branch
+                tmp = memory->Read(007);                // Get current address in PC
+                offset = offset << 1;                   // Multiply offset by 2
+                if (offset & 0400)                      // Check if neg
+                  offset = offset | (07777000);        // Pad with ones
+                tmp = tmp + offset;                     // Get new address for branch
                 (memory->Read(PS) & Vbit) > 0? \
                   memory->Write(007,tmp) : NOP();          // V = 1
                 return instruction;
@@ -350,21 +377,27 @@ int CPU::FDE()/*{{{*/
               if(iB[2] <= 3)
               {
                 //BGE
-                offset = memory->Read(address(dst));  // Get address for branch
-                tmp = memory->Read(007);              // Get current address in PC
-                tmp = tmp + (offset << 2);            // Get new address for branch
+                offset = (instruction & 0x00FF);          // Get address for branch
+                tmp = memory->Read(007);                // Get current address in PC
+                offset = offset << 1;                   // Multiply offset by 2
+                if (offset & 0400)                      // Check if neg
+                  offset = offset | (07777000);        // Pad with ones
+                tmp = tmp + offset;                     // Get new address for branch
                 (((memory->ReadPS() & Nbit) >> 3) ^ ((memory->ReadPS() & Vbit) >> 1)) == 0? \
-                                                                                       memory->Write(007,tmp) : NOP();          // N ^ V = 0
+                  memory->Write(007,tmp) : NOP();          // N ^ V = 0
                 return instruction;
               }
               else if(iB[2] > 3)
               {
                 //BLT
-                offset = memory->Read(address(dst));  // Get address for branch
-                tmp = memory->Read(007);              // Get current address in PC
-                tmp = tmp + (offset << 2);            // Get new address for branch
+                offset = (instruction & 0x00FF);          // Get address for branch
+                tmp = memory->Read(007);                // Get current address in PC
+                offset = offset << 1;                   // Multiply offset by 2
+                if (offset & 0400)                      // Check if neg
+                  offset = offset | (07777000);        // Pad with ones
+                tmp = tmp + offset;                     // Get new address for branch
                 (((memory->ReadPS() & Nbit) >> 3) ^ ((memory->ReadPS() & Vbit) >> 1)) == 1? \
-                                                                                       memory->Write(007,tmp) : NOP();          // N ^ V == 1
+                  memory->Write(007,tmp) : NOP();          // N ^ V == 1
                 return instruction;
               }	
             }
@@ -377,19 +410,25 @@ int CPU::FDE()/*{{{*/
               if(iB[2] <= 3)
               {
                 //BCC
-                offset = memory->Read(address(dst));  // Get address for branch
-                tmp = memory->Read(007);              // Get current address in PC
-                tmp = tmp + (offset << 2);            // Get new address for branch
+                offset = (instruction & 0x00FF);          // Get address for branch
+                tmp = memory->Read(007);                // Get current address in PC
+                offset = offset << 1;                   // Multiply offset by 2
+                if (offset & 0400)                      // Check if neg
+                  offset = offset | (07777000);        // Pad with ones
+                tmp = tmp + offset;                     // Get new address for branch
                 (memory->ReadPS() & Cbit) == 0? \
-                                           memory->Write(007,tmp) : NOP();          // C = 0
+                  memory->Write(007,tmp) : NOP();          // C = 0
                 return instruction;
               }
               else if(iB[2] > 3)
               {
                 //BCS
-                offset = memory->Read(address(dst));             // Get address for branch
-                tmp = memory->Read(007);                        // Get current address in PC
-                offset = tmp + (offset << 2);                   // Calc new address for branch
+                offset = (instruction & 0x00FF);          // Get address for branch
+                tmp = memory->Read(007);                // Get current address in PC
+                offset = offset << 1;                   // Multiply offset by 2
+                if (offset & 0400)                      // Check if neg
+                  offset = offset | (07777000);        // Pad with ones
+                tmp = tmp + offset;                     // Get new address for branch
                 (memory->ReadPS() & Cbit) > 0? \
                   memory->Write(007,offset) : NOP();                 // C = 1
                 return instruction;
@@ -400,9 +439,12 @@ int CPU::FDE()/*{{{*/
               if(iB[2] <= 3)
               {
                 //BGT
-                offset = memory->Read(address(dst));  // Get address for branch
-                tmp = memory->Read(007);              // Get current address in PC
-                tmp = tmp + (offset << 2);            // Get new address for branch
+                offset = (instruction & 0x00FF);          // Get address for branch
+                tmp = memory->Read(007);                  // Get current address in PC
+                offset = offset << 1;                     // Multiply offset by 2
+                if (offset & 0400)                        // Check if neg
+                  offset = offset | (07777000);           // Pad with ones
+                tmp = tmp + offset;                       // Get new address for branch
                 (((memory->ReadPS() & Zbit) >> 2) | \
                  (((memory->ReadPS() & Nbit) >> 3) ^ ((memory->ReadPS() & Vbit) >> 1))) == 0? \
                   memory->Write(007,tmp) : NOP();          // Z | (N ^ V) = 0
@@ -411,12 +453,15 @@ int CPU::FDE()/*{{{*/
               else if(iB[2] > 3)
               {
                 //BLE
-                offset = memory->Read(address(dst));  // Get address for branch
-                tmp = memory->Read(007);              // Get current address in PC
-                offset = tmp + (offset << 2);         // Get new address for branch
-                tmp = memory->ReadPS();               // Get current process status
-                (((tmp & Zbit) >> 2) & (((tmp & Nbit) >> 3) ^ ((tmp & Vbit) >> 1))) == 1? \
-                                                                                     memory->Write(007,offset) : NOP();        // Z(N^V) = 1
+                offset = (instruction & 0x00FF);          // Get address for branch
+                tmp = memory->Read(007);                  // Get current address in PC
+                offset = offset << 1;                     // Multiply offset by 2
+                if (offset & 0400)                        // Check if neg
+                  offset = offset | (07777000);           // Pad with ones
+                offset = tmp + offset;                       // Get new address for branch
+                tmp = memory->ReadPS();                   // Get current process status
+                (((tmp & Zbit) >> 2) | (((tmp & Nbit) >> 3) ^ ((tmp & Vbit) >> 1))) == 1? \
+                  memory->Write(007,offset) : NOP();      // Z(N^V) = 1
                 return instruction;
               }	
             }	
@@ -803,13 +848,17 @@ int CPU::FDE()/*{{{*/
         {
           src_temp = memory->Read(address(src));          // Get value at address of src
           dst_temp = memory->Read(address(dst));          // Get value at address of dst
-          tmp = src_temp - dst_temp;               // Compare values
-          resultIsZero(tmp);                              // Update Z bit
-          resultLTZero(tmp);                              // Update N bit
-          (((src_temp & WORD) & (dst_temp & WORD)) && ((dst_temp & WORD)^(tmp & WORD)))? \
-            update_flags(0,Cbit) : update_flags(1,Cbit);  // Update C bit
-          (((src_temp & WORD) ^ (dst_temp & WORD)) && (~((dst_temp & WORD) ^ (tmp & WORD)) & WORD))? \
+          dst_temp = ~(dst_temp) + 1;                     // Get two's compliment
+          int result = src_temp + dst_temp;               // Calculate result
+          //tmp = src_temp - dst_temp;                    // Compare values
+          resultIsZero(result);                           // Update Z bit
+          resultLTZero(result);                           // Update N bit
+          //(((src_temp & WORD) & (dst_temp & WORD)) && ((dst_temp & WORD)^(tmp & WORD)))? 
+         //   update_flags(0,Cbit) : update_flags(1,Cbit);  // Update C bit
+          result & 0x10000? update_flags(0, Cbit) : update_flags(1,Cbit);
+          (((src_temp & WORD) == (dst_temp & WORD)) && ((dst_temp & WORD) == (result & WORD)))? \
             update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
+          
           return instruction;
         }
 
