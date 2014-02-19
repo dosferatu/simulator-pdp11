@@ -6,10 +6,10 @@
 Memory::Memory(std::vector<std::string> *source)
 {
   // Initialize RAM to 0's
-  this->RAM = new unsigned char[65536] {0};
-  this->initialRAM = new unsigned char[65536] {0};
+  this->RAM = new unsigned char[65536];
+  this->initialRAM = new unsigned char[65536];
   this->byteMode = 02;          // Default to word addressing
-  int addressIndex = 0;
+  unsigned int addressIndex = 0;
 
   regArray[0] = R0;
   regArray[1] = R1;
@@ -43,12 +43,12 @@ Memory::Memory(std::vector<std::string> *source)
         {
           // Shift addressPointer left 3 bits, then add the next octal value
           addressIndex = 0;
-
-          for (std::string::iterator i = (it->begin() + 1); i != it->end(); ++i)
-          {
-            addressIndex = addressIndex << 3;
-            addressIndex = addressIndex | (*i - '0'); // Convert the ascii number to its integer equivalent.
-          }
+          std::string temp;
+          
+          // Grab the value past the first '@' char
+          temp = it->substr(1, it->length() - 1);
+          std::stringstream stream(temp);
+          stream >> std::oct >> addressIndex;
 
           break;
         }
@@ -57,13 +57,13 @@ Memory::Memory(std::vector<std::string> *source)
         {
           // Use address pointer to write to mem, then increment address pointer.
           // If the value loaded in is 16 bits then incremenent address pointer by 2.
-          int value = 0;
-
-          for (std::string::iterator i = (it->begin() + 1); i != it->end(); ++i)
-          {
-            value = value << 3;
-            value = value | (*i - '0'); // Convert the ascii number to it's integer equivalent.
-          }
+          unsigned int value = 0;
+          std::string temp;
+          
+          // Grab the value past the first '-' char
+          temp = it->substr(1, it->length() - 1);
+          std::stringstream stream(temp);
+          stream >> std::oct >> value;
 
           // Update internal memory directly to avoid trace output
           this->RAM[addressIndex++] = value & 0xFF;
@@ -73,13 +73,13 @@ Memory::Memory(std::vector<std::string> *source)
 
       case '*': // This is the value we set the PC to
         {
-          int value = 0;
-
-          for (std::string::iterator i = (it->begin() + 1); i != it->end(); ++i)
-          {
-            value = value << 3;
-            value = value + (*i - '0'); // Convert the ascii number to it's integer equivalent.
-          }
+          unsigned int value = 0;
+          std::string temp;
+          
+          // Grab the value past the first '*' char
+          temp = it->substr(1, it->length() - 1);
+          std::stringstream stream(temp);
+          stream >> std::oct >> value;
 
           // Update internal memory directly to avoid trace output
           this->RAM[PC] = value & 0xFF;
