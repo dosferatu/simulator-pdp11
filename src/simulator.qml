@@ -168,21 +168,23 @@ Rectangle {
     width: 800
     height: 600
 
-    TableViewColumn {
-      id: breakColumn
-      width: 60
-      title: "Break"
-      resizable: false
-      movable: false
-    }
+    model: instructionModel
 
-    TableViewColumn {
-      id: positionColumn
-      width: 70
-      title: "Position"
-      resizable: false
-      movable: false
-    }
+    //TableViewColumn {
+      //id: breakColumn
+      //width: 60
+      //title: "Break"
+      //resizable: false
+      //movable: false
+    //}
+
+    //TableViewColumn {
+      //id: positionColumn
+      //width: 70
+      //title: "Position"
+      //resizable: false
+      //movable: false
+    //}
 
     TableViewColumn {
       id: instructionColumn

@@ -1,4 +1,6 @@
 #include <iostream>
+#include <fstream>
+#include <QtQml>
 #include "programViewModel.h"
 
 // Constructors/*{{{*/
@@ -10,7 +12,7 @@ programViewModel::programViewModel(QObject *parent) :
   this->status = -1;
 }
 
-programViewModel::programViewModel(CPU *cpu, Memory *memory, QObject *parent) :
+programViewModel::programViewModel(CPU *cpu, Memory *memory, QQuickView *view, std::vector<std::string> *source, QObject *parent) :
   QObject(parent)
 {
   this->breakPoints = new std::vector<unsigned short>();
@@ -18,6 +20,44 @@ programViewModel::programViewModel(CPU *cpu, Memory *memory, QObject *parent) :
   this->currentInstruction = -1;
   this->memory = memory;
   this->status = -1;
+  this->view = view;
+
+  std::fstream *macFile;
+  macFile = new std::fstream("main.lst");
+
+  if (macFile->good())
+  {
+    std::cout << "Parsing main.lst for GUI..." << std::endl;
+    std::string buffer;
+
+    // Read in a line and store it in to our instruction source vector
+    while (!macFile->eof())
+    {
+      std::getline(*macFile, buffer);
+      std::cout << "Parsed: " << buffer.c_str() << std::endl;
+      instructionModel.append(buffer.c_str());
+    }
+
+    // File IO is finished, so close the file
+    macFile->close();
+    delete macFile;
+  }
+
+  else
+  {
+    // Implement file not found, access denied, and !success eventually
+    for (std::vector<std::string>::iterator it = source->begin(); it != source->end(); ++it)
+    {
+      instructionModel.append(it->c_str());
+    }
+
+    // Ghetto file not found version
+    std::cout << "Error parsing Macro11 assembler source file!" << std::endl;
+    std::cout << "Falling back to parsed in .ascii file..." << std::endl;
+  }
+
+  // Update the instructionModel
+  this->view->rootContext()->setContextProperty("instructionModel", QVariant::fromValue(this->instructionModel));
 }/*}}}*/
 
 // Destructor/*{{{*/
@@ -84,7 +124,7 @@ void programViewModel::run()
 
   std::cout << "Run!" << std::endl;
   int status = 0;
-  
+
   // Reset status
   std::cout << "Resetting state..." << std::endl;
   this->cpu->ResetInstructionCount();

@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <QObject>
+#include <QQuickView>
 #include "cpu.h"
 #include "memory.h"
 
@@ -11,7 +12,7 @@ class programViewModel : public QObject
   Q_OBJECT
 public:
   explicit programViewModel(QObject *parent = 0);
-  explicit programViewModel(CPU *cpu, Memory *memory, QObject *parent = 0);
+  explicit programViewModel(CPU *cpu, Memory *memory, QQuickView *view, std::vector<std::string> *source, QObject *parent = 0);
   ~programViewModel();
 
 signals:
@@ -35,6 +36,8 @@ private:
   int status;
   CPU *cpu;
   Memory *memory;
+  QQuickView *view;
+  QStringList instructionModel;
 };
 
 #endif // PROGRAMVIEWMODEL_H
