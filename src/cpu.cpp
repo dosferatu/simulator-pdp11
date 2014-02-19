@@ -34,8 +34,8 @@ CPU::~CPU()/*{{{*/
  */ 
 int CPU::FDE()/*{{{*/
 {
-  unsigned short instruction = 0;          // Instruction word buffer
-  unsigned short iB[6];   // Dissected instruction word
+  unsigned short instruction = 0;   // Instruction word buffer
+  unsigned short iB[6];             // Dissected instruction word
 
   // Lambda declarations and definitions/*{{{*/
   auto address = [&] (const int i) { return (iB[i] << 3) + iB[i - 1]; };
