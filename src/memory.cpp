@@ -40,11 +40,12 @@ Memory::Memory(std::vector<std::string> *source)
       case '@': // This is the line we set our address pointer to
         {
           // Shift addressPointer left 3 bits, then add the next octal value
+          addressIndex = 0;
+
           for (std::string::iterator i = (it->begin() + 1); i != it->end(); ++i)
           {
-            addressIndex = 0;
             addressIndex = addressIndex << 3;
-            addressIndex = addressIndex + (*i - '0'); // Convert the ascii number to it's integer equivalent.
+            addressIndex = addressIndex | (*i - '0'); // Convert the ascii number to its integer equivalent.
           }
 
           break;
@@ -54,12 +55,12 @@ Memory::Memory(std::vector<std::string> *source)
         {
           // Use address pointer to write to mem, then increment address pointer.
           // If the value loaded in is 16 bits then incremenent address pointer by 2.
-          int value;
+          int value = 0;
 
           for (std::string::iterator i = (it->begin() + 1); i != it->end(); ++i)
           {
             value = value << 3;
-            value = value + (*i - '0'); // Convert the ascii number to it's integer equivalent.
+            value = value | (*i - '0'); // Convert the ascii number to it's integer equivalent.
           }
 
           // Update internal memory directly to avoid trace output
@@ -70,7 +71,7 @@ Memory::Memory(std::vector<std::string> *source)
 
       case '*': // This is the value we set the PC to
         {
-          int value;
+          int value = 0;
 
           for (std::string::iterator i = (it->begin() + 1); i != it->end(); ++i)
           {
