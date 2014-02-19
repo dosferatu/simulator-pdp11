@@ -1,3 +1,6 @@
+#ifndef CPU_H
+#define CPU_H
+
 #include "memory.h"
 
 class CPU
@@ -18,3 +21,4 @@ class CPU
                                 // R7 is the program counter
                                 // R8 is the Processor Status Register
 };
+#endif // CPU_H
