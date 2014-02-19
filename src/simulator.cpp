@@ -179,7 +179,6 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
   source->pop_back();
   /*}}}*/
 
-
   // Simulator declarations/*{{{*/
   memory = new Memory(source);
   memory->SetDebugMode(verbosity);

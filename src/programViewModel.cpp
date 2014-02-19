@@ -76,7 +76,9 @@ void programViewModel::run()
 
   std::cout << "Run!" << std::endl;
   int status = 0;
-  this->memory->ResetPC();
+  
+  // Reset status
+  this->memory->WritePS(0);
 
   // Run until HALT or break point/*{{{*/
   do
@@ -152,7 +154,10 @@ void programViewModel::stop()
 {
   std::cout << "Stop!" << std::endl;
   this->memory->ResetPC();
-  // Reset state of CPU simulator here
+
+  // Reset status
+  this->memory->WritePS(0);
+  // Need to clear memory
 }/*}}}*/
 /*}}}*/
 
