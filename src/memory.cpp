@@ -1,6 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include "memory.h"
+#include <iomanip>
 
 // Initialize memory using the assembly source/*{{{*/
 Memory::Memory(std::vector<std::string> *source)
@@ -510,7 +511,10 @@ void Memory::TraceDump(Transaction type, unsigned short address)/*{{{*/
   std::stringstream stream;
   stream << std::oct << type;
   buffer.append(stream.str());
+  buffer.append(" ");
+  stream.str(std::string());
   stream.clear();
+  stream << std::setfill('0') << std::setw(6);
   stream << std::oct << address;
   buffer.append(stream.str());
   buffer.append("\n");
