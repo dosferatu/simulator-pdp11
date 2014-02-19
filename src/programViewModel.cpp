@@ -7,6 +7,7 @@ programViewModel::programViewModel(QObject *parent) :
 {
   this->breakPoints = new std::vector<unsigned short>();
   this->currentInstruction = -1;
+  this->status = -1;
 }
 
 programViewModel::programViewModel(CPU *cpu, Memory *memory, QObject *parent) :
@@ -16,6 +17,7 @@ programViewModel::programViewModel(CPU *cpu, Memory *memory, QObject *parent) :
   this->cpu = cpu;
   this->currentInstruction = -1;
   this->memory = memory;
+  this->status = -1;
 }/*}}}*/
 
 // Destructor/*{{{*/
@@ -30,7 +32,13 @@ programViewModel::~programViewModel()
 void programViewModel::continueExecution()
 {
   std::cout << "Continue!" << std::endl;
-  int status = 0;
+
+  // Detect HALT condition
+  if (status <= 0)
+  {
+    std::cout << "End of program!" << std::endl;
+    return;
+  }
 
   // Run until HALT or break point/*{{{*/
   do
@@ -78,6 +86,7 @@ void programViewModel::run()
   int status = 0;
   
   // Reset status
+  std::cout << "Resetting state..." << std::endl;
   this->cpu->ResetInstructionCount();
   this->memory->WritePS(0);
   this->memory->ResetPC();
@@ -121,7 +130,13 @@ void programViewModel::run()
 void programViewModel::step()
 {
   std::cout << "Step!" << std::endl;
-  int status = 0;
+
+  // Detect HALT condition
+  if (status <= 0)
+  {
+    std::cout << "End of program!" << std::endl;
+    return;
+  }
 
   this->currentInstruction = this->memory->RetrievePC();
   status = cpu->FDE();
@@ -158,6 +173,7 @@ void programViewModel::stop()
   std::cout << "Stop!" << std::endl;
 
   // Reset status
+  std::cout << "Resetting state..." << std::endl;
   this->cpu->ResetInstructionCount();
   this->memory->WritePS(0);
   this->memory->ResetPC();

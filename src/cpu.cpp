@@ -78,7 +78,7 @@ int CPU::FDE()/*{{{*/
     std::cout << std::endl;
     std::cout << "********************************************************************************" << std::endl;
     std::cout << std::endl;
-    std::cout << "                              INSTRUCTION #" << std::dec << instructionCount << std::endl;
+    std::cout << "                              INSTRUCTION #" << std::dec << this->instructionCount << std::endl;
     std::cout << std::endl;
     std::cout << "********************************************************************************" << std::endl;
     std::cout << "Fetched instruction: " << std::oct << instruction << std::endl;
@@ -992,9 +992,10 @@ void CPU::SetDebugMode(Verbosity verbosity)/*{{{*/
   this->debugLevel = verbosity;
   return;
 }
+/*}}}*/
 
-void CPU::ResetInstructionCount()
+void CPU::ResetInstructionCount()/*{{{*/
 {
   this->instructionCount = 0;
   return;
-}
+}/*}}}*/

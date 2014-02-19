@@ -32,6 +32,7 @@ private:
   std::vector<unsigned short> *breakPoints;
   unsigned short currentInstruction;
   unsigned short nextBreak;
+  int status;
   CPU *cpu;
   Memory *memory;
 };
