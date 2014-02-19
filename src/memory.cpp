@@ -82,6 +82,7 @@ Memory::Memory(std::vector<std::string> *source)
           // Update internal memory directly to avoid trace output
           this->RAM[PC] = value & 0xFF;
           this->RAM[PC + 1] = value >> 8;
+          this->initialPC = value;
           break;
         }
 
@@ -523,3 +524,16 @@ void Memory::WritePS(unsigned short status)
   this->RAM[PS] = status & 0xFF;
   this->RAM[PS + 1] = (status >> 8);
 } /*}}}*/
+
+void Memory::ResetPC()
+{
+  this->RAM[PC] = initialPC & 0xFF;
+  this->RAM[PC + 1] = initialPC >> 8;
+  
+  if (debugLevel == Verbosity::verbose)
+  {
+    std::cout << "Reset PC to " << initialPC << std::endl;
+  }
+
+  return;
+}
