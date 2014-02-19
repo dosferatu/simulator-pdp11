@@ -11,6 +11,7 @@ class CPU
     short EA(short encodedAddress);
     int FDE();
     void SetDebugMode(Verbosity verbosity);
+    void ResetInstructionCount();
 
   private:
     int debugLevel;             // Debug verbosity level

@@ -992,3 +992,9 @@ void CPU::SetDebugMode(Verbosity verbosity)/*{{{*/
   this->debugLevel = verbosity;
   return;
 }
+
+void CPU::ResetInstructionCount()
+{
+  this->instructionCount = 0;
+  return;
+}

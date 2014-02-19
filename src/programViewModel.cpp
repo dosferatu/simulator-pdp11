@@ -78,6 +78,7 @@ void programViewModel::run()
   int status = 0;
   
   // Reset status
+  this->cpu->ResetInstructionCount();
   this->memory->WritePS(0);
   this->memory->ResetPC();
   this->memory->ResetRAM();
@@ -157,6 +158,7 @@ void programViewModel::stop()
   std::cout << "Stop!" << std::endl;
 
   // Reset status
+  this->cpu->ResetInstructionCount();
   this->memory->WritePS(0);
   this->memory->ResetPC();
   this->memory->ResetRAM();
