@@ -36,95 +36,111 @@ std::vector<int> *breakPoints;	// Will be PC values
  *****************************************************************************/
 Q_DECL_EXPORT int main(int argc, char *argv[])
 {
-  //int sourceArg = -1;
+  int sourceArg = -1;
+  bool GUImode = false;
   Verbosity verbosity = Verbosity::off;
   macFile = new std::fstream();
 
-  // Parse command line arguments/*{{{*/
-  //if (argc > 3)
-  //{
-  //std::cout << "Usage: simulator <ascii file>" << std::endl;
-  //return 0;
-  //}
+  //Parse command line arguments[>{{{<]
+  if (argc > 4)
+  {
+    std::cout << "Usage: simulator {OPTIONAL}<-V or -v> {OPTIONAL}<-g> {REQUIRED}<ascii file>" << std::endl;
+    return 0;
+  }
 
-  //// Support only one .ascii file
-  //switch(argc)
-  //{
-  //case 2:
-  //{
-  //if (static_cast<std::string>(argv[1]).find(".ascii") != std::string::npos)
-  //{
-  //sourceArg = 1;
-  //break;
-  //}
+  // Support only one .ascii file
+  switch(argc)
+  {
+    case 2:
+      {
+        if (static_cast<std::string>(argv[1]).find(".ascii") != std::string::npos)
+        {
+          sourceArg = 1;
+          break;
+        }
 
-  //else if (static_cast<std::string>(argv[1]).find(".PCascii") != std::string::npos)
-  //{
-  //sourceArg = 1;
-  //break;
-  //}
-  //}
+        else if (static_cast<std::string>(argv[1]).find(".PCascii") != std::string::npos)
+        {
+          sourceArg = 1;
+          break;
+        }
+      }
 
-  //case 3:
-  //{
-  //for (int i = 1; i < argc; ++i)
-  //{
-  //if(static_cast<std::string>(argv[i]).compare("-v") == 0)
-  //{
-  //if (verbosity == Verbosity::off)
-  //{
-  //verbosity = Verbosity::minimal;
-  //}
+    case 3: case 4:
+      {
+        for (int i = 1; i < argc; ++i)
+        {
+          if(static_cast<std::string>(argv[i]).compare("-v") == 0)
+          {
+            if (verbosity == Verbosity::off)
+            {
+              verbosity = Verbosity::minimal;
+            }
 
-  //else
-  //{
-  //std::cout << "Conflicting verbosity arguments!" << std::endl;
-  //std::cout << "Usage: simulator <ascii file>" << std::endl;
-  //return 0;
-  //}
-  //}
+            else
+            {
+              std::cout << "Conflicting verbosity arguments!" << std::endl;
+              std::cout << "Usage: simulator {OPTIONAL}<-V or -v> {OPTIONAL}<-g> {REQUIRED}<ascii file>" << std::endl;
+              return 0;
+            }
+          }
 
-  //else if(static_cast<std::string>(argv[i]).compare("-V") == 0)
-  //{
-  //if (verbosity == Verbosity::off)
-  //{
-  //verbosity = Verbosity::verbose;
-  //}
+          else if(static_cast<std::string>(argv[i]).compare("-V") == 0)
+          {
+            if (verbosity == Verbosity::off)
+            {
+              verbosity = Verbosity::verbose;
+            }
 
-  //else
-  //{
-  //std::cout << "Conflicting verbosity arguments!" << std::endl;
-  //std::cout << "Usage: simulator <ascii file>" << std::endl;
-  //return 0;
-  //}
-  //}
+            else
+            {
+              std::cout << "Conflicting verbosity arguments!" << std::endl;
+              std::cout << "Usage: simulator {OPTIONAL}<-V or -v> {OPTIONAL}<-g> {REQUIRED}<ascii file>" << std::endl;
+              return 0;
+            }
+          }
 
-  //else if (static_cast<std::string>(argv[i]).find(".ascii") != std::string::npos)
-  //{
-  //sourceArg = i;
-  //}
+          else if(static_cast<std::string>(argv[i]).compare("-g") == 0)
+          {
+            if (!GUImode)
+            {
+              GUImode = true;
+            }
 
-  //else if (static_cast<std::string>(argv[i]).find(".PCascii") != std::string::npos)
-  //{
-  //sourceArg = i;
-  //}
+            else
+            {
+              std::cout << "Conflicting GUI arguments!" << std::endl;
+              std::cout << "Usage: simulator {OPTIONAL}<-V or -v> {OPTIONAL}<-g> {REQUIRED}<ascii file>" << std::endl;
+              return 0;
+            }
+          }
 
-  //else
-  //{
-  //std::cout << "Usage: simulator <ascii file>" << std::endl;
-  //return 0;
-  //}
-  //}
+          else if (static_cast<std::string>(argv[i]).find(".ascii") != std::string::npos)
+          {
+            sourceArg = i;
+          }
 
-  //break;
+          else if (static_cast<std::string>(argv[i]).find(".PCascii") != std::string::npos)
+          {
+            sourceArg = i;
+          }
 
-  //default:
-  //{
-  //std::cout << "Usage: simulator <ascii file>" << std::endl;
-  //return 0;
-  //}
-  //}
-  //}
+          else
+          {
+            std::cout << "Usage: simulator {OPTIONAL}<-V or -v> {OPTIONAL}<-g> {REQUIRED}<ascii file>" << std::endl;
+            return 0;
+          }
+        }
+
+        break;
+
+        default:
+        {
+          std::cout << "Usage: simulator {OPTIONAL}<-V or -v> {OPTIONAL}<-g> {REQUIRED}<ascii file>" << std::endl;
+          return 0;
+        }
+      }
+  }
   /*}}}*/
 
   /*
@@ -136,8 +152,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
   // Parse in .ascii file and retrieve instructions until EOF/*{{{*/
   try
   {
-    //macFile->open(argv[sourceArg]);
-    macFile->open("main.PCascii");
+    macFile->open(argv[sourceArg]);
     source = new std::vector<std::string>;
     std::string buffer;
 
@@ -164,7 +179,6 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
   source->pop_back();
   /*}}}*/
 
-  bool GUImode = true;
 
   // Simulator declarations/*{{{*/
   memory = new Memory(source);

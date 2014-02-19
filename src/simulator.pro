@@ -1,7 +1,7 @@
 # Additional import path used to resolve QML modules in the Creator\'s code model
 QML_IMPORT_PATH =
 
-QMAKE_CXXFLAGS += -std=gnu++11
+QMAKE_CXXFLAGS += -g -std=gnu++11 -Wall -Wpedantic
 OTHER_FILES += simulator.qml
 
 # The .cpp file which was generated for your project. Feel free to hack it.
