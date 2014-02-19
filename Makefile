@@ -18,6 +18,7 @@ PY_TARGETS = $(patsubst src/%.mac, src/%.PCascii, $(MACS))
 # Simulator binary
 SIM = src/simulator
 SIM_FLAGS = -V
+SIM_GUI_FLAGS = -V -g
 
 # Make commands
 all : $(PDP_TARGETS) $(PY_TARGETS)
@@ -56,6 +57,9 @@ leak-check: all
 
 simulate: all
 	./$(SIM) $(SIM_FLAGS) $(PY_TARGETS)
+
+simulate-gui: all
+	./$(SIM) $(SIM_GUI_FLAGS) $(PY_TARGETS)
 
 
 # Target the addrmodes.ascii file
