@@ -64,7 +64,7 @@ clean :
 	rm -rf src/*.ascii
 	rm -rf src/*.PCascii
 	rm -rf src/*.o
-	rm -rf src/$(SIM)
+	rm -rf $(SIM)
 	rm -rf src/trace.txt
 	cd src; make clean
 
