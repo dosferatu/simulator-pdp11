@@ -7,12 +7,12 @@ CCFLAGS = -g -Wall -Wpedantic -pipe -std=gnu++11
 PY = python2
 
 # Macro11 assembly
-MACS = $(wildcard *.mac)
-PDP_TARGETS = $(patsubst %.mac, %.ascii, $(MACS))
+#MACS = $(wildcard *.mac)
+#PDP_TARGETS = $(patsubst %.mac, %.ascii, $(MACS))
 
 # Python2 .lst parser
-PYS = asciiPCinsert.py
-PY_TARGETS = $(patsubst %.mac, %.PCascii, $(MACS))
+#PYS = asciiPCinsert.py
+#PY_TARGETS = $(patsubst %.mac, %.PCascii, $(MACS))
 
 # C++ source
 SIM = simulator
@@ -25,13 +25,13 @@ SIM_TARGETS = $(patsubst %.cpp, %.o, $(SIMS))
 all : $(PDP_TARGETS) $(PY_TARGETS) $(SIM_TARGETS) $(SIMOBJ)
 
 
-%.PCascii : %.ascii
-	$(PY) $(PYS) $*.ascii $*.lst $@
+#%.PCascii : %.ascii
+#	$(PY) $(PYS) $*.ascii $*.lst $@
 
 
-%.ascii : %.mac
-	$(AS) $< -o $*.obj -l $*.lst
-	$(TRANS) $*.obj $@
+#%.ascii : %.mac
+#	$(AS) $< -o $*.obj -l $*.lst
+#	$(TRANS) $*.obj $@
 
 
 %.o : %.cpp
