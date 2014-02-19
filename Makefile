@@ -21,7 +21,7 @@ SIM_FLAGS = -V
 
 # Make commands
 all : $(PDP_TARGETS) $(PY_TARGETS)
-	cd src;make
+	cd src;$(MAKE)
 
 
 src/%.PCascii : src/%.ascii
