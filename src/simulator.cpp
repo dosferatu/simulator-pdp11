@@ -212,10 +212,38 @@ int main(int argc, char *argv[])
     view.rootContext()->setContextProperty("programViewModel", programVM);
     view.rootContext()->setContextProperty("memoryViewModel", memoryVM);
 
+    // This works; we need to now use QAbstractList whatever
+    // in order to implement complex models that we can extrapolate
+    // to several columns.
+    //
+    // The instruction model should have buttons as one of it's type
+    // in order to set/clear breakpoints.
+    memoryModel.append("TEMP1");
+    memoryModel.append("TEMP2");
+    memoryModel.append("TEMP3");
+    memoryModel.append("TEMP4");
+    memoryModel.append("TEMP5");
+    memoryModel.append("TEMP6");
+    memoryModel.append("TEMP7");
+    memoryModel.append("TEMP8");
+    memoryModel.append("TEMP9");
+
     // Register Models
     view.rootContext()->setContextProperty("memoryModel", QVariant::fromValue(memoryModel));
     view.rootContext()->setContextProperty("registerModel", QVariant::fromValue(registerModel));
     view.rootContext()->setContextProperty("instructionModel", QVariant::fromValue(instructionModel));
+
+    // Here the View does not get updated; we need to figure out how to
+    // notify the view of changes in order to use this in our VM
+    //memoryModel.append("TEMP1");
+    //memoryModel.append("TEMP2");
+    //memoryModel.append("TEMP3");
+    //memoryModel.append("TEMP4");
+    //memoryModel.append("TEMP5");
+    //memoryModel.append("TEMP6");
+    //memoryModel.append("TEMP7");
+    //memoryModel.append("TEMP8");
+    //memoryModel.append("TEMP9");
 
     // Load the GUI
     view.setSource(QUrl::fromLocalFile("simulator.qml"));
