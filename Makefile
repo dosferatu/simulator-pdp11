@@ -58,6 +58,16 @@ simulate: all
 	./$(SIM) $(SIM_FLAGS) $(PY_TARGETS)
 
 
+# Target the addrmodes.ascii file
+run-addrmodes: all
+	./$(SIM) $(SIM_FLAGS) src/Test\ Cases/obj/addrmodes.ascii
+
+
+# Target the multiply.ascii file
+run-multiply: all
+	./$(SIM) $(SIM_FLAGS) src/Test\ Cases/obj/multiply.ascii
+
+
 clean :
 	rm -rf src/*.obj
 	rm -rf src/*.lst
@@ -68,4 +78,4 @@ clean :
 	rm -rf src/trace.txt
 	cd src; make clean
 
-.PHONY : all clean debug leak-check simulate
+.PHONY : all clean debug leak-check simulate run-addrmodes run-multiply
