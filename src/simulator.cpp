@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include </usr/include/qt/QtGui/QtGui>
 #include <QtGui>
 #include <QQmlComponent>
 #include <QtQml>
@@ -24,24 +25,22 @@ CPU *cpu;
 std::vector<std::string> *source;
 std::fstream *macFile;
 
-/*
- * Data structures used by the GUI
- */
-std::vector<int> *breakPoints;	// Will be PC values
-
 /******************************************************************************
  *
  *                                BEGIN MAIN
  *
  *****************************************************************************/
-Q_DECL_EXPORT int main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
   int sourceArg = -1;
   bool GUImode = false;
   Verbosity verbosity = Verbosity::off;
   macFile = new std::fstream();
 
-  //Parse command line arguments[>{{{<]
+/******************************************************************************
+ *                            PARSE COMMAND LINE ARGS
+ *****************************************************************************/
+  //Parse command line arguments/*{{{*/
   if (argc > 4)
   {
     std::cout << "Usage: simulator {OPTIONAL}<-V or -v> {OPTIONAL}<-g> {REQUIRED}<ascii file>" << std::endl;
@@ -143,12 +142,9 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
   }
   /*}}}*/
 
-  /*
-   * Ideally would perform validation on input name and check to see if the file exists
-   * so we can print the appropriate error if something goes wrong. This isn't critical
-   * right now so it isn't implemented.
-   */
-
+/******************************************************************************
+ *                            PARSE ASCII FILE
+ *****************************************************************************/
   // Parse in .ascii file and retrieve instructions until EOF/*{{{*/
   try
   {
@@ -185,33 +181,60 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
   cpu = new CPU(memory);
   cpu->SetDebugMode(verbosity);/*}}}*/
 
+/******************************************************************************
+ *                            GUI EXECUTION BLOCK
+ *****************************************************************************/
   // GUI execution block/*{{{*/
   if (GUImode)
   {
-    /*
-     * Declare the UI ViewModels
-     */
+    // Declare the UI ViewModels
     programViewModel *programVM = new programViewModel(cpu, memory);
-    memoryViewModel *memoryVM = new memoryViewModel();
+    memoryViewModel *memoryVM = new memoryViewModel(memory);
 
-    /*
-     * Register the ViewModels for use in the QML file
-     */
+    // Register the ViewModels for use in the QML file
     qmlRegisterType<programViewModel>("ProgramViewModel", 1, 0, "programViewModel");
     qmlRegisterType<memoryViewModel>("MemoryViewModel", 1, 0, "memoryViewModel");
 
-    // Set the context for the GUI and launch
-    QGuiApplication app(argc, argv);
-    QtQuick2ApplicationViewer viewer;
-    viewer.rootContext()->setContextProperty("programViewModel", programVM);
-    viewer.rootContext()->setContextProperty("memoryViewModel", memoryVM);
-    viewer.setMainQmlFile(QStringLiteral("simulator.qml"));
+    // Establish the models for the UI to bind to
+    QStringList memoryModel;
+    QStringList instructionModel;
+    QStringList registerModel;
 
-    // Set this to be conditional for an optional GUI
-    viewer.showExpanded();
+    // Initialize the main window
+    QGuiApplication app(argc, argv);
+    QQuickView view;
+    view.setResizeMode(QQuickView::SizeRootObjectToView);
+
+    // Create UI signal receivers
+    QObject::connect((QObject*)view.engine(), SIGNAL(quit()), &app, SLOT(quit()));  // Handle Quit
+
+    // Register ViewModels
+    view.rootContext()->setContextProperty("programViewModel", programVM);
+    view.rootContext()->setContextProperty("memoryViewModel", memoryVM);
+
+    // Register Models
+    view.rootContext()->setContextProperty("memoryModel", QVariant::fromValue(memoryModel));
+    view.rootContext()->setContextProperty("registerModel", QVariant::fromValue(registerModel));
+    view.rootContext()->setContextProperty("instructionModel", QVariant::fromValue(instructionModel));
+
+    // Load the GUI
+    view.setSource(QUrl::fromLocalFile("simulator.qml"));
+    view.show();
     return app.exec();
+
+    // Garbage collection/*{{{*/
+    delete programVM;
+    delete memoryVM;
+    //delete registerModel;
+    //delete memoryModel;
+    //delete instructionModel;
+    /*}}}*/
   }/*}}}*/
 
+
+/******************************************************************************
+ *                            CONSOLE EXECUTION BLOCK
+ *****************************************************************************/
   // Console execution block/*{{{*/
   else
   {
@@ -247,8 +270,10 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     } while (status > 0);
   }/*}}}*/
 
+/******************************************************************************
+ *                            GARBAGE COLLECTION
+ *****************************************************************************/
   // Garbage collection/*{{{*/
-  delete breakPoints;
   delete cpu;
   delete macFile;
   delete source;

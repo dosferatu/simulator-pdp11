@@ -7,6 +7,7 @@ Memory::Memory(std::vector<std::string> *source)
 {
   // Initialize RAM to 0's
   this->RAM = new unsigned char[65536] {0};
+  this->initialRAM = new unsigned char[65536] {0};
   this->byteMode = 02;          // Default to word addressing
   int addressIndex = 0;
 
@@ -33,7 +34,7 @@ Memory::Memory(std::vector<std::string> *source)
     std::cout << "Error opening trace file for output mode!" << std::endl;
   }
 
-  // Make sure each line starts with a - or @ and only has numbers following
+  // Make sure each line starts with a - or @ and only has numbers following/*{{{*/
   for (std::vector<std::string>::iterator it = source->begin(); it != source->end(); ++it)
   {
     switch(it->c_str()[0])
@@ -77,7 +78,7 @@ Memory::Memory(std::vector<std::string> *source)
           for (std::string::iterator i = (it->begin() + 1); i != it->end(); ++i)
           {
             value = value << 3;
-            value = value | (*i - '0'); // Convert the ascii number to it's integer equivalent.
+            value = value + (*i - '0'); // Convert the ascii number to it's integer equivalent.
           }
 
           // Update internal memory directly to avoid trace output
@@ -92,6 +93,12 @@ Memory::Memory(std::vector<std::string> *source)
           std::cout << "Unrecognized instruction at line " << it - source->begin() << std::endl;
         }
     }
+  }/*}}}*/
+
+  // Make a copy of the initial memory state to support GUI restart of program execution
+  for (int i = 0; i < 65536; ++i)
+  {
+    this->initialRAM[i] = this->RAM[i];
   }
 }
 /*}}}*/
@@ -526,15 +533,24 @@ void Memory::WritePS(unsigned short status)
   this->RAM[PS + 1] = (status >> 8);
 } /*}}}*/
 
-void Memory::ResetPC()
+void Memory::ResetPC()/*{{{*/
 {
   this->RAM[PC] = initialPC & 0xFF;
   this->RAM[PC + 1] = initialPC >> 8;
-  
+
   if (debugLevel == Verbosity::verbose)
   {
     std::cout << "Reset PC to " << initialPC << std::endl;
   }
 
   return;
+}/*}}}*/
+
+// Restore RAM to initial state of program
+void Memory::ResetRAM()
+{
+  for (int i = 0; i < 65536; ++i)
+  {
+    this->RAM[i] = this->initialRAM[i];
+  }
 }

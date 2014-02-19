@@ -201,6 +201,8 @@ Rectangle {
     width: 400
     height: 295
 
+    model: memoryModel
+
     TableViewColumn {
       id: lsbColumn
       horizontalAlignment: 1
@@ -306,25 +308,20 @@ Rectangle {
     y: 8
     width: 20
     height: 20
+    z: 3
     color: "#1c1c1c"
 
     MouseArea {
       id: closeArea
-      x: 1338
-      y: 8
       width: 20
       height: 20
-      z: 1
 
       onClicked: {
-        console.log("Clicked!!!")
         Qt.quit()
       }
 
       Image {
         id: closeImage
-        x: -1338
-        y: -8
         width: 20
         height: 20
         source: "icons/Close.png"

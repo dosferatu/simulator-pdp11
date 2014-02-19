@@ -79,6 +79,8 @@ void programViewModel::run()
   
   // Reset status
   this->memory->WritePS(0);
+  this->memory->ResetPC();
+  this->memory->ResetRAM();
 
   // Run until HALT or break point/*{{{*/
   do
@@ -153,11 +155,11 @@ void programViewModel::step()
 void programViewModel::stop()
 {
   std::cout << "Stop!" << std::endl;
-  this->memory->ResetPC();
 
   // Reset status
   this->memory->WritePS(0);
-  // Need to clear memory
+  this->memory->ResetPC();
+  this->memory->ResetRAM();
 }/*}}}*/
 /*}}}*/
 

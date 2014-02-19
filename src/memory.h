@@ -53,6 +53,7 @@ class Memory
     void SetByteMode() { byteMode = 01; };
     void ClearByteMode() { byteMode = 02; };
     void ResetPC();
+    void ResetRAM();
     unsigned short ReadPS();
     void WritePS(unsigned short status);
 
@@ -60,6 +61,7 @@ class Memory
     int byteMode;
     int debugLevel;
     int regArray[8];
+    unsigned char *initialRAM;
     unsigned char *RAM;
     unsigned short initialPC;
     std::ofstream *traceFile;

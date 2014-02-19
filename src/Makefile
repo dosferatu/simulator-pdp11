@@ -545,6 +545,7 @@ moc_memoryViewModel.cpp: /usr/include/qt/QtCore/QObject \
 		/usr/include/qt/QtCore/qsharedpointer_impl.h \
 		/usr/include/qt/QtGui/qfont.h \
 		/usr/include/qt/QtGui/qicon.h \
+		memory.h \
 		memoryViewModel.h
 	/usr/lib/qt/bin/moc $(DEFINES) $(INCPATH) -I/usr/lib/gcc/include/c++/4.8.2 -I/usr/lib/gcc/include/c++/4.8.2/x86_64-unknown-linux-gnu -I/usr/lib/gcc/include/c++/4.8.2/backward -I/usr/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include -I/usr/local/include -I/usr/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include-fixed -I/usr/include memoryViewModel.h -o moc_memoryViewModel.cpp
 
@@ -1139,11 +1140,11 @@ simulator.o: simulator.cpp /usr/include/qt/QtGui/QtGui \
 		programViewModel.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o simulator.o simulator.cpp
 
-memoryViewModel.o: memoryViewModel.cpp /usr/include/qt/QtGui/QStandardItemModel \
-		/usr/include/qt/QtGui/qstandarditemmodel.h \
-		/usr/include/qt/QtCore/qabstractitemmodel.h \
-		/usr/include/qt/QtCore/qvariant.h \
-		/usr/include/qt/QtCore/qatomic.h \
+memoryViewModel.o: memoryViewModel.cpp memoryViewModel.h \
+		/usr/include/qt/QtCore/QObject \
+		/usr/include/qt/QtCore/qobject.h \
+		/usr/include/qt/QtCore/qobjectdefs.h \
+		/usr/include/qt/QtCore/qnamespace.h \
 		/usr/include/qt/QtCore/qglobal.h \
 		/usr/include/qt/QtCore/qconfig.h \
 		/usr/include/qt/QtCore/qfeatures.h \
@@ -1151,12 +1152,7 @@ memoryViewModel.o: memoryViewModel.cpp /usr/include/qt/QtGui/QStandardItemModel 
 		/usr/include/qt/QtCore/qprocessordetection.h \
 		/usr/include/qt/QtCore/qcompilerdetection.h \
 		/usr/include/qt/QtCore/qglobalstatic.h \
-		/usr/include/qt/QtCore/qmutex.h \
-		/usr/include/qt/QtCore/qlogging.h \
-		/usr/include/qt/QtCore/qflags.h \
-		/usr/include/qt/QtCore/qtypeinfo.h \
-		/usr/include/qt/QtCore/qtypetraits.h \
-		/usr/include/qt/QtCore/qsysinfo.h \
+		/usr/include/qt/QtCore/qatomic.h \
 		/usr/include/qt/QtCore/qbasicatomic.h \
 		/usr/include/qt/QtCore/qatomic_bootstrap.h \
 		/usr/include/qt/QtCore/qgenericatomic.h \
@@ -1179,32 +1175,39 @@ memoryViewModel.o: memoryViewModel.cpp /usr/include/qt/QtGui/QStandardItemModel 
 		/usr/include/qt/QtCore/qatomic_cxx11.h \
 		/usr/include/qt/QtCore/qatomic_gcc.h \
 		/usr/include/qt/QtCore/qatomic_unix.h \
-		/usr/include/qt/QtCore/qbytearray.h \
-		/usr/include/qt/QtCore/qrefcount.h \
-		/usr/include/qt/QtCore/qnamespace.h \
-		/usr/include/qt/QtCore/qarraydata.h \
+		/usr/include/qt/QtCore/qmutex.h \
+		/usr/include/qt/QtCore/qlogging.h \
+		/usr/include/qt/QtCore/qflags.h \
+		/usr/include/qt/QtCore/qtypeinfo.h \
+		/usr/include/qt/QtCore/qtypetraits.h \
+		/usr/include/qt/QtCore/qsysinfo.h \
+		/usr/include/qt/QtCore/qobjectdefs_impl.h \
 		/usr/include/qt/QtCore/qstring.h \
 		/usr/include/qt/QtCore/qchar.h \
+		/usr/include/qt/QtCore/qbytearray.h \
+		/usr/include/qt/QtCore/qrefcount.h \
+		/usr/include/qt/QtCore/qarraydata.h \
 		/usr/include/qt/QtCore/qstringbuilder.h \
 		/usr/include/qt/QtCore/qlist.h \
 		/usr/include/qt/QtCore/qalgorithms.h \
 		/usr/include/qt/QtCore/qiterator.h \
+		/usr/include/qt/QtCore/qcoreevent.h \
+		/usr/include/qt/QtCore/qscopedpointer.h \
 		/usr/include/qt/QtCore/qmetatype.h \
 		/usr/include/qt/QtCore/qvarlengtharray.h \
 		/usr/include/qt/QtCore/qcontainerfwd.h \
 		/usr/include/qt/QtCore/qisenum.h \
-		/usr/include/qt/QtCore/qobjectdefs.h \
-		/usr/include/qt/QtCore/qobjectdefs_impl.h \
+		/usr/include/qt/QtCore/qobject_impl.h \
+		/usr/include/qt/QtGui/QStandardItemModel \
+		/usr/include/qt/QtGui/qstandarditemmodel.h \
+		/usr/include/qt/QtCore/qabstractitemmodel.h \
+		/usr/include/qt/QtCore/qvariant.h \
 		/usr/include/qt/QtCore/qmap.h \
 		/usr/include/qt/QtCore/qpair.h \
 		/usr/include/qt/QtCore/qdebug.h \
 		/usr/include/qt/QtCore/qhash.h \
 		/usr/include/qt/QtCore/qtextstream.h \
 		/usr/include/qt/QtCore/qiodevice.h \
-		/usr/include/qt/QtCore/qobject.h \
-		/usr/include/qt/QtCore/qcoreevent.h \
-		/usr/include/qt/QtCore/qscopedpointer.h \
-		/usr/include/qt/QtCore/qobject_impl.h \
 		/usr/include/qt/QtCore/qlocale.h \
 		/usr/include/qt/QtCore/qshareddata.h \
 		/usr/include/qt/QtCore/qvector.h \
@@ -1235,8 +1238,7 @@ memoryViewModel.o: memoryViewModel.cpp /usr/include/qt/QtGui/QStandardItemModel 
 		/usr/include/qt/QtCore/qsharedpointer_impl.h \
 		/usr/include/qt/QtGui/qfont.h \
 		/usr/include/qt/QtGui/qicon.h \
-		memoryViewModel.h \
-		/usr/include/qt/QtCore/QObject
+		memory.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o memoryViewModel.o memoryViewModel.cpp
 
 programViewModel.o: programViewModel.cpp programViewModel.h \

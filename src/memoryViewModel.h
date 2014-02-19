@@ -4,28 +4,31 @@
 #include <QObject>
 #include <QStandardItemModel>
 #include <string>
+#include "memory.h"
 
 class memoryViewModel : public QObject
 {
   Q_OBJECT
 
   public:
-    Q_PROPERTY(QVector<std::string> memoryReference\
+    Q_PROPERTY(QStringList memoryReference\
         READ memoryReference\
         WRITE setMemoryReference)
 
       memoryViewModel();
+      memoryViewModel(Memory *memory);
     ~memoryViewModel();
 
-    QVector<std::string> memoryReference();
+    QStringList memoryReference();
 
-    void setMemoryReference(QVector<std::string> __memoryReference);
+    void setMemoryReference(QStringList memoryReference);
 
     public slots:
       void displayMemory(QString address);
 
   private:
-      QVector<std::string> *_memoryReference;
+      QStringList *_memoryReference;
+      Memory *memory;
 };
 
 #endif // MEMORYVIEWMODEL_H
