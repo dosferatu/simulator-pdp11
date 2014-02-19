@@ -1,3 +1,6 @@
+#ifndef MEMORY_H
+#define MEMORY_H
+
 #include <fstream>
 #include <string>
 #include <vector>
@@ -49,6 +52,7 @@ class Memory
     void TraceDump(Transaction type, unsigned short address);
     void SetByteMode() { byteMode = 01; };
     void ClearByteMode() { byteMode = 02; };
+    void ResetPC();
     unsigned short ReadPS();
     void WritePS(unsigned short status);
 
@@ -57,5 +61,7 @@ class Memory
     int debugLevel;
     int regArray[8];
     unsigned char *RAM;
+    unsigned short initialPC;
     std::ofstream *traceFile;
 };
+#endif // MEMORY_H

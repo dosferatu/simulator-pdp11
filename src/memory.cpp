@@ -5,7 +5,8 @@
 // Initialize memory using the assembly source/*{{{*/
 Memory::Memory(std::vector<std::string> *source)
 {
-  this->RAM = new unsigned char[65536];
+  // Initialize RAM to 0's
+  this->RAM = new unsigned char[65536] {0};
   this->byteMode = 02;          // Default to word addressing
   int addressIndex = 0;
 
@@ -76,12 +77,13 @@ Memory::Memory(std::vector<std::string> *source)
           for (std::string::iterator i = (it->begin() + 1); i != it->end(); ++i)
           {
             value = value << 3;
-            value = value + (*i - '0'); // Convert the ascii number to it's integer equivalent.
+            value = value | (*i - '0'); // Convert the ascii number to it's integer equivalent.
           }
 
           // Update internal memory directly to avoid trace output
           this->RAM[PC] = value & 0xFF;
           this->RAM[PC + 1] = value >> 8;
+          this->initialPC = value;
           break;
         }
 
@@ -523,3 +525,16 @@ void Memory::WritePS(unsigned short status)
   this->RAM[PS] = status & 0xFF;
   this->RAM[PS + 1] = (status >> 8);
 } /*}}}*/
+
+void Memory::ResetPC()
+{
+  this->RAM[PC] = initialPC & 0xFF;
+  this->RAM[PC + 1] = initialPC >> 8;
+  
+  if (debugLevel == Verbosity::verbose)
+  {
+    std::cout << "Reset PC to " << initialPC << std::endl;
+  }
+
+  return;
+}

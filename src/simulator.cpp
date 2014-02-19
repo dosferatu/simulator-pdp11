@@ -1,7 +1,13 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <QtGui>
+#include <QQmlComponent>
+#include <QtQml>
+#include "qtquick2applicationviewer.h"
 #include "cpu.h"
+#include "memoryViewModel.h"
+#include "programViewModel.h"
 
 /******************************************************************************
  *
@@ -18,21 +24,27 @@ CPU *cpu;
 std::vector<std::string> *source;
 std::fstream *macFile;
 
+/*
+ * Data structures used by the GUI
+ */
+std::vector<int> *breakPoints;	// Will be PC values
+
 /******************************************************************************
  *
  *                                BEGIN MAIN
  *
  *****************************************************************************/
-int main(int argc, char *argv[])
+Q_DECL_EXPORT int main(int argc, char *argv[])
 {
   int sourceArg = -1;
+  bool GUImode = false;
   Verbosity verbosity = Verbosity::off;
   macFile = new std::fstream();
 
-  // Parse command line arguments/*{{{*/
-  if (argc > 3)
+  //Parse command line arguments[>{{{<]
+  if (argc > 4)
   {
-    std::cout << "Usage: simulator <ascii file>" << std::endl;
+    std::cout << "Usage: simulator {OPTIONAL}<-V or -v> {OPTIONAL}<-g> {REQUIRED}<ascii file>" << std::endl;
     return 0;
   }
 
@@ -54,7 +66,7 @@ int main(int argc, char *argv[])
         }
       }
 
-    case 3:
+    case 3: case 4:
       {
         for (int i = 1; i < argc; ++i)
         {
@@ -68,7 +80,7 @@ int main(int argc, char *argv[])
             else
             {
               std::cout << "Conflicting verbosity arguments!" << std::endl;
-              std::cout << "Usage: simulator <ascii file>" << std::endl;
+              std::cout << "Usage: simulator {OPTIONAL}<-V or -v> {OPTIONAL}<-g> {REQUIRED}<ascii file>" << std::endl;
               return 0;
             }
           }
@@ -83,7 +95,22 @@ int main(int argc, char *argv[])
             else
             {
               std::cout << "Conflicting verbosity arguments!" << std::endl;
-              std::cout << "Usage: simulator <ascii file>" << std::endl;
+              std::cout << "Usage: simulator {OPTIONAL}<-V or -v> {OPTIONAL}<-g> {REQUIRED}<ascii file>" << std::endl;
+              return 0;
+            }
+          }
+
+          else if(static_cast<std::string>(argv[i]).compare("-g") == 0)
+          {
+            if (!GUImode)
+            {
+              GUImode = true;
+            }
+
+            else
+            {
+              std::cout << "Conflicting GUI arguments!" << std::endl;
+              std::cout << "Usage: simulator {OPTIONAL}<-V or -v> {OPTIONAL}<-g> {REQUIRED}<ascii file>" << std::endl;
               return 0;
             }
           }
@@ -100,7 +127,7 @@ int main(int argc, char *argv[])
 
           else
           {
-            std::cout << "Usage: simulator <ascii file>" << std::endl;
+            std::cout << "Usage: simulator {OPTIONAL}<-V or -v> {OPTIONAL}<-g> {REQUIRED}<ascii file>" << std::endl;
             return 0;
           }
         }
@@ -109,7 +136,7 @@ int main(int argc, char *argv[])
 
         default:
         {
-          std::cout << "Usage: simulator <ascii file>" << std::endl;
+          std::cout << "Usage: simulator {OPTIONAL}<-V or -v> {OPTIONAL}<-g> {REQUIRED}<ascii file>" << std::endl;
           return 0;
         }
       }
@@ -152,43 +179,80 @@ int main(int argc, char *argv[])
   source->pop_back();
   /*}}}*/
 
+  // Simulator declarations/*{{{*/
   memory = new Memory(source);
   memory->SetDebugMode(verbosity);
   cpu = new CPU(memory);
-  cpu->SetDebugMode(verbosity);
+  cpu->SetDebugMode(verbosity);/*}}}*/
 
-  // Loop the CPU which will handle state changes internally.
-  // Need to make sure program halting is handled in CPU.
-  int status = 0;
-  do
+  // GUI execution block/*{{{*/
+  if (GUImode)
   {
-    status = cpu->FDE();
-    memory->IncrementPC();
+    /*
+     * Declare the UI ViewModels
+     */
+    programViewModel *programVM = new programViewModel(cpu, memory);
+    memoryViewModel *memoryVM = new memoryViewModel();
 
-    if (memory->RetrievePC() % 2 != 0)
+    /*
+     * Register the ViewModels for use in the QML file
+     */
+    qmlRegisterType<programViewModel>("ProgramViewModel", 1, 0, "programViewModel");
+    qmlRegisterType<memoryViewModel>("MemoryViewModel", 1, 0, "memoryViewModel");
+
+    // Set the context for the GUI and launch
+    QGuiApplication app(argc, argv);
+    QtQuick2ApplicationViewer viewer;
+    viewer.rootContext()->setContextProperty("programViewModel", programVM);
+    viewer.rootContext()->setContextProperty("memoryViewModel", memoryVM);
+    viewer.setMainQmlFile(QStringLiteral("simulator.qml"));
+
+    // Set this to be conditional for an optional GUI
+    viewer.showExpanded();
+    return app.exec();
+  }/*}}}*/
+
+  // Console execution block/*{{{*/
+  else
+  {
+    /*
+     * RUN THIS ONLY IF IN CONSOLE MODE
+     */
+
+    // Loop the CPU which will handle state changes internally.
+    // Need to make sure program halting is handled in CPU.
+    int status = 0;
+    do
     {
-      std::cout << "Warning: program counter is not an even number!" << std::endl;
-    }
+      status = cpu->FDE();
+      memory->IncrementPC();
 
-    if (status == 0)
-    { 
-      std::cout << "PDP 11/20 received HALT instruction\n" << std::endl;
+      if (memory->RetrievePC() % 2 != 0)
+      {
+        std::cout << "Warning: program counter is not an even number!" << std::endl;
+      }
 
-      /* The HALT results in a process halt but can be resumed after the user
-       *  presses continue on the console.  In this case we are using the
-       *  enter key to denote the continue key on the console.
-       */
-      //std::cout << "Press Enter to continue\n" << std::endl;
-      //std::cin.get();
-      //status = 0;  // Reset status to allow process to continue.
-    }
-  } while (status > 0);
+      if (status == 0)
+      {
+        std::cout << "PDP 11/20 received HALT instruction\n" << std::endl;
 
+        /* The HALT results in a process halt but can be resumed after the user
+         *  presses continue on the console.  In this case we are using the
+         *  enter key to denote the continue key on the console.
+         */
+        //std::cout << "Press Enter to continue\n" << std::endl;
+        //std::cin.get();
+        //status = 0;  // Reset status to allow process to continue.
+      }
+    } while (status > 0);
+  }/*}}}*/
 
   // Garbage collection/*{{{*/
+  delete breakPoints;
   delete cpu;
   delete macFile;
   delete source;
-/*}}}*/
+  /*}}}*/
+
   return 0;
 }

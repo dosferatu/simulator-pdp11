@@ -1,12 +1,11 @@
 # PDP-11
-*.ascii
-*.PCascii
 *.lst
 *.obj
 
 # Simulator output
 simulator
 trace.txt
+*.o
 
 # Vim
 *.swp
