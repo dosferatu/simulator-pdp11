@@ -535,11 +535,11 @@ int CPU::FDE()/*{{{*/
                       return instruction;
                     }
             case 4: { // NEG dst: -(dst) -> (dst) 
-                      tmp = memory->Read(address(dst)); // Get value at address NEG
-                      tmp = ~tmp;                   // Get 2's comp of value
-                      memory->Write(address(dst),tmp);  // Write to memory
-                      resultIsZero(tmp);                // Update Z bit
-                      resultLTZero(tmp);                // Update N bit
+                      tmp = memory->Read(address(dst));       // Get value at address NEG
+                      tmp = ~tmp;                             // Get 2's comp of value
+                      memory->Write(address(dst),tmp);        // Write to memory
+                      resultIsZero(tmp);                      // Update Z bit
+                      resultLTZero(tmp);                      // Update N bit
                       tmp == 0? update_flags(0,Cbit) : update_flags(1,Cbit);          // Update C bit
                       tmp == 0100000? update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
                       return instruction;
@@ -957,11 +957,7 @@ int CPU::FDE()/*{{{*/
       memory->Write(address(dst),result);     // Write result to memory
       resultIsZero(result);                   // Update Z bit
       resultLTZero(result);                   // Update N bit
-      //((src_temp & WORD) | (dst_temp & WORD)) && (tmp > 0)? \
-      //  update_flags(1,Cbit) : update_flags(0,Cbit);  // Update C bit
       (result & 0xF0000) > 0? update_flags(1,Cbit) : update_flags(0,Cbit);
-      //((~((src_temp & WORD) ^ (dst_temp & WORD)) & WORD) & (~(tmp & WORD) & WORD))? \
-      //  update_flags(1,Vbit) : update_flags(0,Vbit); // Update V bit (src !^ dst) & ~result
       (((src_temp & WORD) & (dst_temp & WORD)) ^ ((result & 0x10000) >> 1))? \
        update_flags(1,Vbit) : update_flags(0,Vbit);
       return instruction;
@@ -976,11 +972,7 @@ int CPU::FDE()/*{{{*/
       memory->Write(address(dst), result);         // Write to memory
       resultIsZero(result);                        // Update Z bit
       resultLTZero(result);                        // Update N bit
-      //((~((dst_temp & WORD) ^ (src_temp & WORD)) & WORD) & (~(tmp & WORD) & WORD))? \
-      //  update_flags(0,Cbit) : update_flags(1,Cbit);   // Update C bit
       (result & 0x10000)? update_flags(0,Cbit) : update_flags(1,Cbit);
-      //(((dst_temp & WORD) ^ (src_temp & WORD)) & (~((tmp & WORD) ^ (src_temp & WORD)) & WORD))? \
-      //  update_flags(1,Vbit) : update_flags(0,Vbit);                          // Update V bit
       (((src_temp & WORD) ^ (dst_temp & WORD)) & ((src_temp & WORD) & ((result & 0x10000) >> 1)))? \
         update_flags(1,Vbit) : update_flags(0,Vbit);
       return instruction;
