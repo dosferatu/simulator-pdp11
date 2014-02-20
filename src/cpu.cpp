@@ -224,9 +224,9 @@ int CPU::FDE()/*{{{*/
         tmp = memory->Read(address(dst));       // Get value at effective address // SWAB
         unsigned short byte_temp = tmp << 8;    // Create temp and give it LSByte of value in MSByte
         tmp = (tmp >> 8) & 0x00FF;             // Shift MSByte into LSByte and clear MSByte
-		(tmp == 0)?	\ 
+		(tmp == 0)? \
 		update_flags(1,Zbit): update_flags(0,Zbit);	//Update Z bit based on low order byte
-		((tmp & 0x0080) == 0x0080)? \				
+		((tmp & 0x0080) == 0x0080)? \
 		update_flags(1,Nbit): update_flags(0,Nbit); //Update N bit based on low order byte
         tmp = byte_temp + tmp;                  // Finalize the swap byte
         memory->Write(address(dst), byte_temp); // Write to register
