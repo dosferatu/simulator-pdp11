@@ -196,7 +196,7 @@ Rectangle {
     sortIndicatorVisible: false
     sortIndicatorColumn: 0
     headerVisible: false
-    alternatingRowColors: true
+    alternatingRowColors: false
     backgroundVisible: false
 
     TableViewColumn {
