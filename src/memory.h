@@ -6,15 +6,15 @@
 #include <vector>
 
 // Register memory locations
-#define R0 0177700
-#define R1 0177704
-#define R2 0177710
-#define R3 0177714
-#define R4 0177720
-#define R5 0177724
-#define SP 0177730
-#define PC 0177734
-#define PS 0177776
+#define R0 0177700U
+#define R1 0177704U
+#define R2 0177710U
+#define R3 0177714U
+#define R4 0177720U
+#define R5 0177724U
+#define SP 0177730U
+#define PC 0177734U
+#define PS 0177776U
 
 // Debug levels
 enum Verbosity

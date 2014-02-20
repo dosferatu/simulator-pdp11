@@ -295,7 +295,7 @@ unsigned short Memory::EA(unsigned short encodedAddress, Transaction type)/*{{{*
           }
 
           unsigned short address = this->RetrievePC();
-          unsigned short relativeAddress = (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);
+          unsigned short relativeAddress = ((this->RAM[address + 1] << 8) & 0xFF00) | (this->RAM[address] & 0xFF);
           decodedAddress = address + relativeAddress + 02;
         }
 
@@ -380,7 +380,7 @@ unsigned short Memory::Read(unsigned short encodedAddress)/*{{{*/
   unsigned short address = this->EA(encodedAddress);
 
   // If not a general register operand then do a trace dump
-  if (!(address > R0 && address < PC))
+  if (address < R0)
   {
     this->TraceDump(Transaction::read, address);
   }
@@ -415,7 +415,7 @@ void Memory::Write(unsigned short encodedAddress, unsigned short data)/*{{{*/
   unsigned short address = this->EA(encodedAddress, Transaction::write);
 
   // If not a general register operand then do a trace dump
-  if (!(address > R0 && address < PC))
+  if (address < R0)
   {
     this->TraceDump(Transaction::write, address);
   }

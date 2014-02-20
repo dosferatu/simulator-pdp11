@@ -1,104 +1,23 @@
-;Test simple branching instructions
-SUCCESS:
-MOV #1, R0
-BR FAIL
+		;.PSECT A,ABS
+;    **************************************
+;    * CALCULATE THE NTH FIBONACCI NUMBER *
+;    **************************************
+; 
+OLD:      .WORD     0.             ;initialise OLD, NEW, and FIBO
+NEW:      .WORD     0.             
+FIBO:     .WORD     0.
+N:        .WORD     6.             ;initialise N
 
-ONLOWER:
-CLC
-BLO FAIL
-SEC
-BLO SUCCESS
-BR FAIL
-
-HIGHERORSAME:
-SEC
-BHIS FAIL
-CLC
-BHIS ONLOWER
-BR FAIL
-
-LOWERORSAME2:
-CLZ
-SEC
-BLOS HIGHERORSAME
-BR FAIL
-
-LOWERORSAME:
-CLZ
-CLC
-BLOS FAIL
-SEZ
-BLOS LOWERORSAME2
-BR FAIL
-
-ONHIGHER:
-SEC
-SEZ
-BHI FAIL
-CLC
-BHI FAIL
-SEC
-CLZ
-BHI FAIL
-CLC
-BHI LOWERORSAME
-BR FAIL
-
-GREATERTHAN:
-SEZ
-CLN
-CLV
-BGT FAIL
-SEV
-BGT FAIL
-SEN
-BGT FAIL
-CLN
-CLZ
-BGT FAIL
-CLV
-BGT ONHIGHER
-BR FAIL
-
-LESSEQUAL2:
-CLV
-SEZ
-BLE GREATERTHAN
-BR FAIL
-
-LESSEQUAL:
-CLZ
-SEN
-SEV
-BLE FAIL
-CLN
-CLV
-BLE FAIL
-SEV
-BLE LESSEQUAL2
-BR FAIL
-
-GREATEREQUAL:
-SEV
-CLN
-BGE FAIL
-CLV
-SEN
-BGE FAIL
-SEV
-BGE LESSEQUAL
-BR FAIL
-
-START:
-;Test the less than zero branch
-CLN
-CLV
-BLT FAIL
-SEN
-SEV
-BLT FAIL
-CLN
-BLT GREATEREQUAL
-
-FAIL:
-.END START
+START:                             ;program starts executing here
+          MOV       #1.,OLD        ;set OLD, FIBO to 1
+          MOV       #1.,FIBO
+WHILE:    CMP       N, #1.         ;WHILE N > 1 DO
+          BLE       WEND           
+          MOV       FIBO,NEW
+          ADD       OLD,NEW        ;    NEW = FIBO + OLD
+          MOV       FIBO,OLD       ;    OLD = FIBO    
+          MOV       NEW,FIBO       ;    FIBO = NEW
+          DEC       N              ;    N = N - 1
+          BR        WHILE          ;WEND
+WEND:     HALT                     ;STOP
+          .END      START

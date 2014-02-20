@@ -478,12 +478,12 @@ int CPU::FDE()/*{{{*/
       // JSR reg, dst /*{{{*/
       case 4:
         { 
-          tmp = memory->Read(address(dst));             // Get value at effective address for dst JSR
-          unsigned short reg = memory->Read(iB[2]);     // Get value at effective address for reg
-          memory->StackPush(reg);                       // Push value from reg onto stack
-          reg = memory->Read(007);                      // Get value from PC
-          memory->Write(iB[2],reg);                     // Write PC value to register
-          memory->Write(007,tmp);                       // Write new address to PC
+          tmp = memory->Read(address(dst));               // Get value at effective address for dst JSR
+          unsigned short reg = memory->Read(iB[2] & 007); // Get value at effective address for reg
+          memory->StackPush(reg);                         // Push value from reg onto stack
+          reg = memory->Read(007);                        // Get value from PC
+          memory->Write((iB[2] & 007),reg);               // Write PC value to register
+          memory->Write(007,tmp);                         // Write new address to PC
           return instruction;
         }/*}}}*/
 
