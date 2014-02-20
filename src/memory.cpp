@@ -21,10 +21,6 @@ Memory::Memory(std::vector<std::string> *source)
   regArray[6] = SP;
   regArray[7] = PC;
 
-  // Initialize the SP
-  this->RAM[SP] = 0160000 & 0xFF;
-  this->RAM[SP + 1] = 0160000 >> 8;
-
   try
   {
     traceFile = new std::ofstream("trace.txt", std::ios::out);
@@ -122,12 +118,12 @@ void Memory::WriteAddress(unsigned short address, unsigned short data)
 
 unsigned short Memory::ReadAddress(unsigned short address)
 {
-  return (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);
+  return (this->RAM[address + 1] << 8) | (this->RAM[address] & 0xFF);
 }
 
 unsigned short Memory::RetrievePC()/*{{{*/
 {
-  return (this->RAM[PC + 1] << 8) + (this->RAM[PC] & 0xFF);
+  return (this->RAM[PC + 1] << 8) | (this->RAM[PC] & 0xFF);
 }
 /*}}}*/
 
@@ -152,8 +148,7 @@ unsigned short Memory::EA(unsigned short encodedAddress, Transaction type)/*{{{*
       {
         modeType = "Deferred Register";
 
-        decodedAddress = (this->RAM[regArray[reg] + 1] << 8) + (this->RAM[regArray[reg]] & 0xFF);
-        //this->TraceDump(Transaction::read, decodedAddress);
+        decodedAddress = (this->RAM[regArray[reg] + 1] << 8) | (this->RAM[regArray[reg]] & 0xFF);
         break;
       }
 
@@ -181,7 +176,7 @@ unsigned short Memory::EA(unsigned short encodedAddress, Transaction type)/*{{{*
            */
           modeType = "Autoincrement";
 
-          decodedAddress = (this->RAM[regArray[reg] + 1] << 8) + (this->RAM[regArray[reg]] & 0xFF);
+          decodedAddress = (this->RAM[regArray[reg] + 1] << 8) | (this->RAM[regArray[reg]] & 0xFF);
           //this->TraceDump(Transaction::read, decodedAddress);
 
           unsigned short  incrementedAddress;
@@ -215,7 +210,7 @@ unsigned short Memory::EA(unsigned short encodedAddress, Transaction type)/*{{{*
           }
 
           unsigned short address = this->RetrievePC();
-          decodedAddress = (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);
+          decodedAddress = (this->RAM[address + 1] << 8) | (this->RAM[address] & 0xFF);
         }
 
         else
@@ -223,10 +218,10 @@ unsigned short Memory::EA(unsigned short encodedAddress, Transaction type)/*{{{*
           modeType = "Autoincrement Deferred";
 
           // Read in address from reg
-          unsigned short address = (this->RAM[regArray[reg] + 1] << 8) + (this->RAM[regArray[reg]] & 0xFF);
+          unsigned short address = (this->RAM[regArray[reg] + 1] << 8) | (this->RAM[regArray[reg]] & 0xFF);
 
           // Read in value from address
-          decodedAddress = (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);
+          decodedAddress = (this->RAM[address + 1] << 8) | (this->RAM[address] & 0xFF);
           this->TraceDump(Transaction::read, address);
 
           // Possibly case for byteMode?
@@ -257,7 +252,7 @@ unsigned short Memory::EA(unsigned short encodedAddress, Transaction type)/*{{{*
          */
 
         // Possibly case for byteMode?
-        unsigned short address = (this->RAM[regArray[reg] + 1] << 8) + (this->RAM[regArray[reg]] & 0xFF);
+        unsigned short address = (this->RAM[regArray[reg] + 1] << 8) | (this->RAM[regArray[reg]] & 0xFF);
         if (regArray[reg] == SP)
         {
           decodedAddress = address - 02;
@@ -277,7 +272,7 @@ unsigned short Memory::EA(unsigned short encodedAddress, Transaction type)/*{{{*
         modeType = "Autodecrement Deferred";
 
         // Decrement Rn, and return the address in Rn
-        unsigned short address = (this->RAM[regArray[reg] + 1] << 8) + (this->RAM[regArray[reg]] & 0xFF);
+        unsigned short address = (this->RAM[regArray[reg] + 1] << 8) | (this->RAM[regArray[reg]] & 0xFF);
         unsigned short decrementedAddress;
         if (regArray[reg] == SP)
         {
@@ -288,7 +283,7 @@ unsigned short Memory::EA(unsigned short encodedAddress, Transaction type)/*{{{*
         {
           decrementedAddress = address - byteMode;
         }
-        decodedAddress = (this->RAM[decrementedAddress + 1] << 8) + (this->RAM[decrementedAddress] & 0xFF);
+        decodedAddress = (this->RAM[decrementedAddress + 1] << 8) | (this->RAM[decrementedAddress] & 0xFF);
         this->RAM[regArray[reg]] = decrementedAddress & 0xFF;
         this->RAM[regArray[reg] + 1] = decrementedAddress >> 8;
         this->TraceDump(Transaction::read, decrementedAddress);
@@ -322,9 +317,9 @@ unsigned short Memory::EA(unsigned short encodedAddress, Transaction type)/*{{{*
           }
 
           // Retrieve the index offset from memory
-          unsigned short base = (this->RAM[regArray[reg] + 1] << 8) + (this->RAM[regArray[reg]] & 0xFF);
+          unsigned short base = (this->RAM[regArray[reg] + 1] << 8) | (this->RAM[regArray[reg]] & 0xFF);
           unsigned short offsetAddress = this->RetrievePC();
-          unsigned short offset = (this->RAM[offsetAddress + 1] << 8) + (this->RAM[offsetAddress] & 0xFF);
+          unsigned short offset = (this->RAM[offsetAddress + 1] << 8) | (this->RAM[offsetAddress] & 0xFF);
           decodedAddress = offset + base;
         }
 
@@ -344,9 +339,9 @@ unsigned short Memory::EA(unsigned short encodedAddress, Transaction type)/*{{{*
           }
 
           unsigned short address = this->RetrievePC();
-          unsigned short relativeAddress = (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);
+          unsigned short relativeAddress = (this->RAM[address + 1] << 8) | (this->RAM[address] & 0xFF);
           unsigned short relativeAddressAddress = address + relativeAddress;
-          decodedAddress = (this->RAM[relativeAddressAddress + 1] << 8) + (this->RAM[relativeAddressAddress] & 0xFF);
+          decodedAddress = (this->RAM[relativeAddressAddress + 1] << 8) | (this->RAM[relativeAddressAddress] & 0xFF);
         }
 
         else
@@ -364,11 +359,11 @@ unsigned short Memory::EA(unsigned short encodedAddress, Transaction type)/*{{{*
             this->IncrementPC();
           }
 
-          unsigned short base = (this->RAM[regArray[reg] + 1] << 8) + (this->RAM[regArray[reg]] & 0xFF);
+          unsigned short base = (this->RAM[regArray[reg] + 1] << 8) | (this->RAM[regArray[reg]] & 0xFF);
           unsigned short offsetAddress = this->RetrievePC();
-          unsigned short offset = (this->RAM[offsetAddress + 1] << 8) + (this->RAM[offsetAddress] & 0xFF);
+          unsigned short offset = (this->RAM[offsetAddress + 1] << 8) | (this->RAM[offsetAddress] & 0xFF);
           unsigned short address = offset + base;
-          decodedAddress = (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);
+          decodedAddress = (this->RAM[address + 1] << 8) | (this->RAM[address] & 0xFF);
           this->TraceDump(Transaction::read, address);
         }
 
@@ -409,7 +404,7 @@ unsigned short Memory::Read(unsigned short encodedAddress)/*{{{*/
 
   else
   {
-    return (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);
+    return (this->RAM[address + 1] << 8) | (this->RAM[address] & 0xFF);
   }
 }
 /*}}}*/
@@ -419,7 +414,7 @@ unsigned short Memory::ReadInstruction()/*{{{*/
   unsigned short address = this->RetrievePC();
   // Trace file output
   this->TraceDump(Transaction::instruction, this->RetrievePC());
-  return (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);
+  return (this->RAM[address + 1] << 8) | (this->RAM[address] & 0xFF);
 }
 /*}}}*/
 
@@ -452,7 +447,7 @@ void Memory::Write(unsigned short encodedAddress, unsigned short data)/*{{{*/
 unsigned short Memory::StackPop()/*{{{*/
 {
   // Read stack
-  unsigned short address = (this->RAM[SP + 1] << 8) + (this->RAM[SP] & 0xFF);
+  unsigned short address = (this->RAM[SP + 1] << 8) | (this->RAM[SP] & 0xFF);
 
   // Increment stack pointer
   address += 02;
@@ -460,14 +455,14 @@ unsigned short Memory::StackPop()/*{{{*/
   this->RAM[SP + 1] = address >> 8;
 
   // Return data
-  return (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);
+  return (this->RAM[address + 1] << 8) | (this->RAM[address] & 0xFF);
 }
 /*}}}*/
 
 void Memory::StackPush(unsigned short _register)/*{{{*/
 {
 
-  unsigned short address = (this->RAM[SP + 1] << 8) + (this->RAM[SP] & 0xFF);
+  unsigned short address = (this->RAM[SP + 1] << 8) | (this->RAM[SP] & 0xFF);
   /*
    * Check if stack pointer has exceeded it's limit.
    * If it has then we need to crash and burn.
@@ -482,7 +477,7 @@ void Memory::StackPush(unsigned short _register)/*{{{*/
 
     // Get location in memory to write to
     this->TraceDump(Transaction::write, address);
-    unsigned short location = (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);
+    unsigned short location = (this->RAM[address + 1] << 8) | (this->RAM[address] & 0xFF);
 
     // Write the data
     this->RAM[location] = _register & 0xFF;
@@ -540,7 +535,7 @@ void Memory::TraceDump(Transaction type, unsigned short address)/*{{{*/
 // ReadPS()
 unsigned short Memory::ReadPS()
 {
-  return (this->RAM[PS + 1] << 8) + (this->RAM[PS] & 0xFF);
+  return (this->RAM[PS + 1] << 8) | (this->RAM[PS] & 0xFF);
 }
 
 // WritePS()
