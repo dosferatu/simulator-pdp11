@@ -82,6 +82,7 @@ signals:
   QStringList memoryModel;
   Memory *memory;
   QQuickView *view;
+  QString currentMemoryAddress;
   QString _R0;
   QString _R1;
   QString _R2;

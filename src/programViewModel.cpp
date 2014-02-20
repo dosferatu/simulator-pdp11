@@ -49,6 +49,14 @@ programViewModel::programViewModel(CPU *cpu, Memory *memory, memoryViewModel *me
     for (std::vector<std::string>::iterator it = source->begin(); it != source->end(); ++it)
     {
       instructionModel.append(it->c_str());
+
+      // Save PC for each line to support line highlighting
+      // .lst file will have line numbers
+      // use numeric value at column range 10-15 for pc
+      // save line number
+      //
+      // each instruction update, compare pc to vector and highlight
+      // line number for match.
     }
 
     // Ghetto file not found version

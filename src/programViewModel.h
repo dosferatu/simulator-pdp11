@@ -43,6 +43,7 @@ signals:
     memoryViewModel *memoryVM;
     QQuickView *view;
     QStringList instructionModel;
+    std::vector<std::string> pcList;
 };
 
 #endif // PROGRAMVIEWMODEL_H

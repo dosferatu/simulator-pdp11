@@ -9,6 +9,8 @@ Rectangle {
   height: 768
   color: "#1c1c1c"
 
+  // Buttons//{{{
+  // Stop button//{{{
   Rectangle {
     id: stopRectangle
     x: 8
@@ -45,8 +47,9 @@ Rectangle {
         stopRectangle.color = "#1c1c1c"
       }
     }
-  }
+  }//}}}
 
+  // Step button//{{{
   Rectangle {
     id: stepRectangle
     x: 114
@@ -80,11 +83,12 @@ Rectangle {
       }
 
       onExited: {
-        stepRectangle.color = "#1c1c1c"
+        //stepRectangle.color = "#1c1c1c"
       }
     }
-  }
+  }//}}}
 
+  // Continue button//{{{
   Rectangle {
     id: continueRectangle
     x: 220
@@ -118,11 +122,12 @@ Rectangle {
       }
 
       onExited: {
-        continueRectangle.color = "#1c1c1c"
+        //continueRectangle.color = "#1c1c1c"
       }
     }
-  }
+  }//}}}
 
+  // Run button//{{{
   Rectangle {
     id: runRectangle
     x: 326
@@ -156,124 +161,12 @@ Rectangle {
       }
 
       onExited: {
-        runRectangle.color = "#1c1c1c"
+        //runRectangle.color = "#1c1c1c"
       }
     }
-  }
+  }//}}}
 
-  TableView {
-    id: instructionTable
-    model: instructionModel
-    x: 8
-    y: 160
-    width: 800
-    height: 600
-    alternatingRowColors: false
-    backgroundVisible: false
-    headerVisible: false
-    frameVisible: false
-
-    TableViewColumn {
-      id: instructionColumn
-      width: 999
-      horizontalAlignment: 1
-      title: "Instruction"
-      resizable: false
-      movable: false
-    }
-  }
-
-  TableView {
-    id: memoryTable
-    model: memoryModel
-    x: 958
-    y: 465
-    width: 400
-    height: 295
-    activeFocusOnTab: false
-    frameVisible: false
-    highlightOnFocus: false
-    sortIndicatorVisible: false
-    sortIndicatorColumn: 0
-    headerVisible: false
-    alternatingRowColors: false
-    backgroundVisible: false
-
-    TableViewColumn {
-      id: dataColumn
-      horizontalAlignment: 1
-      title: "Value"
-      resizable: false
-      movable: false
-    }
-  }
-
-  TextInput {
-    id: searchMemoryInput
-    x: 958
-    y: 439
-    width: 160
-    height: 20
-    color: "#739685"
-    text: qsTr("Enter memory location")
-    transformOrigin: Item.Center
-    font.family: "Verdana"
-    visible: true
-    font.pixelSize: 12
-
-    MouseArea {
-      id: searchMemoryArea
-
-      onClicked: {
-        searchMemoryInput.text = ""
-      }
-    }
-  }
-
-  Rectangle {
-    id: searchMemoryRectangle
-    x: 958
-    y: 439
-    width: 160
-    height: 20
-    color: "#333338"
-    visible: true
-    z: -1
-  }
-
-  Rectangle {
-    id: displayMemoryRectangle
-    x: 1198
-    y: 439
-    width: 160
-    height: 20
-    color: "#349dfe"
-
-    MouseArea {
-      id: displayMemoryArea
-      x: 0
-      y: 0
-      width: 160
-      height: 20
-      onClicked: {
-        memoryViewModel.displayMemory(searchMemoryInput.text.toString())
-      }
-    }
-  }
-
-  Text {
-    id: displayMemoryText
-    x: 1198
-    y: 439
-    width: 160
-    height: 20
-    text: qsTr("Display")
-    font.family: "Verdana"
-    horizontalAlignment: Text.AlignHCenter
-    verticalAlignment: Text.AlignVCenter
-    font.pixelSize: 12
-  }
-
+  // Close button//{{{
   Rectangle {
     id: closeRectangle
     x: 1338
@@ -299,8 +192,138 @@ Rectangle {
         source: "icons/Close.png"
       }
     }
+  }//}}}
+//}}}
+
+  // Instruction window//{{{
+  TableView {
+    id: instructionTable
+    model: instructionModel
+    x: 8
+    y: 160
+    width: 800
+    height: 600
+    alternatingRowColors: false
+    backgroundVisible: false
+    headerVisible: false
+    frameVisible: false
+
+    TableViewColumn {
+      id: instructionColumn
+      width: 999
+      horizontalAlignment: 1
+      title: "Instruction"
+      resizable: false
+      movable: false
+    }
+  }//}}}
+
+  // Memory display window//{{{
+  TableView {
+    id: memoryTable
+    model: memoryModel
+    x: 958
+    y: 465
+    width: 400
+    height: 295
+    activeFocusOnTab: false
+    frameVisible: false
+    highlightOnFocus: false
+    sortIndicatorVisible: false
+    sortIndicatorColumn: 0
+    headerVisible: false
+    alternatingRowColors: false
+    backgroundVisible: false
+
+    TableViewColumn {
+      id: dataColumn
+      horizontalAlignment: 1
+      title: "Value"
+      resizable: false
+      movable: false
+    }
   }
 
+  // Search memory input//{{{
+  Rectangle {
+    id: searchMemoryRectangle
+    x: 958
+    y: 439
+    width: 160
+    height: 20
+    color: "#333338"
+    visible: true
+    z: 4
+
+    TextInput {
+        id: searchMemoryInput
+        x: 0
+        y: 0
+        width: 160
+        height: 20
+        color: "#739685"
+        text: qsTr("Enter memory location")
+        z: 3
+        transformOrigin: Item.Center
+        font.family: "Verdana"
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        visible: true
+        font.pixelSize: 12
+
+        MouseArea {
+            id: searchMemoryArea
+            width: 160
+            height: 20
+            z: 1
+
+            onClicked: {
+                searchMemoryInput.text = ""
+                visible: false
+                searchMemoryInput.focus = true
+            }
+        }
+    }
+  }//}}}
+
+  // Search memory button//{{{
+  Rectangle {
+    id: displayMemoryRectangle
+    x: 1198
+    y: 439
+    width: 160
+    height: 20
+    color: "#349dfe"
+
+    Text {
+        id: displayMemoryText
+        x: 0
+        y: 0
+        width: 160
+        height: 20
+        text: qsTr("Display")
+        z: 0
+        font.family: "Verdana"
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        font.pixelSize: 12
+
+        MouseArea {
+            id: displayMemoryArea
+            x: 0
+            y: 0
+            width: 160
+            height: 20
+            z: 1
+            onClicked: {
+                memoryViewModel.displayMemory(searchMemoryInput.text.toString())
+            }
+        }
+    }
+  }//}}}
+//}}}
+
+// Register display section//{{{
   // Register fields//{{{
   TextInput {
       id: reg0
@@ -648,5 +671,7 @@ Rectangle {
       height: 20
       color: "#739685"
       text: qsTr("Z")
-  }//}}}
+  }
+  //}}}
+//}}}
 }

@@ -94,6 +94,7 @@ memoryViewModel::~memoryViewModel()
 void memoryViewModel::displayMemory(QString address)
 {
   this->memoryModel.clear();
+  this->currentMemoryAddress = address;
 
   // Perform validation on address here
 
@@ -119,6 +120,8 @@ void memoryViewModel::displayMemory(QString address)
 
 void memoryViewModel::refreshFields()/*{{{*/
 {
+  this->displayMemory(this->currentMemoryAddress);
+
   // Refresh all the register values when called
   std::stringstream stream;
   unsigned short value;
@@ -203,6 +206,8 @@ void memoryViewModel::refreshFields()/*{{{*/
   stream.str(std::string());
   stream.clear();
   this->notifyC(_C);
+
+
   return;
 }/*}}}*/
 
