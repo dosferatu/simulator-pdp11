@@ -31,7 +31,11 @@ Kevin Bedrossian}         % type author(s) between braces
  The PDP-11/20 ISA simulator is modularized into parts similar to the actual computer hardware.  The CPU object controls the overall functionality of the simulator by managing the fetch, decode, and execute processes.  The steps to this process are as follows: fetch instruction, decode instruction, request data from the Memory object in accordance with the decoded instruction, followed by the appropriate execution of operations and condition code updates.  There is a Memory object that manages the loading of program into the memory block and the flow of reading and writing data. 
 
 \chapter{Design Plan}
+<<<<<<< HEAD
 \section{
+=======
+Simple object-oriented design techniques were used to implement the simulator application, which were leveraged for development of a GUI using the Qt5 framework. The GUI development loosely follows a Model-View-ViewModel framework where we use ViewModel class objects to act as the delegate to propagate changes in the application data to and from the UI.
+>>>>>>> ebb8e0f84544eea516c11b5de7828c0fc97726d4
 
 \chapter{Test Plan}
 
