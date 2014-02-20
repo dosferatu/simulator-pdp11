@@ -168,6 +168,10 @@ Rectangle {
     y: 160
     width: 800
     height: 600
+    alternatingRowColors: false
+    backgroundVisible: false
+    headerVisible: false
+    frameVisible: false
 
     TableViewColumn {
       id: instructionColumn
@@ -186,35 +190,19 @@ Rectangle {
     y: 465
     width: 400
     height: 295
+    activeFocusOnTab: false
+    frameVisible: false
+    highlightOnFocus: false
+    sortIndicatorVisible: false
+    sortIndicatorColumn: 0
+    headerVisible: false
+    alternatingRowColors: true
+    backgroundVisible: false
 
     TableViewColumn {
       id: dataColumn
       horizontalAlignment: 1
       title: "Value"
-      resizable: false
-      movable: false
-    }
-  }
-
-  TableView {
-    id: stateTable
-    x: 958
-    y: 160
-    width: 400
-    height: 250
-
-    TableViewColumn {
-      id: stateListColumn
-      horizontalAlignment: 1
-      title: "Registers"
-      resizable: false
-      movable: false
-    }
-
-    TableViewColumn {
-      id: stateValuesColumn
-      horizontalAlignment: 1
-      title: "Values"
       resizable: false
       movable: false
     }
@@ -312,4 +300,244 @@ Rectangle {
       }
     }
   }
+
+  // Register fields//{{{
+  TextInput {
+      id: reg0
+      x: 998
+      y: 160
+      width: 120
+      height: 20
+      color: "#739685"
+      text: qsTr("register 0 contents")
+      MouseArea {
+          id: searchMemoryArea1
+      }
+      font.family: "Verdana"
+      font.pixelSize: 12
+      transformOrigin: Item.Center
+      visible: true
+  }
+
+  TextInput {
+      id: reg2
+      x: 998
+      y: 186
+      width: 120
+      height: 20
+      color: "#739685"
+      text: qsTr("register 2 contents")
+      MouseArea {
+          id: searchMemoryArea2
+      }
+      font.family: "Verdana"
+      font.pixelSize: 12
+      visible: true
+      transformOrigin: Item.Center
+  }
+
+  TextInput {
+      id: reg4
+      x: 998
+      y: 212
+      width: 120
+      height: 20
+      color: "#739685"
+      text: qsTr("register 4 contents")
+      MouseArea {
+          id: searchMemoryArea3
+      }
+      font.family: "Verdana"
+      font.pixelSize: 12
+      transformOrigin: Item.Center
+      visible: true
+  }
+
+  TextInput {
+      id: reg6
+      x: 998
+      y: 238
+      width: 120
+      height: 20
+      color: "#739685"
+      text: qsTr("sp contents")
+      MouseArea {
+          id: searchMemoryArea4
+      }
+      font.family: "Verdana"
+      font.pixelSize: 12
+      transformOrigin: Item.Center
+      visible: true
+  }
+
+  TextInput {
+      id: reg1
+      x: 1238
+      y: 160
+      width: 120
+      height: 20
+      color: "#739685"
+      text: qsTr("register 1 contents")
+      MouseArea {
+          id: searchMemoryArea6
+      }
+      font.family: "Verdana"
+      font.pixelSize: 12
+      transformOrigin: Item.Center
+      visible: true
+  }
+
+  TextInput {
+      id: reg3
+      x: 1238
+      y: 186
+      width: 120
+      height: 20
+      color: "#739685"
+      text: qsTr("register 3 contents")
+      MouseArea {
+          id: searchMemoryArea7
+      }
+      font.family: "Verdana"
+      font.pixelSize: 12
+      visible: true
+      transformOrigin: Item.Center
+  }
+
+  TextInput {
+      id: reg5
+      x: 1238
+      y: 212
+      width: 120
+      height: 20
+      color: "#739685"
+      text: qsTr("register 5 contents")
+      MouseArea {
+          id: searchMemoryArea8
+      }
+      font.family: "Verdana"
+      font.pixelSize: 12
+      visible: true
+      transformOrigin: Item.Center
+  }
+
+  TextInput {
+      id: reg7
+      x: 1238
+      y: 238
+      width: 120
+      height: 20
+      color: "#739685"
+      text: qsTr("pc contents")
+      MouseArea {
+          id: searchMemoryArea9
+      }
+      font.family: "Verdana"
+      font.pixelSize: 12
+      visible: true
+      transformOrigin: Item.Center
+  }//}}}
+
+  // Register labels//{{{
+  Label {
+      id: r0Label
+      x: 959
+      y: 160
+      width: 40
+      height: 20
+      color: "#739685"
+      text: qsTr("R0")
+  }
+
+  Label {
+      id: r2Label
+      x: 959
+      y: 186
+      width: 40
+      height: 20
+      color: "#739685"
+      text: qsTr("R2")
+  }
+
+  Label {
+      id: r4Label
+      x: 959
+      y: 212
+      width: 40
+      height: 20
+      color: "#739685"
+      text: qsTr("R4")
+  }
+
+  Label {
+      id: spLabel
+      x: 959
+      y: 238
+      width: 40
+      height: 20
+      color: "#739685"
+      text: qsTr("SP")
+  }
+
+  Label {
+      id: r1Label
+      x: 1198
+      y: 160
+      width: 40
+      height: 20
+      color: "#739685"
+      text: qsTr("R1")
+  }
+
+  Label {
+      id: r3Label
+      x: 1198
+      y: 186
+      width: 40
+      height: 20
+      color: "#739685"
+      text: qsTr("R3")
+  }
+
+  Label {
+      id: r5Label
+      x: 1198
+      y: 212
+      width: 40
+      height: 20
+      color: "#739685"
+      text: qsTr("R5")
+  }
+
+  Label {
+      id: pcLabel
+      x: 1198
+      y: 238
+      width: 40
+      height: 20
+      color: "#739685"
+      text: qsTr("PC")
+  }
+
+  Text {
+      id: pcDisplayText
+      x: 648
+      y: 134
+      width: 160
+      height: 20
+      color: "#739685"
+      text: qsTr("Not Running")
+      font.family: "Verdana"
+      font.pixelSize: 12
+  }
+
+  Label {
+      id: pcDisplayLabel
+      x: 482
+      y: 134
+      width: 160
+      height: 20
+      text: qsTr("current instruction:")
+      font.family: "Verdana"
+  }//}}}
 }

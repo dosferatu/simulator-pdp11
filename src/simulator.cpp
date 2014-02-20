@@ -200,17 +200,14 @@ int main(int argc, char *argv[])
     qmlRegisterType<programViewModel>("ProgramViewModel", 1, 0, "programViewModel");
     qmlRegisterType<memoryViewModel>("MemoryViewModel", 1, 0, "memoryViewModel");
 
-    // Establish the models for the UI to bind to
-    QStringList memoryModel;
-    QStringList instructionModel;
-    QStringList registerModel;
-
     // Create UI signal receivers
     QObject::connect((QObject*)view->engine(), SIGNAL(quit()), &app, SLOT(quit()));  // Handle Quit
 
     // Register ViewModels
     view->rootContext()->setContextProperty("programViewModel", programVM);
     view->rootContext()->setContextProperty("memoryViewModel", memoryVM);
+
+    memoryVM->setR0("HAHAHA");
 
     // Load the GUI
     view->setSource(QUrl::fromLocalFile("src/simulator.qml"));

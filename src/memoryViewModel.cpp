@@ -5,12 +5,10 @@
 
 memoryViewModel::memoryViewModel(QObject *parent) : QObject(parent)
 {
-  //this->_memoryReference = new QStringList();
 }
 
 memoryViewModel::memoryViewModel(Memory *memory, QQuickView *view, QObject *parent) : QObject(parent)
 {
-  //this->_memoryReference = new QStringList();
   this->memory = memory;
   this->view = view;
 
@@ -19,7 +17,6 @@ memoryViewModel::memoryViewModel(Memory *memory, QQuickView *view, QObject *pare
 
 memoryViewModel::~memoryViewModel()
 {
-  //delete this->_memoryReference;
 }
 
 void memoryViewModel::displayMemory(QString address)
@@ -48,12 +45,51 @@ void memoryViewModel::displayMemory(QString address)
   this->view->rootContext()->setContextProperty("memoryModel", QVariant::fromValue(this->memoryModel));
 }
 
-//QStringList memoryViewModel::memoryReference()
-//{
-//return *this->_memoryReference;
-//}
+// Set/*{{{*/
+void memoryViewModel::setR0(QString value)
+{
+  this->memory->WriteAddress(R0, value.toUShort());
+  return;
+}
 
-//void memoryViewModel::setMemoryReference(QStringList _memoryReference)
-//{
-//*this->_memoryReference = _memoryReference;
-//}
+void memoryViewModel::setR1(QString value)
+{
+  this->memory->WriteAddress(R1, value.toUShort());
+  return;
+}
+
+void memoryViewModel::setR2(QString value)
+{
+  this->memory->WriteAddress(R2, value.toUShort());
+  return;
+}
+
+void memoryViewModel::setR3(QString value)
+{
+  this->memory->WriteAddress(R3, value.toUShort());
+  return;
+}
+
+void memoryViewModel::setR4(QString value)
+{
+  this->memory->WriteAddress(R4, value.toUShort());
+  return;
+}
+
+void memoryViewModel::setR5(QString value)
+{
+  this->memory->WriteAddress(R5, value.toUShort());
+  return;
+}
+
+void memoryViewModel::setSP(QString value)
+{
+  this->memory->WriteAddress(SP, value.toUShort());
+  return;
+}
+
+void memoryViewModel::setPC(QString value)
+{
+  this->memory->WriteAddress(PC, value.toUShort());
+  return;
+}/*}}}*/

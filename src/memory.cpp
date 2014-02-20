@@ -113,6 +113,13 @@ Memory::~Memory()/*{{{*/
 }
 /*}}}*/
 
+void Memory::WriteAddress(unsigned short address, unsigned short data)
+{
+  this->RAM[address] = data & 0xFF;
+  this->RAM[address + 1] = (data >> 8);
+  return;
+}
+
 unsigned short Memory::ReadAddress(unsigned short address)
 {
   return (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);

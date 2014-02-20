@@ -39,6 +39,7 @@ class Memory
     Memory(std::vector<std::string> *source);
     ~Memory();
     unsigned short ReadAddress(unsigned short address);
+    void WriteAddress(unsigned short address, unsigned short data);
     void DecrementPC() { RAM[PC] = RAM[PC] - 2; };
     void IncrementPC() { RAM[PC] = RAM[PC] + 2; };
     unsigned short RetrievePC();
