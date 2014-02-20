@@ -153,7 +153,7 @@ unsigned short Memory::EA(unsigned short encodedAddress, Transaction type)/*{{{*
         modeType = "Deferred Register";
 
         decodedAddress = (this->RAM[regArray[reg] + 1] << 8) + (this->RAM[regArray[reg]] & 0xFF);
-        this->TraceDump(Transaction::read, decodedAddress);
+        //this->TraceDump(Transaction::read, decodedAddress);
         break;
       }
 
@@ -182,7 +182,7 @@ unsigned short Memory::EA(unsigned short encodedAddress, Transaction type)/*{{{*
           modeType = "Autoincrement";
 
           decodedAddress = (this->RAM[regArray[reg] + 1] << 8) + (this->RAM[regArray[reg]] & 0xFF);
-          this->TraceDump(Transaction::read, decodedAddress);
+          //this->TraceDump(Transaction::read, decodedAddress);
 
           unsigned short  incrementedAddress;
           if (regArray[reg] == SP)
@@ -227,7 +227,7 @@ unsigned short Memory::EA(unsigned short encodedAddress, Transaction type)/*{{{*
 
           // Read in value from address
           decodedAddress = (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);
-          this->TraceDump(Transaction::read, decodedAddress);
+          this->TraceDump(Transaction::read, address);
 
           // Possibly case for byteMode?
           unsigned short incrementedAddress = address + byteMode;
