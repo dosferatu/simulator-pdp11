@@ -52,24 +52,25 @@ leak-check: all
 		--show-leak-kinds=all\
 		--track-origins=yes\
 		-v\
-		./$(SIM) $(PY_TARGETS)
+		./$(SIM) $(SIM_FLAGS) $(PY_TARGETS)
+
+
+leak-check-gui: all
+	valgrind\
+		--tool=memcheck\
+		--leak-check=full\
+		--show-leak-kinds=all\
+		--track-origins=yes\
+		-v\
+		./$(SIM) $(SIM_GUI_FLAGS) $(PY_TARGETS)
 
 
 simulate: all
 	./$(SIM) $(SIM_FLAGS) $(PY_TARGETS)
 
+
 simulate-gui: all
 	./$(SIM) $(SIM_GUI_FLAGS) $(PY_TARGETS)
-
-
-# Target the addrmodes.ascii file
-run-addrmodes: all
-	./$(SIM) $(SIM_FLAGS) src/Test\ Cases/obj/addrmodes.ascii
-
-
-# Target the multiply.ascii file
-run-multiply: all
-	./$(SIM) $(SIM_FLAGS) src/Test\ Cases/obj/multiply.ascii
 
 
 clean :
@@ -79,7 +80,7 @@ clean :
 	rm -rf src/*.PCascii
 	rm -rf src/*.o
 	rm -rf $(SIM)
-	rm -rf src/trace.txt
+	rm -rf trace.txt
 	cd src; make clean
 
-.PHONY : all clean debug leak-check simulate run-addrmodes run-multiply
+.PHONY : all clean debug leak-check leak-check-gui ssimulate simulate-gui

@@ -13,8 +13,8 @@ MAKEFILE      = Makefile
 CC            = gcc
 CXX           = g++
 DEFINES       = -DQT_NO_DEBUG -DQT_QUICK_LIB -DQT_QML_LIB -DQT_NETWORK_LIB -DQT_GUI_LIB -DQT_CORE_LIB
-CFLAGS        = -pipe -march=x86-64 -mtune=generic -O0 -pipe -fstack-protector --param=ssp-buffer-size=4 -Wall -W -D_REENTRANT -fPIE $(DEFINES)
-CXXFLAGS      = -pipe -g -std=gnu++11 -Wall -Wpedantic -march=x86-64 -mtune=generic -O0 -pipe -fstack-protector --param=ssp-buffer-size=4 -Wall -W -D_REENTRANT -fPIE $(DEFINES)
+CFLAGS        = -pipe -march=x86-64 -mtune=generic -O2 -pipe -fstack-protector --param=ssp-buffer-size=4 -Wall -W -D_REENTRANT -fPIE $(DEFINES)
+CXXFLAGS      = -pipe -g -std=gnu++11 -Wall -Wpedantic -march=x86-64 -mtune=generic -O2 -pipe -fstack-protector --param=ssp-buffer-size=4 -Wall -W -D_REENTRANT -fPIE $(DEFINES)
 INCPATH       = -I/usr/lib/qt/mkspecs/linux-g++ -I. -Iqtquick2applicationviewer -I/usr/include/qt -I/usr/include/qt/QtQuick -I/usr/include/qt/QtQml -I/usr/include/qt/QtNetwork -I/usr/include/qt/QtGui -I/usr/include/qt/QtCore -I.
 LINK          = g++
 LFLAGS        = -Wl,-O1,--sort-common,--as-needed,-z,relro -Wl,-O1
@@ -695,6 +695,12 @@ moc_programViewModel.cpp: /usr/include/qt/QtCore/QObject \
 		/usr/include/qt/QtQml/qtqmlglobal.h \
 		cpu.h \
 		memory.h \
+		memoryViewModel.h \
+		/usr/include/qt/QtGui/QStandardItemModel \
+		/usr/include/qt/QtGui/qstandarditemmodel.h \
+		/usr/include/qt/QtCore/qabstractitemmodel.h \
+		/usr/include/qt/QtGui/qbrush.h \
+		/usr/include/qt/QtGui/qfont.h \
 		programViewModel.h
 	/usr/lib/qt/bin/moc $(DEFINES) $(INCPATH) -I/usr/lib/gcc/include/c++/4.8.2 -I/usr/lib/gcc/include/c++/4.8.2/x86_64-unknown-linux-gnu -I/usr/lib/gcc/include/c++/4.8.2/backward -I/usr/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include -I/usr/local/include -I/usr/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include-fixed -I/usr/include programViewModel.h -o moc_programViewModel.cpp
 
@@ -1841,7 +1847,12 @@ programViewModel.o: programViewModel.cpp /usr/include/qt/QtQml/QtQml \
 		/usr/include/qt/QtGui/qvector2d.h \
 		/usr/include/qt/QtGui/qtouchdevice.h \
 		cpu.h \
-		memory.h
+		memory.h \
+		memoryViewModel.h \
+		/usr/include/qt/QtGui/QStandardItemModel \
+		/usr/include/qt/QtGui/qstandarditemmodel.h \
+		/usr/include/qt/QtGui/qbrush.h \
+		/usr/include/qt/QtGui/qfont.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o programViewModel.o programViewModel.cpp
 
 qtquick2applicationviewer.o: qtquick2applicationviewer/qtquick2applicationviewer.cpp qtquick2applicationviewer/qtquick2applicationviewer.h \

@@ -108,9 +108,17 @@ Memory::~Memory()/*{{{*/
 {
   this->traceFile->close();
   delete [] RAM;
+  delete [] initialRAM;
   delete traceFile;
 }
 /*}}}*/
+
+void Memory::WriteAddress(unsigned short address, unsigned short data)
+{
+  this->RAM[address] = data & 0xFF;
+  this->RAM[address + 1] = (data >> 8);
+  return;
+}
 
 unsigned short Memory::ReadAddress(unsigned short address)
 {
