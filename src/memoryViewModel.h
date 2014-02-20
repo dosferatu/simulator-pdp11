@@ -36,6 +36,7 @@ class memoryViewModel : public QObject
 
   public slots:
     void displayMemory(QString address);
+  void refreshFields();
 
   // Set/*{{{*/
   void setR0(QString value);
@@ -65,7 +66,6 @@ signals:
   QStringList memoryModel;
   Memory *memory;
   QQuickView *view;
-  int _val;
   QString _R0;
   QString _R1;
   QString _R2;

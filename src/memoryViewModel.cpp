@@ -13,6 +13,58 @@ memoryViewModel::memoryViewModel(Memory *memory, QQuickView *view, QObject *pare
   this->view = view;
 
   this->view->rootContext()->setContextProperty("memoryModel", QVariant::fromValue(this->memoryModel));
+
+  // Initialize the UI register fields
+  std::stringstream stream;
+  unsigned short value;
+
+  value = this->memory->ReadAddress(R0);
+  stream << value;
+  this->_R0 = stream.str().c_str();
+  stream.str(std::string());
+  stream.clear();
+
+  value = this->memory->ReadAddress(R1);
+  stream << value;
+  this->_R1 = stream.str().c_str();
+  stream.str(std::string());
+  stream.clear();
+
+  value = this->memory->ReadAddress(R2);
+  stream << value;
+  this->_R2 = stream.str().c_str();
+  stream.str(std::string());
+  stream.clear();
+
+  value = this->memory->ReadAddress(R3);
+  stream << value;
+  this->_R3 = stream.str().c_str();
+  stream.str(std::string());
+  stream.clear();
+
+  value = this->memory->ReadAddress(R4);
+  stream << value;
+  this->_R4 = stream.str().c_str();
+  stream.str(std::string());
+  stream.clear();
+
+  value = this->memory->ReadAddress(R5);
+  stream << value;
+  this->_R5 = stream.str().c_str();
+  stream.str(std::string());
+  stream.clear();
+
+  value = this->memory->ReadAddress(SP);
+  stream << value;
+  this->_SP = stream.str().c_str();
+  stream.str(std::string());
+  stream.clear();
+
+  value = this->memory->ReadAddress(PC);
+  stream << value;
+  this->_PC = stream.str().c_str();
+  stream.str(std::string());
+  stream.clear();
 }
 
 memoryViewModel::~memoryViewModel()
@@ -45,10 +97,75 @@ void memoryViewModel::displayMemory(QString address)
   this->view->rootContext()->setContextProperty("memoryModel", QVariant::fromValue(this->memoryModel));
 }
 
+void memoryViewModel::refreshFields()
+{
+  // Refresh all the register values when called
+  std::stringstream stream;
+  unsigned short value;
+
+  value = this->memory->ReadAddress(R0);
+  stream << value;
+  this->_R0 = stream.str().c_str();
+  stream.str(std::string());
+  stream.clear();
+  this->notifyR0(_R0);
+
+  value = this->memory->ReadAddress(R1);
+  stream << value;
+  this->_R1 = stream.str().c_str();
+  stream.str(std::string());
+  stream.clear();
+  this->notifyR1(_R1);
+
+  value = this->memory->ReadAddress(R2);
+  stream << value;
+  this->_R2 = stream.str().c_str();
+  stream.str(std::string());
+  stream.clear();
+  this->notifyR2(_R2);
+
+  value = this->memory->ReadAddress(R3);
+  stream << value;
+  this->_R3 = stream.str().c_str();
+  stream.str(std::string());
+  stream.clear();
+  this->notifyR3(_R3);
+
+  value = this->memory->ReadAddress(R4);
+  stream << value;
+  this->_R4 = stream.str().c_str();
+  stream.str(std::string());
+  stream.clear();
+  this->notifyR4(_R4);
+
+  value = this->memory->ReadAddress(R5);
+  stream << value;
+  this->_R5 = stream.str().c_str();
+  stream.str(std::string());
+  stream.clear();
+  this->notifyR5(_R5);
+
+  value = this->memory->ReadAddress(SP);
+  stream << value;
+  this->_SP = stream.str().c_str();
+  stream.str(std::string());
+  stream.clear();
+  this->notifySP(_SP);
+
+  value = this->memory->ReadAddress(PC);
+  stream << value;
+  this->_PC = stream.str().c_str();
+  stream.str(std::string());
+  stream.clear();
+  this->notifyPC(_PC);
+  return;
+}
+
 // Set/*{{{*/
 void memoryViewModel::setR0(QString value)
 {
   this->memory->WriteAddress(R0, value.toUShort());
+  //this->view->rootContext()->setContextProperty("memoryViewModel._R0", value);
   return;
 }
 

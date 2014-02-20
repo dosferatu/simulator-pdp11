@@ -193,8 +193,8 @@ int main(int argc, char *argv[])
     view->setResizeMode(QQuickView::SizeRootObjectToView);
 
     // Declare the UI ViewModels
-    programViewModel *programVM = new programViewModel(cpu, memory, view, source);
     memoryViewModel *memoryVM = new memoryViewModel(memory, view);
+    programViewModel *programVM = new programViewModel(cpu, memory, memoryVM, view, source);
 
     // Register the ViewModels for use in the QML file
     qmlRegisterType<programViewModel>("ProgramViewModel", 1, 0, "programViewModel");
@@ -206,8 +206,6 @@ int main(int argc, char *argv[])
     // Register ViewModels
     view->rootContext()->setContextProperty("programViewModel", programVM);
     view->rootContext()->setContextProperty("memoryViewModel", memoryVM);
-
-    memoryVM->setR0("HAHAHA");
 
     // Load the GUI
     view->setSource(QUrl::fromLocalFile("src/simulator.qml"));

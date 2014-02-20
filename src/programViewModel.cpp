@@ -12,13 +12,14 @@ programViewModel::programViewModel(QObject *parent) :
   this->status = -1;
 }
 
-programViewModel::programViewModel(CPU *cpu, Memory *memory, QQuickView *view, std::vector<std::string> *source, QObject *parent) :
+programViewModel::programViewModel(CPU *cpu, Memory *memory, memoryViewModel *memoryVM, QQuickView *view, std::vector<std::string> *source, QObject *parent) :
   QObject(parent)
 {
   this->breakPoints = new std::vector<unsigned short>();
   this->cpu = cpu;
   this->currentInstruction = -1;
   this->memory = memory;
+  this->memoryVM = memoryVM;
   this->status = -1;
   this->view = view;
 
@@ -73,7 +74,7 @@ void programViewModel::continueExecution()
   std::cout << "Continue!" << std::endl;
 
   // Detect HALT condition
-  if (status <= 0)
+  if (this->status == 0)
   {
     std::cout << "End of program!" << std::endl;
     return;
@@ -83,10 +84,11 @@ void programViewModel::continueExecution()
   do
   {
     this->currentInstruction = this->memory->RetrievePC();
-    status = cpu->FDE();
+    this->status = cpu->FDE();
     this->memory->IncrementPC();
+    this->memoryVM->refreshFields();
 
-  } while (status > 0 && this->currentInstruction != this->nextBreak);/*}}}*/
+  } while (this->status > 0 && this->currentInstruction != this->nextBreak);/*}}}*/
 
   // Report exit status/*{{{*/
   if (this->currentInstruction % 2 != 0)
@@ -122,7 +124,7 @@ void programViewModel::run()
    */
 
   std::cout << "Run!" << std::endl;
-  int status = 0;
+  this->status = 0;
 
   // Reset status
   std::cout << "Resetting state..." << std::endl;
@@ -135,10 +137,11 @@ void programViewModel::run()
   do
   {
     this->currentInstruction = this->memory->RetrievePC();
-    status = cpu->FDE();
+    this->status = cpu->FDE();
     this->memory->IncrementPC();
+    this->memoryVM->refreshFields();
 
-  } while (status > 0 && this->currentInstruction != this->nextBreak);/*}}}*/
+  } while (this->status > 0 && this->currentInstruction != this->nextBreak);/*}}}*/
 
   // Report exit status/*{{{*/
   if (this->currentInstruction % 2 != 0)
@@ -171,15 +174,16 @@ void programViewModel::step()
   std::cout << "Step!" << std::endl;
 
   // Detect HALT condition
-  if (status <= 0)
+  if (this->status == 0)
   {
     std::cout << "End of program!" << std::endl;
     return;
   }
 
   this->currentInstruction = this->memory->RetrievePC();
-  status = cpu->FDE();
+  this->status = cpu->FDE();
   this->memory->IncrementPC();
+  this->memoryVM->refreshFields();
 
   // Report exit status/*{{{*/
   if (this->currentInstruction % 2 != 0)
@@ -204,6 +208,7 @@ void programViewModel::step()
   {
     std::cout << "Break point encountered!\n" << std::endl;
   }/*}}}*/
+  return;
 }/*}}}*/
 
 // Stop simulation/*{{{*/
@@ -217,6 +222,8 @@ void programViewModel::stop()
   this->memory->WritePS(0);
   this->memory->ResetPC();
   this->memory->ResetRAM();
+  this->memoryVM->refreshFields();
+  this->status = -1;
 }/*}}}*/
 /*}}}*/
 

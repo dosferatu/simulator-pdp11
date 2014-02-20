@@ -309,7 +309,7 @@ Rectangle {
       width: 120
       height: 20
       color: "#739685"
-      text: qsTr("register 0 contents")
+      text: memoryViewModel._R0
       MouseArea {
           id: searchMemoryArea1
       }
@@ -326,7 +326,7 @@ Rectangle {
       width: 120
       height: 20
       color: "#739685"
-      text: qsTr("register 2 contents")
+      text: memoryViewModel._R2
       MouseArea {
           id: searchMemoryArea2
       }
@@ -343,7 +343,7 @@ Rectangle {
       width: 120
       height: 20
       color: "#739685"
-      text: qsTr("register 4 contents")
+      text: memoryViewModel._R4
       MouseArea {
           id: searchMemoryArea3
       }
@@ -360,7 +360,7 @@ Rectangle {
       width: 120
       height: 20
       color: "#739685"
-      text: qsTr("sp contents")
+      text: memoryViewModel._SP
       MouseArea {
           id: searchMemoryArea4
       }
@@ -377,7 +377,7 @@ Rectangle {
       width: 120
       height: 20
       color: "#739685"
-      text: qsTr("register 1 contents")
+      text: memoryViewModel._R1
       MouseArea {
           id: searchMemoryArea6
       }
@@ -394,7 +394,7 @@ Rectangle {
       width: 120
       height: 20
       color: "#739685"
-      text: qsTr("register 3 contents")
+      text: memoryViewModel._R3
       MouseArea {
           id: searchMemoryArea7
       }
@@ -411,7 +411,7 @@ Rectangle {
       width: 120
       height: 20
       color: "#739685"
-      text: qsTr("register 5 contents")
+      text: memoryViewModel._R5
       MouseArea {
           id: searchMemoryArea8
       }
@@ -428,7 +428,7 @@ Rectangle {
       width: 120
       height: 20
       color: "#739685"
-      text: qsTr("pc contents")
+      text: memoryViewModel._PC
       MouseArea {
           id: searchMemoryArea9
       }
@@ -526,7 +526,7 @@ Rectangle {
       width: 160
       height: 20
       color: "#739685"
-      text: qsTr("Not Running")
+      text: memoryViewModel._PC
       font.family: "Verdana"
       font.pixelSize: 12
   }

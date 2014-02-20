@@ -7,6 +7,7 @@
 #include <string>
 #include "cpu.h"
 #include "memory.h"
+#include "memoryViewModel.h"
 
 class programViewModel : public QObject
 {
@@ -15,7 +16,7 @@ class programViewModel : public QObject
     // Define any Q_PROPERTY values here for proper UI binding if I have time
 
     explicit programViewModel(QObject *parent = 0);
-    explicit programViewModel(CPU *cpu, Memory *memory, QQuickView *view, std::vector<std::string> *source, QObject *parent = 0);
+    explicit programViewModel(CPU *cpu, Memory *memory, memoryViewModel *memoryVM, QQuickView *view, std::vector<std::string> *source, QObject *parent = 0);
     ~programViewModel();
 
 signals:
@@ -39,6 +40,7 @@ signals:
     int status;
     CPU *cpu;
     Memory *memory;
+    memoryViewModel *memoryVM;
     QQuickView *view;
     QStringList instructionModel;
 };

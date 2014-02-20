@@ -695,6 +695,12 @@ moc_programViewModel.cpp: /usr/include/qt/QtCore/QObject \
 		/usr/include/qt/QtQml/qtqmlglobal.h \
 		cpu.h \
 		memory.h \
+		memoryViewModel.h \
+		/usr/include/qt/QtGui/QStandardItemModel \
+		/usr/include/qt/QtGui/qstandarditemmodel.h \
+		/usr/include/qt/QtCore/qabstractitemmodel.h \
+		/usr/include/qt/QtGui/qbrush.h \
+		/usr/include/qt/QtGui/qfont.h \
 		programViewModel.h
 	/usr/lib/qt/bin/moc $(DEFINES) $(INCPATH) -I/usr/lib/gcc/include/c++/4.8.2 -I/usr/lib/gcc/include/c++/4.8.2/x86_64-unknown-linux-gnu -I/usr/lib/gcc/include/c++/4.8.2/backward -I/usr/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include -I/usr/local/include -I/usr/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include-fixed -I/usr/include programViewModel.h -o moc_programViewModel.cpp
 
@@ -1841,7 +1847,12 @@ programViewModel.o: programViewModel.cpp /usr/include/qt/QtQml/QtQml \
 		/usr/include/qt/QtGui/qvector2d.h \
 		/usr/include/qt/QtGui/qtouchdevice.h \
 		cpu.h \
-		memory.h
+		memory.h \
+		memoryViewModel.h \
+		/usr/include/qt/QtGui/QStandardItemModel \
+		/usr/include/qt/QtGui/qstandarditemmodel.h \
+		/usr/include/qt/QtGui/qbrush.h \
+		/usr/include/qt/QtGui/qfont.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o programViewModel.o programViewModel.cpp
 
 qtquick2applicationviewer.o: qtquick2applicationviewer/qtquick2applicationviewer.cpp qtquick2applicationviewer/qtquick2applicationviewer.h \
