@@ -539,5 +539,114 @@ Rectangle {
       height: 20
       text: qsTr("current instruction:")
       font.family: "Verdana"
+  }
+
+  TextInput {
+      id: cFlag
+      x: 1338
+      y: 290
+      width: 20
+      height: 20
+      color: "#739685"
+      text: memoryViewModel._C
+      transformOrigin: Item.Center
+      MouseArea {
+          id: searchMemoryArea5
+      }
+      font.pixelSize: 12
+      visible: true
+      font.family: "Verdana"
+  }
+
+  TextInput {
+      id: vFlag
+      x: 1312
+      y: 290
+      width: 20
+      height: 20
+      color: "#739685"
+      text: memoryViewModel._V
+      transformOrigin: Item.Center
+      MouseArea {
+          id: searchMemoryArea10
+      }
+      font.pixelSize: 12
+      visible: true
+      font.family: "Verdana"
+  }
+
+  TextInput {
+      id: zFlag
+      x: 1286
+      y: 290
+      width: 20
+      height: 20
+      color: "#739685"
+      text: memoryViewModel._Z
+      transformOrigin: Item.Center
+      MouseArea {
+          id: searchMemoryArea11
+      }
+      font.pixelSize: 12
+      visible: true
+      font.family: "Verdana"
+  }
+
+  TextInput {
+      id: nFlag
+      x: 1260
+      y: 290
+      width: 20
+      height: 20
+      color: "#739685"
+      text: memoryViewModel._N
+      transformOrigin: Item.Center
+      MouseArea {
+          id: searchMemoryArea12
+      }
+      font.pixelSize: 12
+      visible: true
+      font.family: "Verdana"
+  }
+
+  Label {
+      id: nFlagLabel
+      x: 1260
+      y: 264
+      width: 20
+      height: 20
+      color: "#739685"
+      text: qsTr("N")
+      font.family: "Verdana"
+  }
+
+  Label {
+      id: cFlagLabel
+      x: 1338
+      y: 264
+      width: 20
+      height: 20
+      color: "#739685"
+      text: qsTr("C")
+  }
+
+  Label {
+      id: vFlagLabel
+      x: 1312
+      y: 264
+      width: 20
+      height: 20
+      color: "#739685"
+      text: qsTr("V")
+  }
+
+  Label {
+      id: zFlagLabel
+      x: 1286
+      y: 264
+      width: 20
+      height: 20
+      color: "#739685"
+      text: qsTr("Z")
   }//}}}
 }

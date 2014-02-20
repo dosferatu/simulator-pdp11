@@ -7,7 +7,7 @@ memoryViewModel::memoryViewModel(QObject *parent) : QObject(parent)
 {
 }
 
-memoryViewModel::memoryViewModel(Memory *memory, QQuickView *view, QObject *parent) : QObject(parent)
+memoryViewModel::memoryViewModel(Memory *memory, QQuickView *view, QObject *parent) : QObject(parent)/*{{{*/
 {
   this->memory = memory;
   this->view = view;
@@ -65,7 +65,27 @@ memoryViewModel::memoryViewModel(Memory *memory, QQuickView *view, QObject *pare
   this->_PC = stream.str().c_str();
   stream.str(std::string());
   stream.clear();
-}
+
+  value = this->memory->ReadPS();
+  stream << ((value & 0x8) >> 3);
+  this->_N = stream.str().c_str();
+  stream.str(std::string());
+  stream.clear();
+
+  value = this->memory->ReadPS();
+  stream << ((value & 0x4) >> 2);
+  this->_Z = stream.str().c_str();
+  stream.str(std::string());
+  stream.clear();
+
+  stream << ((value & 0x2) >> 1);
+  this->_V = stream.str().c_str();
+  stream.str(std::string());
+  stream.clear();
+
+  stream << (value & 0x1);
+  this->_C = stream.str().c_str();
+}/*}}}*/
 
 memoryViewModel::~memoryViewModel()
 {
@@ -97,7 +117,7 @@ void memoryViewModel::displayMemory(QString address)
   this->view->rootContext()->setContextProperty("memoryModel", QVariant::fromValue(this->memoryModel));
 }
 
-void memoryViewModel::refreshFields()
+void memoryViewModel::refreshFields()/*{{{*/
 {
   // Refresh all the register values when called
   std::stringstream stream;
@@ -158,8 +178,33 @@ void memoryViewModel::refreshFields()
   stream.str(std::string());
   stream.clear();
   this->notifyPC(_PC);
+
+  value = this->memory->ReadPS();
+  stream << ((value & 0x8) >> 3);
+  this->_N = stream.str().c_str();
+  stream.str(std::string());
+  stream.clear();
+  this->notifyN(_N);
+
+  stream << ((value & 0x4) >> 2);
+  this->_Z = stream.str().c_str();
+  stream.str(std::string());
+  stream.clear();
+  this->notifyZ(_Z);
+
+  stream << ((value & 0x2) >> 1);
+  this->_V = stream.str().c_str();
+  stream.str(std::string());
+  stream.clear();
+  this->notifyV(_V);
+
+  stream << (value & 0x1);
+  this->_C = stream.str().c_str();
+  stream.str(std::string());
+  stream.clear();
+  this->notifyC(_C);
   return;
-}
+}/*}}}*/
 
 // Set/*{{{*/
 void memoryViewModel::setR0(QString value)
