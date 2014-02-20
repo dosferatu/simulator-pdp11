@@ -7,8 +7,8 @@
 Memory::Memory(std::vector<std::string> *source)
 {
   // Initialize RAM to 0's
-  this->RAM = new unsigned char[65536];
-  this->initialRAM = new unsigned char[65536];
+  this->RAM = new unsigned char[65536] {0};
+  this->initialRAM = new unsigned char[65536] {0};
   this->byteMode = 02;          // Default to word addressing
   unsigned int addressIndex = 0;
 
@@ -111,6 +111,11 @@ Memory::~Memory()/*{{{*/
   delete traceFile;
 }
 /*}}}*/
+
+unsigned short Memory::ReadAddress(unsigned short address)
+{
+  return (this->RAM[address + 1] << 8) + (this->RAM[address] & 0xFF);
+}
 
 unsigned short Memory::RetrievePC()/*{{{*/
 {
