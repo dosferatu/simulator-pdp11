@@ -22,19 +22,18 @@ Kevin Bedrossian}         % type author(s) between braces
 \maketitle
 
 \begin{abstract}
-  A PDP-11/20 Instruction Set Architecture (ISA) simulator.  A Macro-11 assembly program can be compiled and loaded into the simulator and run giving the same functionality as the original system.  This was accomplished using C++ as the framework with Qt5 creating the GUI to game easy access to view memory space and registers and to follow the assembly code while the instructions are processed.
+  A PDP-11/20 Instruction Set Architecture (ISA) simulator.  A Macro-11 assembly program can be compiled and loaded into the simulator and run giving the same functionality as the original system.  This was accomplished using C++ as the framework with Qt5 creating the GUI to gain easy access to view memory space and registers and to follow the assembly code while the instructions are processed.
 \end{abstract}
 
 \tableofcontents
 
 \chapter{Introduction}
- The PDP-11/20 ISA simulator is modularized into parts similar to the actual computer hardware.  The CPU object controls the overall functionality of the simulator by managing the fetch, decode, and execute processes.  The steps to this process are as follows: fetch instruction, decode instruction, request data from the Memory object in accordance with the decoded instruction.  
+ The PDP-11/20 ISA simulator is modularized into parts similar to the actual computer hardware.  The CPU object controls the overall functionality of the simulator by managing the fetch, decode, and execute processes.  The steps to this process are as follows: fetch instruction, decode instruction, request data from the Memory object in accordance with the decoded instruction, followed by the appropriate execution of operations and condition code updates.  There is a Memory object that manages the loading of program into the memory block and the flow of reading and writing data. 
 
 \chapter{Design Plan}
 
 
 \chapter{Test Plan}
-
 
 %\begin{thebibliography}{9}
   % type bibliography here
