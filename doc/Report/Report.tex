@@ -36,6 +36,29 @@ Simple object-oriented design techniques were used to implement the simulator ap
 An object-oriented approach was chosen to allow for a standard interface between abstracted simulator components to be defined early on in order to avoid breaking from changes in implementation throughout the project.
 
 \chapter{Test Plan}
+Several test cases were written in Macro-11 assembly format in order to demonstrate functionality of the simulator. The 12 test cases written probe for correct design in the following areas:
+
+\begin{itemize}
+  \item Addressing modes
+  \begin{itemize}
+  \item General Register
+  \item General Register Deferred
+  \item Register Autoincrement\textbackslash Decrement
+  \item Register Autoincrement\textbackslash Decrement Deferred
+  \item Register Index\textbackslash Index Deferred
+  \item Stack Pointer
+  \item Program Counter
+  \end{itemize}
+\item Instructions
+  \begin{itemize}
+  \item Double Operand
+  \item Single Operand
+  \item Branches
+  \end{itemize}
+\item JSR
+\end{itemize}
+
+Using states predefined in these documented test cases we can follow the execution in the simulator in order to verify that the architecture is being emulated to specifications properly.
 
 %\begin{thebibliography}{9}
   % type bibliography here
