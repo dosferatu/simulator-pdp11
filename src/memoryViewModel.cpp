@@ -19,71 +19,71 @@ memoryViewModel::memoryViewModel(Memory *memory, QQuickView *view, QObject *pare
   unsigned short value;
 
   value = this->memory->ReadAddress(R0);
-  stream << value;
+  stream << std::oct << value;
   this->_R0 = stream.str().c_str();
   stream.str(std::string());
   stream.clear();
 
   value = this->memory->ReadAddress(R1);
-  stream << value;
+  stream << std::oct << value;
   this->_R1 = stream.str().c_str();
   stream.str(std::string());
   stream.clear();
 
   value = this->memory->ReadAddress(R2);
-  stream << value;
+  stream << std::oct << value;
   this->_R2 = stream.str().c_str();
   stream.str(std::string());
   stream.clear();
 
   value = this->memory->ReadAddress(R3);
-  stream << value;
+  stream << std::oct << value;
   this->_R3 = stream.str().c_str();
   stream.str(std::string());
   stream.clear();
 
   value = this->memory->ReadAddress(R4);
-  stream << value;
+  stream << std::oct << value;
   this->_R4 = stream.str().c_str();
   stream.str(std::string());
   stream.clear();
 
   value = this->memory->ReadAddress(R5);
-  stream << value;
+  stream << std::oct << value;
   this->_R5 = stream.str().c_str();
   stream.str(std::string());
   stream.clear();
 
   value = this->memory->ReadAddress(SP);
-  stream << value;
+  stream << std::oct << value;
   this->_SP = stream.str().c_str();
   stream.str(std::string());
   stream.clear();
 
   value = this->memory->ReadAddress(PC);
-  stream << value;
+  stream << std::oct << value;
   this->_PC = stream.str().c_str();
   stream.str(std::string());
   stream.clear();
 
   value = this->memory->ReadPS();
-  stream << ((value & 0x8) >> 3);
+  stream << std::oct << ((value & 0x8) >> 3);
   this->_N = stream.str().c_str();
   stream.str(std::string());
   stream.clear();
 
   value = this->memory->ReadPS();
-  stream << ((value & 0x4) >> 2);
+  stream << std::oct << ((value & 0x4) >> 2);
   this->_Z = stream.str().c_str();
   stream.str(std::string());
   stream.clear();
 
-  stream << ((value & 0x2) >> 1);
+  stream << std::oct << ((value & 0x2) >> 1);
   this->_V = stream.str().c_str();
   stream.str(std::string());
   stream.clear();
 
-  stream << (value & 0x1);
+  stream << std::oct << (value & 0x1);
   this->_C = stream.str().c_str();
 }/*}}}*/
 
@@ -127,81 +127,81 @@ void memoryViewModel::refreshFields()/*{{{*/
   unsigned short value;
 
   value = this->memory->ReadAddress(R0);
-  stream << value;
+  stream << std::oct << value;
   this->_R0 = stream.str().c_str();
   stream.str(std::string());
   stream.clear();
   this->notifyR0(_R0);
 
   value = this->memory->ReadAddress(R1);
-  stream << value;
+  stream << std::oct << value;
   this->_R1 = stream.str().c_str();
   stream.str(std::string());
   stream.clear();
   this->notifyR1(_R1);
 
   value = this->memory->ReadAddress(R2);
-  stream << value;
+  stream << std::oct << value;
   this->_R2 = stream.str().c_str();
   stream.str(std::string());
   stream.clear();
   this->notifyR2(_R2);
 
   value = this->memory->ReadAddress(R3);
-  stream << value;
+  stream << std::oct << value;
   this->_R3 = stream.str().c_str();
   stream.str(std::string());
   stream.clear();
   this->notifyR3(_R3);
 
   value = this->memory->ReadAddress(R4);
-  stream << value;
+  stream << std::oct << value;
   this->_R4 = stream.str().c_str();
   stream.str(std::string());
   stream.clear();
   this->notifyR4(_R4);
 
   value = this->memory->ReadAddress(R5);
-  stream << value;
+  stream << std::oct << value;
   this->_R5 = stream.str().c_str();
   stream.str(std::string());
   stream.clear();
   this->notifyR5(_R5);
 
   value = this->memory->ReadAddress(SP);
-  stream << value;
+  stream << std::oct << value;
   this->_SP = stream.str().c_str();
   stream.str(std::string());
   stream.clear();
   this->notifySP(_SP);
 
   value = this->memory->ReadAddress(PC);
-  stream << value;
+  stream << std::oct << value;
   this->_PC = stream.str().c_str();
   stream.str(std::string());
   stream.clear();
   this->notifyPC(_PC);
 
   value = this->memory->ReadPS();
-  stream << ((value & 0x8) >> 3);
+  stream << std::oct << ((value & 0x8) >> 3);
   this->_N = stream.str().c_str();
   stream.str(std::string());
   stream.clear();
   this->notifyN(_N);
 
-  stream << ((value & 0x4) >> 2);
+  stream << std::oct << ((value & 0x4) >> 2);
   this->_Z = stream.str().c_str();
   stream.str(std::string());
   stream.clear();
   this->notifyZ(_Z);
 
-  stream << ((value & 0x2) >> 1);
+  stream << std::oct << ((value & 0x2) >> 1);
   this->_V = stream.str().c_str();
   stream.str(std::string());
   stream.clear();
   this->notifyV(_V);
 
-  stream << (value & 0x1);
+  stream << std::oct << (value & 0x1);
   this->_C = stream.str().c_str();
   stream.str(std::string());
   stream.clear();

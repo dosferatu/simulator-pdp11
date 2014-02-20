@@ -83,7 +83,7 @@ Rectangle {
       }
 
       onExited: {
-        //stepRectangle.color = "#1c1c1c"
+        stepRectangle.color = "#1c1c1c"
       }
     }
   }//}}}
@@ -122,7 +122,7 @@ Rectangle {
       }
 
       onExited: {
-        //continueRectangle.color = "#1c1c1c"
+        continueRectangle.color = "#1c1c1c"
       }
     }
   }//}}}
@@ -161,7 +161,7 @@ Rectangle {
       }
 
       onExited: {
-        //runRectangle.color = "#1c1c1c"
+        runRectangle.color = "#1c1c1c"
       }
     }
   }//}}}
