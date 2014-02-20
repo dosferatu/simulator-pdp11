@@ -108,6 +108,7 @@ Memory::~Memory()/*{{{*/
 {
   this->traceFile->close();
   delete [] RAM;
+  delete [] initialRAM;
   delete traceFile;
 }
 /*}}}*/
