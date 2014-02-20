@@ -1,7 +1,6 @@
 ;Test simple branching instructions
 
 START:
-;Test the unconditional Branch
 BR EQUAL
 
 EQUAL: ;test BEQ
