@@ -23,7 +23,7 @@ programViewModel::programViewModel(CPU *cpu, Memory *memory, QQuickView *view, s
   this->view = view;
 
   std::fstream *macFile;
-  macFile = new std::fstream("main.lst");
+  macFile = new std::fstream("src/main.lst");
 
   if (macFile->good())
   {
