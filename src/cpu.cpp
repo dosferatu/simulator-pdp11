@@ -141,7 +141,12 @@ int CPU::FDE()/*{{{*/
         {
 		  case 0:
 			{
-				//RTS
+				// RTS reg
+				tmp = memory->Read(address(dst));                 // Read register value
+                memory->Write(007, tmp);                          // reg --> (PC)
+				tmp = memory->Read(026);                        // Push value of reg onto stack
+                memory->Write(address(dst),tmp);   // pop reg
+                return instruction;
 			}
           case 4:
             {
@@ -517,10 +522,8 @@ int CPU::FDE()/*{{{*/
                       memory->Write(address(dst), tmp);  // Write compiment to memory
                       resultIsZero(tmp);                 // Update Z bit
                       resultLTZero(tmp);                 // Update N bit
-                      tmp == 0? \
-                        update_flags(0,Cbit) : update_flags(1,Cbit);  // Update C bit
-                      tmp == 0100000? \
-                        update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
+                      update_flags(1, Cbit);			 // Update C bit
+                      update_flags(0, Vbit);			 // Update V bit
                       return instruction;
                     }
             case 2: { // INC dst: (dst)++ -> (dst)
@@ -540,14 +543,14 @@ int CPU::FDE()/*{{{*/
                       memory->Write(address(dst), tmp);       // Write to memory
                       resultIsZero(tmp);                      // Update Z bit
                       resultLTZero(tmp);                      // Update N bit
-                      dst_temp == 0100000? \
-                        update_flags(1,Cbit) : update_flags(0,Cbit);  // Update C bit
-                      update_flags(0,Vbit);                   // Update V bit
+                      //C bit not affected (typo in handbook)
+					  dst_temp == 0100000? \
+                        update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
                       return instruction;
                     }
             case 4: { // NEG dst: -(dst) -> (dst) 
                       tmp = memory->Read(address(dst));       // Get value at address NEG
-                      tmp = ~tmp;                             // Get 2's comp of value
+                      tmp = ~tmp + 1;                         // Get 2's comp of value
                       memory->Write(address(dst),tmp);        // Write to memory
                       resultIsZero(tmp);                      // Update Z bit
                       resultLTZero(tmp);                      // Update N bit
@@ -563,9 +566,9 @@ int CPU::FDE()/*{{{*/
                       memory->Write(address(dst),tmp);          // Write to memory
                       resultIsZero(tmp);                        // Update Z bit
                       resultLTZero(tmp);                        // Update N bit
-                      (dst_temp == 0177777) && (tmpC == 1)? \
+                      ((dst_temp == 0177777) && (tmpC == 1))? \
                                  update_flags(1,Cbit) : update_flags(0,Cbit);  // Update C bit
-                      tmp == 0077777? update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
+                      ((dst_temp == 0077777) && (tmpC == 1))? update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
                       return instruction;
                     }
             case 6: { // SBC: (dst) - (C) -> (dst)
@@ -578,7 +581,7 @@ int CPU::FDE()/*{{{*/
                       resultLTZero(tmp);                        // Update N bit
                       (tmp == 0) && (tmpC == 1)? \
                             update_flags(0,Cbit) : update_flags(1,Cbit);  // Update C bit
-                      (tmp & WORD) > 0? update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
+                      (tmp == 0100000)? update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
                       return instruction;
                     }
             case 7: { // TST dst - Tests if dst is 0 (0 - dst)
@@ -612,8 +615,8 @@ int CPU::FDE()/*{{{*/
             case 1:
               { // ROL dst: ROtate Left - include C bit as LSB -> (dst)
                 dst_temp = memory->Read(address(dst));  // Get value at dst
-                unsigned short tempCN = memory->ReadPS() & 0x9; // Get C and N bits
-                tmp = (dst_temp << 1) | (tempCN & 01);  // Rotate bits to the right
+                unsigned short tempCN = (memory->ReadPS() & 0x9); // Get C and N bits
+                tmp = ((dst_temp << 1) | (tempCN & 01));  // Rotate bits to the right
                 memory->Write(address(dst),tmp);         // Write to memory
                 resultIsZero(tmp);                      // Update Z bit
                 resultLTZero(tmp);                      // Update N bit
@@ -625,8 +628,10 @@ int CPU::FDE()/*{{{*/
               { // ASR dst: Arithmetic Shift Right
                 dst_temp = memory->Read(address(dst));  // Get value at dst
                 unsigned short tempCN = memory->ReadPS() & 0x9;     // Get C and N bits
-                tmp = dst_temp >> 1;                    // Rotate bits to the right
-                memory->Write(address(dst),tmp);         // Write to memory
+				tmp = dst_temp >> 1;                    // Rotate bits to the right
+                if(dst_tmp & WORD)						//If destination is negative
+					dst_temp = dst_temp | WORD;			//then shift in a 1 on the end
+				memory->Write(address(dst),tmp);        // Write to memory
                 resultIsZero(tmp);                      // Update Z bit
                 resultLTZero(tmp);                      // Update N bit
                 update_flags((dst_temp & 01),Cbit);     // Update C bit LSB (result)
@@ -667,6 +672,10 @@ int CPU::FDE()/*{{{*/
                 tmp = memory->Read(address(dst)); // Get value at dst
                 tmp = tmp & 0x0;                  // Clear byte
                 memory->Write(address(dst),tmp);  // Write byte to dst
+				update_flags(1,Zbit);              // Set Z bit
+                update_flags(0,Nbit);              // Set N bit
+                update_flags(0,Cbit);              // Set C bit
+                update_flags(0,Vbit);              // Set V bit
                 memory->ClearByteMode();          // Clear byte mode
                 return instruction;
               }
