@@ -851,14 +851,13 @@ int CPU::FDE()/*{{{*/
       // MOV (src) -> (dst)
       case 1:
         {
-          src_temp = memory->Read(address(src));  // Get value at address of src MOV
-          //dst_temp = memory->Read(address(dst));  // Dummy read for PC convention
+          src_temp = (memory->Read(address(src)));  // Get value at address of src MOV
           if(address(dst) == 027 || address(dst) == 037 || iB[1] == 06 || iB[1] == 07)
             memory->IncrementPC();
-          memory->Write(address(dst),src_temp);   // Write value to memory
-          resultIsZero(src_temp);                 // Update Z bit
-          resultLTZero(src_temp);                 // Update N bit
-          update_flags(0,Vbit);                   // Update V bit
+          memory->Write(address(dst),src_temp);     // Write value to memory
+          resultIsZero(src_temp);                   // Update Z bit
+          resultLTZero(src_temp);                   // Update N bit
+          update_flags(0,Vbit);                     // Update V bit
           return instruction;
         }
 
