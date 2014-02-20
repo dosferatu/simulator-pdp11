@@ -34,8 +34,7 @@ programViewModel::programViewModel(CPU *cpu, Memory *memory, QQuickView *view, s
     while (!macFile->eof())
     {
       std::getline(*macFile, buffer);
-      std::cout << "Parsed: " << buffer.c_str() << std::endl;
-      instructionModel.append(buffer.c_str());
+      this->instructionModel.append(buffer.c_str());
     }
 
     // File IO is finished, so close the file
@@ -56,7 +55,7 @@ programViewModel::programViewModel(CPU *cpu, Memory *memory, QQuickView *view, s
     std::cout << "Falling back to parsed in .ascii file..." << std::endl;
   }
 
-  // Update the instructionModel
+  // Notify the view that the model is updated
   this->view->rootContext()->setContextProperty("instructionModel", QVariant::fromValue(this->instructionModel));
 }/*}}}*/
 

@@ -2,8 +2,8 @@
 #define MEMORYVIEWMODEL_H
 
 #include <QObject>
+#include <QQuickView>
 #include <QStandardItemModel>
-#include <string>
 #include "memory.h"
 
 class memoryViewModel : public QObject
@@ -11,24 +11,19 @@ class memoryViewModel : public QObject
   Q_OBJECT
 
   public:
-    Q_PROPERTY(QStringList memoryReference\
-        READ memoryReference\
-        WRITE setMemoryReference)
-
-      memoryViewModel();
-      memoryViewModel(Memory *memory);
+    // Define any Q_PROPERTY values here for proper UI binding if I have time
+    
+    explicit memoryViewModel(QObject *parent = 0);
+    explicit memoryViewModel(Memory *memory,QQuickView *view, QObject *parent = 0);
     ~memoryViewModel();
-
-    QStringList memoryReference();
-
-    void setMemoryReference(QStringList memoryReference);
 
     public slots:
       void displayMemory(QString address);
 
   private:
-      QStringList *_memoryReference;
-      Memory *memory;
+    QStringList memoryModel;
+    Memory *memory;
+    QQuickView *view;
 };
 
 #endif // MEMORYVIEWMODEL_H

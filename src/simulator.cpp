@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
 
     // Declare the UI ViewModels
     programViewModel *programVM = new programViewModel(cpu, memory, view, source);
-    memoryViewModel *memoryVM = new memoryViewModel(memory);
+    memoryViewModel *memoryVM = new memoryViewModel(memory, view);
 
     // Register the ViewModels for use in the QML file
     qmlRegisterType<programViewModel>("ProgramViewModel", 1, 0, "programViewModel");
