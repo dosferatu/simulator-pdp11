@@ -163,26 +163,11 @@ Rectangle {
 
   TableView {
     id: instructionTable
+    model: instructionModel
     x: 8
     y: 160
     width: 800
     height: 600
-
-    TableViewColumn {
-      id: breakColumn
-      width: 60
-      title: "Break"
-      resizable: false
-      movable: false
-    }
-
-    TableViewColumn {
-      id: positionColumn
-      width: 70
-      title: "Position"
-      resizable: false
-      movable: false
-    }
 
     TableViewColumn {
       id: instructionColumn
@@ -196,25 +181,16 @@ Rectangle {
 
   TableView {
     id: memoryTable
+    model: memoryModel
     x: 958
     y: 465
     width: 400
     height: 295
 
-    model: memoryModel
-
     TableViewColumn {
-      id: lsbColumn
+      id: dataColumn
       horizontalAlignment: 1
-      title: "LSB"
-      resizable: false
-      movable: false
-    }
-
-    TableViewColumn {
-      id: msbColumn
-      horizontalAlignment: 1
-      title: "MSB"
+      title: "Value"
       resizable: false
       movable: false
     }
@@ -244,7 +220,7 @@ Rectangle {
     }
   }
 
-  TextEdit {
+  TextInput {
     id: searchMemoryInput
     x: 958
     y: 439
@@ -256,10 +232,18 @@ Rectangle {
     font.family: "Verdana"
     visible: true
     font.pixelSize: 12
+
+    MouseArea {
+      id: searchMemoryArea
+
+      onClicked: {
+        searchMemoryInput.text = ""
+      }
+    }
   }
 
   Rectangle {
-    id: searchMemoryArea
+    id: searchMemoryRectangle
     x: 958
     y: 439
     width: 160

@@ -38,6 +38,7 @@ class Memory
   public:
     Memory(std::vector<std::string> *source);
     ~Memory();
+    unsigned short ReadAddress(unsigned short address);
     void DecrementPC() { RAM[PC] = RAM[PC] - 2; };
     void IncrementPC() { RAM[PC] = RAM[PC] + 2; };
     unsigned short RetrievePC();

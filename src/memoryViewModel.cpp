@@ -1,49 +1,59 @@
 #include <iostream>
 #include <sstream>
+#include <QtQml>
 #include "memoryViewModel.h"
 
-memoryViewModel::memoryViewModel()
+memoryViewModel::memoryViewModel(QObject *parent) : QObject(parent)
 {
-  this->_memoryReference = new QStringList();
+  //this->_memoryReference = new QStringList();
 }
 
-memoryViewModel::memoryViewModel(Memory *memory)
+memoryViewModel::memoryViewModel(Memory *memory, QQuickView *view, QObject *parent) : QObject(parent)
 {
-  this->_memoryReference = new QStringList();
+  //this->_memoryReference = new QStringList();
   this->memory = memory;
+  this->view = view;
+
+  this->view->rootContext()->setContextProperty("memoryModel", QVariant::fromValue(this->memoryModel));
 }
 
 memoryViewModel::~memoryViewModel()
 {
-  delete this->_memoryReference;
+  //delete this->_memoryReference;
 }
 
 void memoryViewModel::displayMemory(QString address)
 {
-  std::cout << "Entered memory dump function!" << std::endl;
-  std::cout << "Address passed in: " << address.toStdString() << std::endl;
+  this->memoryModel.clear();
 
-  this->_memoryReference->clear();
+  // Perform validation on address here
+
   // Create the memory list according to the entered address
   std::stringstream stream;
-  
+  unsigned short addressVal;
+
+  // Convert the string to a number
+  stream << std::oct << address.toStdString();
+  stream >> addressVal;
+
   // Create the memory reference model
-  for (int i = 0; i < 10; ++i)
+  for (int i = 0; i < 20; i = i + 2)  // Only access words
   {
-    stream << i;
-    QString buffer;
-    buffer.fromStdString(stream.str());
-    this->_memoryReference->append(buffer);
-    stream.clear();
+    std::stringstream converter;
+    converter << std::oct << this->memory->ReadAddress(addressVal + i);
+    this->memoryModel.append(converter.str().c_str());
   }
+
+  // Notify the view that the model is updated
+  this->view->rootContext()->setContextProperty("memoryModel", QVariant::fromValue(this->memoryModel));
 }
 
-QStringList memoryViewModel::memoryReference()
-{
-  return *this->_memoryReference;
-}
+//QStringList memoryViewModel::memoryReference()
+//{
+//return *this->_memoryReference;
+//}
 
-void memoryViewModel::setMemoryReference(QStringList _memoryReference)
-{
-  *this->_memoryReference = _memoryReference;
-}
+//void memoryViewModel::setMemoryReference(QStringList _memoryReference)
+//{
+//*this->_memoryReference = _memoryReference;
+//}
