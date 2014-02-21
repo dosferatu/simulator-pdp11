@@ -225,7 +225,7 @@ unsigned short Memory::EA(unsigned short encodedAddress, Transaction type)/*{{{*
           this->TraceDump(Transaction::read, address);
 
           // Possibly case for byteMode?
-          unsigned short incrementedAddress = address + byteMode;
+          unsigned short incrementedAddress;
           if (regArray[reg] == SP)
           {
             incrementedAddress = address + 02;
