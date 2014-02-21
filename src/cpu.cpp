@@ -139,15 +139,15 @@ int CPU::FDE()/*{{{*/
       {
         switch(iB[1])
         {
-		  case 0:
-			{
-			    // RTS reg
-			    tmp = memory->Read(address(dst));                 // Read register value
-                            memory->Write(007, tmp);                          // reg --> (PC)
-			    tmp = memory->Read(026);                        // Push value of reg onto stack
-                            memory->Write(address(dst),tmp);   // pop reg
-                            return instruction;
-			}
+          case 0:
+            {
+              // RTS reg
+              tmp = memory->Read(address(dst));                 // Read register value
+              memory->Write(007, tmp);                          // reg --> (PC)
+              tmp = memory->Read(026);                        // Push value of reg onto stack
+              memory->Write(address(dst),tmp);   // pop reg
+              return instruction;
+            }
           case 4:
             {
               switch(iB[0])
@@ -229,14 +229,14 @@ int CPU::FDE()/*{{{*/
         tmp = memory->Read(address(dst));       // Get value at effective address // SWAB
         unsigned short byte_temp = tmp << 8;    // Create temp and give it LSByte of value in MSByte
         tmp = (tmp >> 8) & 0x00FF;             // Shift MSByte into LSByte and clear MSByte
-	(tmp == 0)? \
-          update_flags(1,Zbit): update_flags(0,Zbit);	//Update Z bit based on low order byte
+        (tmp == 0)? \
+              update_flags(1,Zbit): update_flags(0,Zbit);	//Update Z bit based on low order byte
         ((tmp & 0x0080) == 0x0080)? \
-	  update_flags(1,Nbit): update_flags(0,Nbit); //Update N bit based on low order byte
+                         update_flags(1,Nbit): update_flags(0,Nbit); //Update N bit based on low order byte
         tmp = byte_temp + tmp;                  // Finalize the swap byte
         memory->Write(address(dst), byte_temp); // Write to register
         update_flags(0,Cbit);              // Set C bit
-		update_flags(0,Vbit);              // Set V bit
+        update_flags(0,Vbit);              // Set V bit
         return instruction;
       }/*}}}*/
     }/*}}}*/
@@ -273,7 +273,7 @@ int CPU::FDE()/*{{{*/
                   offset = offset | (07777000);       // Pad with ones
                 tmp = tmp + offset;                   // Get new address for branch
                 (memory->ReadPS() & Nbit) == 0? \
-                  memory->Write(007,tmp) : NOP();     // N = 0
+                                           memory->Write(007,tmp) : NOP();     // N = 0
                 return instruction;
               }
             }
@@ -305,7 +305,7 @@ int CPU::FDE()/*{{{*/
                   offset = offset | (07777000);           // Pad with ones
                 tmp = tmp + offset;                       // Get new address for branch
                 (memory->ReadPS() & (Zbit | Cbit)) == 0? \
-                  memory->Write(007,tmp) : NOP();          // C & Z = 0
+                                                    memory->Write(007,tmp) : NOP();          // C & Z = 0
                 return instruction;
               }
               else if(iB[2] > 3)
@@ -334,7 +334,7 @@ int CPU::FDE()/*{{{*/
                   offset = offset | (07777000);           // Pad with ones
                 tmp = tmp + offset;                       // Get new address for branch
                 (memory->ReadPS() & Zbit) == 0? \
-                  memory->Write(007,tmp) : NOP();         // Z = 0
+                                           memory->Write(007,tmp) : NOP();         // Z = 0
                 return instruction;
               }
               else if(iB[2] > 3)
@@ -367,7 +367,7 @@ int CPU::FDE()/*{{{*/
                   offset = offset | (07777000);           // Pad with ones
                 offset = tmp + offset;                       // Get new address for branch
                 (memory->ReadPS() & Vbit) == 0? \
-                  memory->Write(007,offset) : NOP();          // V = 0
+                                           memory->Write(007,offset) : NOP();          // V = 0
                 return instruction;
               }
               else if(iB[2] > 3)
@@ -380,7 +380,7 @@ int CPU::FDE()/*{{{*/
                   offset = offset | (07777000);           // Pad with ones
                 offset = tmp + offset;                       // Get new address for branch
                 (memory->ReadPS() & Vbit) == Vbit? \
-                  memory->Write(007,offset) : NOP();          // V = 1
+                                           memory->Write(007,offset) : NOP();          // V = 1
                 return instruction;
               }
             }
@@ -396,7 +396,7 @@ int CPU::FDE()/*{{{*/
                   offset = offset | (07777000);        // Pad with ones
                 offset = tmp + offset;                     // Get new address for branch
                 (((memory->ReadPS() & Nbit) >> 3) ^ ((memory->ReadPS() & Vbit) >> 1)) == 0? \
-                  memory->Write(007,offset) : NOP();          // N ^ V = 0
+                                                                                       memory->Write(007,offset) : NOP();          // N ^ V = 0
                 return instruction;
               }
               else if(iB[2] > 3)
@@ -409,7 +409,7 @@ int CPU::FDE()/*{{{*/
                   offset = offset | (07777000);        // Pad with ones
                 offset = tmp + offset;                     // Get new address for branch
                 (((memory->ReadPS() & Nbit) >> 3) ^ ((memory->ReadPS() & Vbit) >> 1)) == 1? \
-                  memory->Write(007,offset) : NOP();          // N ^ V == 1
+                                                                                       memory->Write(007,offset) : NOP();          // N ^ V == 1
                 return instruction;
               }	
             }
@@ -429,7 +429,7 @@ int CPU::FDE()/*{{{*/
                   offset = offset | (07777000);         // Pad with ones
                 offset = tmp + offset;                     // Get new address for branch
                 (memory->ReadPS() & Cbit) == 0? \
-                  memory->Write(007,offset) : NOP();       // C = 0
+                                           memory->Write(007,offset) : NOP();       // C = 0
                 return instruction;
               }
               else if(iB[2] > 3)
@@ -442,7 +442,7 @@ int CPU::FDE()/*{{{*/
                   offset = offset | (07777000);         // Pad with ones
                 offset = tmp + offset;                     // Get new address for branch
                 ((memory->ReadPS() & Cbit) == Cbit)? \
-                  memory->Write(007,offset) : NOP();    // C = 1
+                                            memory->Write(007,offset) : NOP();    // C = 1
                 return instruction;
               }
             }
@@ -473,7 +473,7 @@ int CPU::FDE()/*{{{*/
                 offset = tmp + offset;                    // Get new address for branch
                 tmp = memory->ReadPS();                   // Get current process status
                 (((tmp & Zbit) >> 2) | (((tmp & Nbit) >> 3) ^ ((tmp & Vbit) >> 1))) == 1? \
-                  memory->Write(007,offset) : NOP();      // Z(N^V) = 1
+                                                                                     memory->Write(007,offset) : NOP();      // Z(N^V) = 1
                 return instruction;
               }	
             }	
@@ -496,7 +496,7 @@ int CPU::FDE()/*{{{*/
           tmp = memory->EA(address(dst));                 // Get address to jump to    JSR
           unsigned short reg = memory->Read(iB[2] & 007); // Get value of reg to store
           memory->Write(046, reg);                        // Push value of reg onto stack
-          reg = memory->Read(007);                        // Get value from PC
+          reg = (memory->Read(007) + 02);                        // Get value from PC
           memory->Write((iB[2] & 007),reg);               // Write PC value to register
           memory->Write(007,tmp - 02);                         // Write new address to PC
           return instruction;
@@ -533,7 +533,7 @@ int CPU::FDE()/*{{{*/
                       resultLTZero(tmp);                 // Update N bit
                       // C bit not affected
                       dst_temp == 0077777? \
-                        update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
+                                update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
                       return instruction;
                     }
             case 3: { // DEC dst: (dst)-- -> (dst)
@@ -543,8 +543,8 @@ int CPU::FDE()/*{{{*/
                       resultIsZero(tmp);                      // Update Z bit
                       resultLTZero(tmp);                      // Update N bit
                       //C bit not affected (typo in handbook)
-		      dst_temp == 0100000? \
-                        update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
+                      dst_temp == 0100000? \
+                                update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
                       return instruction;
                     }
             case 4: { // NEG dst: -(dst) -> (dst) 
@@ -566,7 +566,7 @@ int CPU::FDE()/*{{{*/
                       resultIsZero(tmp);                        // Update Z bit
                       resultLTZero(tmp);                        // Update N bit
                       ((dst_temp == 0177777) && (tmpC == 1))? \
-                        update_flags(1,Cbit) : update_flags(0,Cbit);  // Update C bit
+                                  update_flags(1,Cbit) : update_flags(0,Cbit);  // Update C bit
                       ((dst_temp == 0077777) && (tmpC == 1))? update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
                       return instruction;
                     }
@@ -627,10 +627,10 @@ int CPU::FDE()/*{{{*/
               { // ASR dst: Arithmetic Shift Right
                 dst_temp = memory->Read(address(dst));  // Get value at dst
                 unsigned short tempCN = memory->ReadPS() & 0x9;     // Get C and N bits
-		tmp = dst_temp >> 1;                    // Rotate bits to the right
+                tmp = dst_temp >> 1;                    // Rotate bits to the right
                 if(dst_temp & WORD)			//If destination is negative
-		  dst_temp = dst_temp | WORD;   	//then shift in a 1 on the end
-		memory->Write(address(dst),tmp);        // Write to memory
+                  dst_temp = dst_temp | WORD;   	//then shift in a 1 on the end
+                memory->Write(address(dst),tmp);        // Write to memory
                 resultIsZero(tmp);                      // Update Z bit
                 resultLTZero(tmp);                      // Update N bit
                 update_flags((dst_temp & 01),Cbit);     // Update C bit LSB (result)
@@ -638,7 +638,7 @@ int CPU::FDE()/*{{{*/
                 return instruction;
               }
             case 3: 
-             { // ASL dst: Arithmetic Shift Left 
+              { // ASL dst: Arithmetic Shift Left 
                 dst_temp = memory->Read(address(dst));  // Get value at dst
                 unsigned short tempCN = memory->ReadPS() & 0x9;    // Get C and N bits
                 tmp = dst_temp << 1;                    // Rotate bits to the right
@@ -671,7 +671,7 @@ int CPU::FDE()/*{{{*/
                 tmp = memory->Read(address(dst)); // Get value at dst
                 tmp = tmp & 0x0;                  // Clear byte
                 memory->Write(address(dst),tmp);  // Write byte to dst
-		update_flags(1,Zbit);              // Set Z bit
+                update_flags(1,Zbit);              // Set Z bit
                 update_flags(0,Nbit);              // Set N bit
                 update_flags(0,Cbit);              // Set C bit
                 update_flags(0,Vbit);              // Set V bit
@@ -701,7 +701,7 @@ int CPU::FDE()/*{{{*/
                 resultLTZero(tmp << 8);                 // Update N bit
                 // C bit not affected
                 dst_temp == 0x00FF? \
-                  update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
+                          update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
                 memory->ClearByteMode();                        // Clear byte mode
                 return instruction;
               }
@@ -742,7 +742,7 @@ int CPU::FDE()/*{{{*/
                 resultIsZero(tmp);                      // Update Z bit
                 resultLTZero(tmp << 8);                 // Update N bit
                 (dst_temp == 0x00FF) && (tmpC == 1)? \
-                  update_flags(1,Cbit) : update_flags(0,Cbit);                // Update C bit
+                           update_flags(1,Cbit) : update_flags(0,Cbit);                // Update C bit
                 tmp == 0x007F? update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
                 memory->ClearByteMode();              // Clear byte mode
                 return instruction;
@@ -758,9 +758,9 @@ int CPU::FDE()/*{{{*/
                 resultIsZero(tmp);                      // Update Z bit
                 resultLTZero(tmp << 8);                      // Update N bit
                 (tmp == 0) && (tmpC == 1)? \
-                  update_flags(0,Cbit) : update_flags(1,Cbit);  // Update C bit
+                      update_flags(0,Cbit) : update_flags(1,Cbit);  // Update C bit
                 ((tmp & BYTE) >> 7) == 1? \
-                  update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
+                                     update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
                 memory->ClearByteMode();          // Clear byte mode
                 return instruction;
               }
@@ -873,8 +873,8 @@ int CPU::FDE()/*{{{*/
           resultLTZero(result);                           // Update N bit
           result & 0x10000? update_flags(0, Cbit) : update_flags(1,Cbit);	//Update C bit
           (((src_temp & WORD) == (dst_temp & WORD)) && ((dst_temp & WORD) != (result & WORD)))? \
-            update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
-          
+                               update_flags(1,Vbit) : update_flags(0,Vbit);  // Update V bit
+
           return instruction;
         }
 
@@ -898,7 +898,7 @@ int CPU::FDE()/*{{{*/
           update_flags(0,Vbit);                                             // Update V bit
           return instruction;
         }
-		// BIS (src) V (dst) -> (dst)
+        // BIS (src) V (dst) -> (dst)
       case 5:
         {
           tmp = ((memory->Read(address(src))) | memory->Read(address(dst))); // Get ~src & dst value BIC
@@ -922,7 +922,7 @@ int CPU::FDE()/*{{{*/
           memory->SetByteMode();                  // Set byte mode
           src_temp = memory->Read(address(src));  // Get value at address of src
           if(address(dst) == 027 || address(dst) == 037 || iB[1] == 06 || iB[1] == 07)
-           memory->IncrementPC();
+            memory->IncrementPC();
           memory->Write(address(dst),src_temp);   // Write value to memory
           resultIsZero(src_temp);                 // Update Z bit
           resultLTZero(src_temp << 8);            // Update N bit
@@ -972,14 +972,14 @@ int CPU::FDE()/*{{{*/
           memory->ClearByteMode();        // Clear byte mode
           return instruction;
         }
-		
-		//BISB (src) V (dst) -> (dst)
-	  case 5:
+
+        //BISB (src) V (dst) -> (dst)
+      case 5:
         {
           memory->SetByteMode();        // Set byte mode
           tmp = memory->Read(address(src)) | memory->Read(address(dst)); // Get value
           memory->Write(address(dst),tmp);                               // Write value to dst
-	  resultIsZero(tmp);            // Update Z bit
+          resultIsZero(tmp);            // Update Z bit
           resultLTZero(tmp << 8);	// Update N bit
           update_flags(0,Vbit);         // Update V bit
           memory->ClearByteMode();      // Clear byte mode
@@ -1002,7 +1002,7 @@ int CPU::FDE()/*{{{*/
       resultLTZero(result);                   // Update N bit
       (result & 0xF0000) > 0? update_flags(1,Cbit) : update_flags(0,Cbit);
       (((src_temp & WORD) == (dst_temp & WORD)) && ((result & WORD) != (dst_temp & WORD)))? \
-       update_flags(1,Vbit) : update_flags(0,Vbit);
+                           update_flags(1,Vbit) : update_flags(0,Vbit);
       return instruction;
     }
 
@@ -1017,7 +1017,7 @@ int CPU::FDE()/*{{{*/
       resultLTZero(result);                        // Update N bit
       (result & 0x10000)? update_flags(0,Cbit) : update_flags(1,Cbit);
       (((src_temp & WORD) != (dst_temp & WORD)) && ((result & WORD) == (src_temp & WORD)))? \
-       update_flags(1,Vbit) : update_flags(0,Vbit);
+                             update_flags(1,Vbit) : update_flags(0,Vbit);
       return instruction;
     }
   }

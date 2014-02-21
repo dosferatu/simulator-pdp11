@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
     view->rootContext()->setContextProperty("memoryViewModel", memoryVM);
 
     // Load the GUI
-    view->setSource(QUrl::fromLocalFile("src/simulator.qml"));
+    view->setSource(QUrl::fromLocalFile("simulator.qml"));
     view->show();
     return app.exec();
 
