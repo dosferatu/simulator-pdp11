@@ -143,7 +143,7 @@ int CPU::FDE()/*{{{*/
             {
               // RTS reg
               tmp = memory->Read(address(dst));                 // Read register value
-              memory->Write(007, tmp);                          // reg --> (PC)
+              memory->Write(007, (tmp - 02));                          // reg --> (PC)
               tmp = memory->Read(026);                        // Push value of reg onto stack
               memory->Write(address(dst),tmp);   // pop reg
               return instruction;
@@ -641,7 +641,7 @@ int CPU::FDE()/*{{{*/
               { // ASL dst: Arithmetic Shift Left 
                 dst_temp = memory->Read(address(dst));  // Get value at dst
                 unsigned short tempCN = memory->ReadPS() & 0x9;    // Get C and N bits
-                tmp = dst_temp << 1;                    // Rotate bits to the right
+                tmp = dst_temp << 1;                    // Rotate bits to the left
                 memory->Write(address(dst),tmp);         // Write to memory
                 resultIsZero(tmp);                      // Update Z bit
                 resultLTZero(tmp);                      // Update N bit
@@ -996,7 +996,7 @@ int CPU::FDE()/*{{{*/
     {
       src_temp = memory->Read(address(src));  // Get source value ADD
       dst_temp = memory->Read(address(dst));  // Get destination value
-      int result = src_temp + dst_temp;       // Add src and dst
+      unsigned int result = src_temp + dst_temp;       // Add src and dst
       memory->Write(address(dst),result);     // Write result to memory
       resultIsZero(result);                   // Update Z bit
       resultLTZero(result);                   // Update N bit
@@ -1011,7 +1011,7 @@ int CPU::FDE()/*{{{*/
     {
       dst_temp = memory->Read(address(dst));    // Get value of dst SUB
       src_temp = memory->Read(address(src));    // Get value of src
-      int result = dst_temp + ~(src_temp) + 1;  // Subtract
+      unsigned int result = dst_temp + ~(src_temp) + 1;  // Subtract
       memory->Write(address(dst), result);         // Write to memory
       resultIsZero(result);                        // Update Z bit
       resultLTZero(result);                        // Update N bit
