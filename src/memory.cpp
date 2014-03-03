@@ -159,13 +159,12 @@ unsigned short Memory::EA(unsigned short encodedAddress, Transaction type)/*{{{*
         {
           modeType = "Immediate PC";
 
-          if (type == Transaction::read)
+          // Point to the word after the instruction word
+          decodedAddress = this->RetrievePC();
+		  if (type == Transaction::read)
           {
             this->IncrementPC();
           }
-
-          // Point to the word after the instruction word
-          decodedAddress = this->RetrievePC();
         }
 
         else
@@ -203,14 +202,13 @@ unsigned short Memory::EA(unsigned short encodedAddress, Transaction type)/*{{{*
         if (reg == 07)
         {
           modeType = "Absolute PC";
-
-          if (type == Transaction::read)
+		  
+          unsigned short address = this->RetrievePC();
+          decodedAddress = (this->RAM[address + 1] << 8) | (this->RAM[address] & 0xFF);
+		  if (type == Transaction::read)
           {
             this->IncrementPC();
           }
-
-          unsigned short address = this->RetrievePC();
-          decodedAddress = (this->RAM[address + 1] << 8) | (this->RAM[address] & 0xFF);
         }
 
         else
@@ -297,30 +295,28 @@ unsigned short Memory::EA(unsigned short encodedAddress, Transaction type)/*{{{*
         {
           modeType = "Relative PC";
 
-          if (type == Transaction::read)
-          {
-            this->IncrementPC();
-          }
-
           unsigned short address = this->RetrievePC();
           unsigned short relativeAddress = ((this->RAM[address + 1] << 8) & 0xFF00) | (this->RAM[address] & 0xFF);
           decodedAddress = address + relativeAddress + 02;
+		  if (type == Transaction::read)
+          {
+            this->IncrementPC();
+          }
         }
 
         else
         {
           modeType = "Indexed";
 
-          if (type == Transaction::read)
-          {
-            this->IncrementPC();
-          }
-
           // Retrieve the index offset from memory
           unsigned short base = (this->RAM[regArray[reg] + 1] << 8) | (this->RAM[regArray[reg]] & 0xFF);
           unsigned short offsetAddress = this->RetrievePC();
           unsigned short offset = (this->RAM[offsetAddress + 1] << 8) | (this->RAM[offsetAddress] & 0xFF);
           decodedAddress = offset + base;
+		  if (type == Transaction::read)
+          {
+            this->IncrementPC();
+          }
         }
 
         break;
@@ -333,15 +329,14 @@ unsigned short Memory::EA(unsigned short encodedAddress, Transaction type)/*{{{*
         {
           modeType = "Deferred Relative PC";
 
-          if (type == Transaction::read)
-          {
-            this->IncrementPC();
-          }
-
           unsigned short address = this->RetrievePC();
           unsigned short relativeAddress = (this->RAM[address + 1] << 8) | (this->RAM[address] & 0xFF);
           unsigned short relativeAddressAddress = address + relativeAddress;
           decodedAddress = (this->RAM[relativeAddressAddress + 1] << 8) | (this->RAM[relativeAddressAddress] & 0xFF);
+		  if (type == Transaction::read)
+          {
+            this->IncrementPC();
+          }
         }
 
         else
@@ -354,16 +349,15 @@ unsigned short Memory::EA(unsigned short encodedAddress, Transaction type)/*{{{*
            * the instruction
            */
 
-          if (type == Transaction::read)
-          {
-            this->IncrementPC();
-          }
-
           unsigned short base = (this->RAM[regArray[reg] + 1] << 8) | (this->RAM[regArray[reg]] & 0xFF);
           unsigned short offsetAddress = this->RetrievePC();
           unsigned short offset = (this->RAM[offsetAddress + 1] << 8) | (this->RAM[offsetAddress] & 0xFF);
           unsigned short address = offset + base;
           decodedAddress = (this->RAM[address + 1] << 8) | (this->RAM[address] & 0xFF);
+          if (type == Transaction::read)
+          {
+            this->IncrementPC();
+          }
           this->TraceDump(Transaction::read, address);
         }
 

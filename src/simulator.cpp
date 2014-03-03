@@ -238,7 +238,6 @@ int main(int argc, char *argv[])
     do
     {
       status = cpu->FDE();
-      memory->IncrementPC();
 
       if (memory->RetrievePC() % 2 != 0)
       {

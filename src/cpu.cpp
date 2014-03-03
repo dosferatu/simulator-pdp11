@@ -66,6 +66,7 @@ int CPU::FDE()/*{{{*/
   // Fetch the instruction and increment PC
   instruction = this->memory->ReadInstruction();
   ++this->instructionCount;
+  memory->IncrementPC();
 
   // Optional instruction fetch state dump/*{{{*/
   if (debugLevel == Verbosity::verbose)
@@ -143,7 +144,7 @@ int CPU::FDE()/*{{{*/
             {
               // RTS reg
               tmp = memory->Read(address(dst));                 // Read register value
-              memory->Write(007, (tmp - 02));                          // reg --> (PC)
+              memory->Write(007, tmp);                          // reg --> (PC)
               tmp = memory->Read(026);                        // Push value of reg onto stack
               memory->Write(address(dst),tmp);   // pop reg
               return instruction;
@@ -496,7 +497,7 @@ int CPU::FDE()/*{{{*/
           tmp = memory->EA(address(dst));                 // Get address to jump to    JSR
           unsigned short reg = memory->Read(iB[2] & 007); // Get value of reg to store
           memory->Write(046, reg);                        // Push value of reg onto stack
-          reg = (memory->Read(007) + 02);                        // Get value from PC
+          reg = (memory->Read(007));                        // Get value from PC
           memory->Write((iB[2] & 007),reg);               // Write PC value to register
           memory->Write(007,tmp - 02);                         // Write new address to PC
           return instruction;
